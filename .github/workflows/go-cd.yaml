@@ -65,12 +65,12 @@ jobs:
       #     repository: kemadev/workflows-and-actions
       #     sparse-checkout: .github/script/reusable
       #     path: ${{ env.TAG_VERSION_SCRIPT_DIR }}
-      - name: Set up Go
-        id: setup-go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: ${{ env.TAG_VERSION_SCRIPT_DIR }}/go.mod
-          cache-dependency-path: ${{ env.TAG_VERSION_SCRIPT_DIR }}/go.sum
+      # - name: Set up Go
+      #   id: setup-go
+      #   uses: actions/setup-go@v5
+      #   with:
+      #     go-version-file: ${{ env.TAG_VERSION_SCRIPT_DIR }}/go.mod
+      #     cache-dependency-path: ${{ env.TAG_VERSION_SCRIPT_DIR }}/go.sum
       - name: Tag version
         id: tag
         working-directory: ${{ env.TAG_VERSION_SCRIPT_DIR }}
