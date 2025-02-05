@@ -1,0 +1,39 @@
+name: PR - Check title
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - unlocked
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check-pr-title:
+    name: Check PR title
+    permissions:
+      contents: none
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Pull Request title
+        id: check-title
+        # Highly inspired from https://gist.github.com/marcojahn/482410b728c31b221b70ea6d2c433f0c
+        # Reference: https://www.conventionalcommits.org
+        run: |
+          conventional_commit_regex='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test){1}(\([[:alnum:]._-]+\))?(!)?: ([[:alnum:]])+([[:space:][:print:]])*$'
+
+          title="$(jq --raw-output .pull_request.title "${GITHUB_EVENT_PATH}")"
+          echo "PR title: ${title}"
+          if [[ "${title}" =~ ${conventional_commit_regex} ]]; then
+            echo "Title is valid!"
+            exit 0
+          else
+            echo "Title is not valid!"
+            echo "::error title=Bad PR title::It must be a conventional commit message, thus matching the regex: ${conventional_commit_regex}."
+            exit 1
+          fi

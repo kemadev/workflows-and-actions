@@ -1,0 +1,300 @@
+name: Go - CD
+
+on:
+  push:
+    branches:
+      - env/prod
+      - env/next
+      # env/dev is deployed manually by developers on their local machines
+  workflow_dispatch:
+    inputs:
+      force-patch:
+        description: Force new patch version, creating a new tag and release
+        type: boolean
+        default: false
+        required: false
+      force-rollback:
+        description: Force rollback to specified git reference (use `latest` for latest successful deploy)
+        type: string
+        default: ""
+        required: false
+
+env:
+  CGO_ENABLED: 0
+  TAG_VERSION_SCRIPT_DIR: ./.github/script/go-cd
+  TAG_VERSION_FILE_NAME: .tag-version
+  ARTIFACT_NAME: build-outputs
+  DEPLOYS_DIR: ./deploy
+  GORELEASER_DIST_DIR: ./dist/goreleaser
+  GHA_BOT_NAME: github-actions[bot]
+  GHA_BOT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+  GIT_DEPLOYMENT_SUCCESS_TAG_PREFIX: deploy-success-
+
+concurrency:
+  group: ${{ github.ref_name }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  tag-version:
+    name: Tag version
+    if: ${{ github.event.inputs.force-rollback == '' }}
+    permissions:
+      contents: write
+      packages: write
+    runs-on: ubuntu-latest
+    outputs:
+      # Defined in ./.github/script/go-cd/output-tag-version.go
+      NEW_MAJOR_VERSION: ${{ steps.tag.outputs.NEW_MAJOR_VERSION }}
+      LATEST_VERSION: ${{ steps.tag.outputs.LATEST_VERSION }}
+    environment: ${{ github.ref_name }}
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Set up Go
+        id: setup-go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ env.TAG_VERSION_SCRIPT_DIR }}/go.mod
+          cache-dependency-path: ${{ env.TAG_VERSION_SCRIPT_DIR }}/go.sum
+      - name: Tag version
+        id: tag
+        working-directory: ${{ env.TAG_VERSION_SCRIPT_DIR }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FORCE_PATCH: ${{ github.event.inputs.force-patch }}
+        # https://github.com/actions/checkout?tab=readme-ov-file#push-a-commit-using-the-built-in-token
+        run: |
+          go run output-tag-version.go "${FORCE_PATCH}"
+          tag_version="$(cat ${RUNNER_TEMP}/${{ env.TAG_VERSION_FILE_NAME }} | tr -d '\n')"
+          git config user.name "${{ env.GHA_BOT_NAME }}"
+          git config user.email "${{ env.GHA_BOT_EMAIL }}"
+          git tag -a "${tag_version}" -m "Release ${tag_version}"
+          git push --tags
+
+  build-and-release:
+    name: Build and release
+    needs: tag-version
+    if: ${{ github.event.inputs.force-rollback == '' }}
+    permissions:
+      contents: write
+      packages: write
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Go
+        id: setup-go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: Install syft
+        id: install-syft
+        # Setup Go already handles caching
+        run: |
+          go install github.com/anchore/syft/cmd/syft@latest
+      - name: Release version
+        id: release
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          args: release --config config/release/.goreleaser.yaml --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload build artifacts
+        id: upload-build-artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.GORELEASER_DIST_DIR }}
+          if-no-files-found: error
+          retention-days: 1
+
+  get-deploys-list:
+    name: Get deploys list
+    needs: build-and-release
+    if: ${{ github.event.inputs.force-rollback != '' || success() }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    outputs:
+      DEPLOYS_LIST: ${{ steps.get-deploys-list.outputs.DEPLOYS_LIST }}
+      DEPLOYS_LIST_REVERSE: ${{ steps.get-deploys-list.outputs.DEPLOYS_LIST_REVERSE }}
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Get deploys list
+        id: get-deploys-list
+        # Output all directories in the deploy directory, sorted alphabetically, then reverse
+        run: |
+          mapfile -t dirs < <(find "./${DEPLOYS_DIR}" -mindepth 1 -maxdepth 1 -type d | sort)
+          declare result="["
+          for dir in "${dirs[@]}"; do
+              dir_name=$(basename "$dir")
+              result+="\"$dir_name\", "
+          done
+          result="${result%, }]"
+          echo "DEPLOYS_LIST=${result}" > "${GITHUB_OUTPUT}"
+          declare reverse_result="["
+          for ((i=${#dirs[@]}-1; i>=0; i--)); do
+              dir_name=$(basename "${dirs[i]}")
+              reverse_result+="\"${dir_name}\", "
+          done
+          reverse_result="${reverse_result%, }]"
+          echo "DEPLOYS_LIST_REVERSE=${reverse_result}" >> "${GITHUB_OUTPUT}"
+
+  deploy:
+    name: Deploy
+    needs: get-deploys-list
+    if: ${{ github.event.inputs.force-rollback == '' }}
+    permissions:
+      contents: read
+      packages: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
+    strategy:
+      # Run sequentially in alphabetical order
+      matrix:
+        deploy: ${{ fromJSON(needs.get-deploys-list.outputs.DEPLOYS_LIST) }}
+      max-parallel: 1
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Download build artifacts
+        id: download-build-artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.GORELEASER_DIST_DIR }}
+      - name: Set up Go
+        id: setup-go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      # - name: Configure AWS credentials
+      #   id: configure-aws-credentials
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   continue-on-error: false
+      #   with:
+      #     role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+      #     aws-region: ${{ secrets.AWS_REGION }}
+      #     role-session-name: gha-${{ github.repository }}-${{ github.ref_name }}-${{ github.run_id }}
+      #     mask-aws-account-id: true
+      #   timeout-minutes: 1
+      # - name: Update Cloud resources
+      #   id: update-cloud-resources
+      #   uses: pulumi/actions@v6
+      #   with:
+      #     command: up
+      #     work-dir: "./${DEPLOYS_DIR}/${{ matrix.deploy }}"
+      #     comment-on-pr: true
+      #     comment-on-summary: true
+      #     stack-name: ${{ github.ref_name }}
+      #     github-token: ${{ github.token }}
+      #   env:
+      #     PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+  tag-deploy-success:
+    name: Tag deploy success
+    needs:
+      - deploy
+    if: ${{ needs.deploy.result == 'success' }}
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Tag deploy success
+        id: tag-deploy-success
+        run: |
+          git config user.name "${{ env.GHA_BOT_NAME }}"
+          git config user.email "${{ env.GHA_BOT_EMAIL }}"
+          git tag -a "deploy-success-${{ github.ref_name }}-${{ github.run_id }}" -m "Deploy success"
+          git push --tags
+
+  rollback:
+    name: Rollback
+    needs:
+      - get-deploys-list
+      - deploy
+    if: ${{ github.event.inputs.force-rollback != '' || failure() }}
+    permissions:
+      contents: read
+      packages: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
+    strategy:
+      # Run sequentially in reverse alphabetical order
+      matrix:
+        deploy: ${{ fromJSON(needs.get-deploys-list.outputs.DEPLOYS_LIST_REVERSE) }}
+      max-parallel: 1
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Checkout to latest sucessful deploy
+        id: checkout-to-latest-sucessful-deploy
+        env:
+          GITHUB_REF: ${{ github.ref_name }}
+          FORCE_ROLLBACK: ${{ github.event.inputs.force-rollback }}
+        run: |
+          export checkout_target=""
+          if [ "${FORCE_ROLLBACK}" == "latest" ]; then
+            checkout_target="$(git tag --list "${{ env.GIT_DEPLOYMENT_SUCCESS_TAG_PREFIX }}${GITHUB_REF}-*" | sort -V | tail -n 1)"
+          else
+            checkout_target="${FORCE_ROLLBACK}"
+          fi
+          git checkout "${checkout_target}"
+      - name: Download build artifacts
+        id: download-build-artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download "${checkout_target}" --dir "${{ env.GORELEASER_DIST_DIR }}"
+      - name: Set up Go
+        id: setup-go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      # - name: Configure AWS credentials
+      #   id: configure-aws-credentials
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   continue-on-error: false
+      #   with:
+      #     role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+      #     aws-region: ${{ secrets.AWS_REGION }}
+      #     role-session-name: gha-${{ github.repository }}-${{ github.ref_name }}-${{ github.run_id }}
+      #     mask-aws-account-id: true
+      #   timeout-minutes: 1
+      # - name: Rollback Cloud resources
+      #   id: rollback-cloud-resources
+      #   uses: pulumi/actions@v6
+      #   with:
+      #     command: up
+      #     work-dir: "./${DEPLOYS_DIR}/${{ matrix.deploy }}"
+      #     comment-on-pr: true
+      #     comment-on-summary: true
+      #     stack-name: ${{ github.ref_name }}
+      #     github-token: ${{ github.token }}
+      #   env:
+      #     PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}

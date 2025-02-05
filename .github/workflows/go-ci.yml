@@ -1,0 +1,174 @@
+name: Go - CI
+
+on:
+  pull_request:
+    paths:
+      - "go.mod"
+      - "go.sum"
+      - "**/*.go"
+  workflow_dispatch: {}
+
+env:
+  CGO_ENABLED: 0
+  COVERAGE_ARTIFACT_NAME: test-coverage
+  COVERAGE_FILE_NAME: coverage.out
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  setup-shared-go-cache:
+    name: Setup shared Go cache
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Set up Go
+        id: setup-go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - name: Download Go modules
+        id: download-go-modules
+        run: go mod download
+
+  unit-test:
+    name: Unit test
+    needs: setup-shared-go-cache
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    env:
+      COVERAGE_FILE_PARENT_DIR: ./dist
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        id: setup-go
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - name: Run Go tests
+        id: test
+        run: go test -bench=. -benchmem -covermode=atomic -coverprofile='${{ env.COVERAGE_FILE_PARENT_DIR }}/${{ env.COVERAGE_FILE_NAME }}' ./...
+      - name: Upload test coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.COVERAGE_ARTIFACT_NAME }}
+          path: ${{ env.COVERAGE_FILE_PARENT_DIR }}
+          if-no-files-found: error
+          retention-days: 1
+
+  report-test-coverage:
+    name: Report test coverage
+    needs: unit-test
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    env:
+      COVERAGE_SCRIPT_DIR: ./.github/script/go-ci
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        id: setup-go
+        with:
+          go-version-file: ${{ env.COVERAGE_SCRIPT_DIR }}/go.mod
+          cache-dependency-path: ${{ env.COVERAGE_SCRIPT_DIR }}/go.sum
+      - name: Download test coverage artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.COVERAGE_ARTIFACT_NAME }}
+          path: ${{ env.COVERAGE_SCRIPT_DIR }}
+      - name: Report test coverage
+        id: report-test-coverage
+        # Don't run on forks or dependabot as they don't have write access to the repository
+        if: github.event_name == 'pull_request' && ! github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]'
+        working-directory: ${{ env.COVERAGE_SCRIPT_DIR }}
+        env:
+          COVERAGE_FILE: ./${{ env.COVERAGE_FILE_NAME }}
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.number }}
+        run: go run report-coverage.go
+
+  check-clean-gomod:
+    name: Clean go.mod
+    needs: setup-shared-go-cache
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        id: setup-go
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - name: Check for unused dependencies
+        id: check-unused-deps
+        run: |
+          go mod tidy
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "Nothing to tidy"
+            exit 0
+          fi
+          echo "::error file=go.mod::Go mod tidy is needed"
+          exit 1
+
+  lint:
+    name: Lint
+    needs: setup-shared-go-cache
+    permissions:
+      contents: read
+      checks: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        id: setup-go
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - name: Lint Go
+        id: lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          args: --config ./config/lint/.golangci.yml
+
+  scan-dependencies:
+    name: Scan dependencies
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Create SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          output-file: "${{ github.event.repository.name }}-sbom.spdx.json"
+          config: config/sbom/.syft.yaml
+      - name: Scan SBOM
+        uses: anchore/scan-action@v6
+        env:
+          GRYPE_CONFIG: config/sbom/.grype.yaml
+        with:
+          sbom: "${{ github.event.repository.name }}-sbom.spdx.json"
+          cache-db: true

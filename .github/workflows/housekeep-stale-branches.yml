@@ -1,0 +1,28 @@
+name: Housekeep - Report stale branches
+
+on:
+  schedule:
+    # Each day at 3:00 AM
+    - cron: "0 3 * * *"
+  workflow_dispatch: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  report-stale-branches:
+    name: Report stale branches
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Report stale branches
+        id: warn-stale-branches
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./.github/script/housekeep-stale-branches/report-stale-branches.sh

@@ -1,0 +1,222 @@
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"log/slog"
+	"os"
+	"sort"
+	"strconv"
+	"strings"
+
+	"github.com/google/go-github/v68/github"
+)
+
+var (
+	// GitHub Actions provided GitHub authentication token
+	ghToken = os.Getenv("GH_TOKEN")
+	// Number of the pull request that triggered the workflow
+	prNumber = os.Getenv("PR_NUMBER")
+	// Number of the pull request that triggered the workflow as an integer
+	prNumberInt int
+	// Path to the website security file for which the report is to be generated
+	websiteSecurityReportFile = os.Getenv("WEBSITE_SECURITY_REPORT_FILE")
+	// GitHub repository owner
+	repoOwner = strings.Split(os.Getenv("GITHUB_REPOSITORY"), "/")[0]
+	// GitHub repository name
+	repoName = strings.Split(os.Getenv("GITHUB_REPOSITORY"), "/")[1]
+)
+
+const (
+	websiteSecurityCommentDelimiterStart = "<!-- START gha:website-security-report -->"
+	websiteSecurityCommentDelimiterEnd   = "<!-- END gha:website-security-report -->"
+)
+
+func checkVariables() error {
+	if ghToken == "" {
+		return fmt.Errorf("Environment variable GH_TOKEN is not set")
+	}
+	if prNumber == "" {
+		return fmt.Errorf("Environment variable PR_NUMBER is not set")
+	} else {
+		prNum, err := strconv.Atoi(prNumber)
+		if err != nil {
+			return fmt.Errorf("PR_NUMBER is not a valid number")
+		}
+		prNumberInt = prNum
+	}
+	if websiteSecurityReportFile == "" {
+		return fmt.Errorf("Environment variable WEBSITE_SECURITY_REPORT_FILE is not set")
+	}
+	if _, err := os.Stat(websiteSecurityReportFile); os.IsNotExist(err) {
+		return fmt.Errorf("Website security file does not exist")
+	}
+	if repoOwner == "" {
+		return fmt.Errorf("Can't infer repository owner from GITHUB_REPOSITORY environment variable")
+	}
+	if repoName == "" {
+		return fmt.Errorf("Can't infer repository name from GITHUB_REPOSITORY environment variable")
+	}
+	return nil
+}
+
+type Scan struct {
+	AlgorithmVersion int    `json:"algorithmVersion"`
+	Grade            string `json:"grade"`
+	Score            int    `json:"score"`
+	TestsPassed      int    `json:"testsPassed"`
+	TestsFailed      int    `json:"testsFailed"`
+	TestsQuantity    int    `json:"testsQuantity"`
+}
+
+type Test struct {
+	Expectation string `json:"expectation"`
+	Pass        bool   `json:"pass"`
+	Result      string `json:"result"`
+}
+
+type Tests map[string]Test
+
+type Report struct {
+	Scan  Scan  `json:"scan"`
+	Tests Tests `json:"tests"`
+}
+
+func parseWebsiteSecurityReport() (string, bool, error) {
+	file, err := os.ReadFile(websiteSecurityReportFile)
+	if err != nil {
+		return "", false, err
+	}
+
+	var reportObject Report
+	err = json.Unmarshal(file, &reportObject)
+	if err != nil {
+		return "", false, err
+	}
+
+	var gradeEmoji string
+	switch {
+	case reportObject.Scan.Score < 90:
+		gradeEmoji = "💔"
+	case reportObject.Scan.Score < 100:
+		gradeEmoji = "❤️‍🩹"
+	case reportObject.Scan.Score < 105:
+		gradeEmoji = "❤️"
+	default:
+		gradeEmoji = "❤️‍🔥"
+	}
+	var report string
+	report += fmt.Sprintf("## Website Security Report 🔐\n")
+	report += fmt.Sprintf("\n")
+	report += fmt.Sprintf("| Grade | Score | Tests Passed | Tests Failed |\n")
+	report += fmt.Sprintf("|-------|-------|--------------|--------------|\n")
+	report += fmt.Sprintf("| %s %s | %d | %d | %d |\n",
+		gradeEmoji, reportObject.Scan.Grade, reportObject.Scan.Score,
+		reportObject.Scan.TestsPassed, reportObject.Scan.TestsFailed)
+	report += fmt.Sprintf("\n")
+	// Generate Markdown table for tests
+	report += fmt.Sprintf("\n")
+	report += fmt.Sprintf("| Test | Pass | Optimal | Result | Expectation |\n")
+	report += fmt.Sprintf("|------|------|---------|--------|-------------|\n")
+	// Sort the tests by name
+	sortedTests := make([]Test, 0, len(reportObject.Tests))
+	sortedTestNames := make([]string, 0, len(reportObject.Tests))
+	for testName, _ := range reportObject.Tests {
+		sortedTestNames = append(sortedTestNames, testName)
+	}
+	sort.Strings(sortedTestNames)
+	for _, testName := range sortedTestNames {
+		sortedTests = append(sortedTests, reportObject.Tests[testName])
+	}
+	var allTestsPassing = true
+	// Generate the table rows
+	for i, test := range sortedTests {
+		optimal := "❤️‍🩹"
+		if test.Expectation == test.Result {
+			optimal = "❤️"
+		}
+		var passing string
+		if test.Pass {
+			passing = "✅"
+		} else {
+			passing = "💥"
+			allTestsPassing = false
+		}
+		report += fmt.Sprintf("| %s | %s | %s | %s | %s |\n", sortedTestNames[i], passing, optimal, test.Result, test.Expectation)
+	}
+	return report, allTestsPassing, nil
+}
+
+func updatePrWithWebsiteSecurityReport(report string) error {
+	client := github.NewClient(nil).WithAuthToken(ghToken)
+	pr, resp, err := client.PullRequests.Get(context.TODO(), repoOwner, repoName, prNumberInt)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Failed to get pull request")
+	}
+	slog.Info(fmt.Sprintf("Found pull request: %d", prNumberInt))
+	var websiteSecurityFormated = ""
+	websiteSecurityFormated += websiteSecurityCommentDelimiterStart + "\n"
+	websiteSecurityFormated += "<!-- This field is auto-generated by a workflow, do not edit manually -->" + "\n"
+	websiteSecurityFormated += report
+	websiteSecurityFormated += websiteSecurityCommentDelimiterEnd
+	var body string
+	if pr.Body != nil {
+		body = *pr.Body
+	} else {
+		body = ""
+	}
+	// Get the body, excluding the websiteSecurity report delimited by the start and end delimiters
+	startIndex := strings.Index(body, websiteSecurityCommentDelimiterStart)
+	endIndex := strings.Index(body, websiteSecurityCommentDelimiterEnd)
+	if startIndex != -1 && endIndex != -1 {
+		body = body[:startIndex] + body[endIndex+len(websiteSecurityCommentDelimiterEnd):]
+	}
+	// If last character before start is not a newline, add it
+	if startIndex != -1 && startIndex != 0 && body[startIndex-1] != '\n' {
+		body = body[:startIndex] + "\n" + body[startIndex:]
+	}
+	body += websiteSecurityFormated
+	// Update the pull request with the new body
+	editedPr := &github.PullRequest{
+		Body: &body,
+	}
+	_, resp, err = client.PullRequests.Edit(context.TODO(), repoOwner, repoName, prNumberInt, editedPr)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Failed to update pull request")
+	}
+	slog.Info("Updated pull request with website security report!")
+	return nil
+}
+
+func main() {
+	err := checkVariables()
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
+	report, allTestsPassing, err := parseWebsiteSecurityReport()
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
+	err = updatePrWithWebsiteSecurityReport(report)
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
+	if allTestsPassing {
+		slog.Info("All tests passed!")
+	} else {
+		slog.Error("Some tests failed!")
+		// https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#setting-an-error-message
+		fmt.Println("::error::title=Security issue::Some tests failed!")
+		os.Exit(1)
+	}
+}
