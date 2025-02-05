@@ -54,27 +54,27 @@ jobs:
     steps:
       - name: Checkout reusable workflow scripts
         id: checkout-reusable-scripts
-        uses: actions/checkout@v4
-        with:
-          repository: kemadev/workflows-and-actions
-          sparse-checkout: .github/script/reusable
+        run:
+          gh api repos/kemadev/workflows-and-actions/contents/.github/script/reusable/go-cd/output-tag-version.go | jq -r '.content' | base64 -d > .github/script/reusable/go-cd/output-tag-version.go
+          gh api repos/kemadev/workflows-and-actions/contents/.github/script/reusable/go-cd/go.mod | jq -r '.content' | base64 -d > .github/script/reusable/go-cd/go.mod
+          gh api repos/kemadev/workflows-and-actions/contents/.github/script/reusable/go-cd/go.sum | jq -r '.content' | base64 -d > .github/script/reusable/go-cd/go.sum
+
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          fetch-tags: true
-          sparse-checkout-cone-mode: false
-          sparse-checkout: "!${{ env.TAG_VERSION_SCRIPT_DIR }}/*"
+          fetch-tags: true'
+          path: main
       - name: Set up Go
         id: setup-go
         uses: actions/setup-go@v5
         with:
-          go-version-file: ${{ env.TAG_VERSION_SCRIPT_DIR }}/go.mod
-          cache-dependency-path: ${{ env.TAG_VERSION_SCRIPT_DIR }}/go.sum
+          go-version-file: main/${{ env.TAG_VERSION_SCRIPT_DIR }}/go.mod
+          cache-dependency-path: main/${{ env.TAG_VERSION_SCRIPT_DIR }}/go.sum
       - name: Tag version
         id: tag
-        working-directory: ${{ env.TAG_VERSION_SCRIPT_DIR }}
+        working-directory: reusable/${{ env.TAG_VERSION_SCRIPT_DIR }}
         env:
           GH_TOKEN: ${{ github.token }}
           FORCE_PATCH: ${{ github.event.inputs.force-patch }}
