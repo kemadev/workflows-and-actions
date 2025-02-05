@@ -6,6 +6,7 @@ on:
       - env/prod
       - env/next
       # env/dev is deployed manually by developers on their local machines
+  workflow_call: {}
   workflow_dispatch:
     inputs:
       force-patch:
