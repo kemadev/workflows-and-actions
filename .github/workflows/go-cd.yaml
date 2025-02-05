@@ -52,18 +52,20 @@ jobs:
       LATEST_VERSION: ${{ steps.tag.outputs.LATEST_VERSION }}
     environment: ${{ github.ref_name }}
     steps:
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          fetch-tags: true
       - name: Checkout reusable workflow scripts
         id: checkout-reusable-scripts
         uses: actions/checkout@v4
         with:
           repository: kemadev/workflows-and-actions
           sparse-checkout: .github/script/reusable
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          sparse-checkout-cone-mode: false
+          sparse-checkout: "!${TAG_VERSION_SCRIPT_DIR}/*"
       - name: Set up Go
         id: setup-go
         uses: actions/setup-go@v5
@@ -80,7 +82,6 @@ jobs:
         run: |
           go run output-tag-version.go "${FORCE_PATCH}"
           tag_version="$(cat ${RUNNER_TEMP}/${{ env.TAG_VERSION_FILE_NAME }} | tr -d '\n')"
-          cd ../..
           git config user.name "${{ env.GHA_BOT_NAME }}"
           git config user.email "${{ env.GHA_BOT_EMAIL }}"
           git tag -a "${tag_version}" -m "Release ${tag_version}"
