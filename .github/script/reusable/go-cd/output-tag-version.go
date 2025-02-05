@@ -91,18 +91,6 @@ func getNextVersion(forcePatchVersion bool) (string, error) {
 	return nextVersion, nil
 }
 
-func getLatestRelease() (string, error) {
-	client := github.NewClient(nil).WithAuthToken(ghToken)
-	release, resp, err := client.Repositories.GetLatestRelease(context.Background(), repoOwner, repoName)
-	if err != nil {
-		return "", err
-	}
-	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("Failed to get latest release: %v", resp.Status)
-	}
-	return release.GetTagName(), nil
-}
-
 func outputTagVersion(version string) error {
 	file, err := os.OpenFile(runnerTemp+"/"+tagVersionFileName, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0600)
 	if err != nil {
@@ -133,12 +121,6 @@ func main() {
 		os.Exit(1)
 	}
 	fmt.Println("Next version is " + nextVersion)
-	latestRelease, err := getLatestRelease()
-	if err != nil {
-		slog.Error(err.Error())
-		os.Exit(1)
-	}
-	fmt.Println("Latest release is " + latestRelease)
 	err = outputTagVersion(nextVersion)
 	if err != nil {
 		slog.Error(err.Error())
