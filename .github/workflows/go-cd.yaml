@@ -80,7 +80,7 @@ jobs:
         run: |
           go run output-tag-version.go "${FORCE_PATCH}"
           tag_version="$(cat ${RUNNER_TEMP}/${{ env.TAG_VERSION_FILE_NAME }} | tr -d '\n')"
-          TMP_CD_DIR="$(git rev-parse --show-toplevel)" ; if [ -n "${TMP_CD_DIR}" ]; then cd "${TMP_CD_DIR}"; fi ; unset TMP_CD_DIR
+          cd ../..
           git config user.name "${{ env.GHA_BOT_NAME }}"
           git config user.email "${{ env.GHA_BOT_EMAIL }}"
           git tag -a "${tag_version}" -m "Release ${tag_version}"
