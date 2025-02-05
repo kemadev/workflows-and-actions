@@ -65,7 +65,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
           sparse-checkout-cone-mode: false
-          sparse-checkout: "!${TAG_VERSION_SCRIPT_DIR}/*"
+          sparse-checkout: "!${{ env.TAG_VERSION_SCRIPT_DIR }}/*"
       - name: Set up Go
         id: setup-go
         uses: actions/setup-go@v5
