@@ -59,15 +59,21 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true'
+      - name: Backup .git directory
+        id: backup-git-dir
+        run: |
+          cp -r .git "${RUNNER_TEMP}/.git"
       - name: Checkout reusable workflow scripts
         id: checkout-reusable-scripts
-        env:
-          GH_TOKEN: ${{ github.token }}
+        uses: actions/checkout@v4
+        with:
+          repository: kemadev/workflows-and-actions
+          sparse-checkout: .github/script/reusable
+      - name: Restore .git directory
+        id: restore-git-dir
         run: |
-          mkdir -p ${{ env.TAG_VERSION_SCRIPT_DIR }}
-          gh api "repos/kemadev/workflows-and-actions/contents/${{ env.TAG_VERSION_SCRIPT_DIR }}/${{ env.TAG_VERSION_SCRIPT_NAME }}" | jq -r '.content' | base64 -d > "${{ env.TAG_VERSION_SCRIPT_DIR }}/${{ env.TAG_VERSION_SCRIPT_NAME }}"
-          gh api "repos/kemadev/workflows-and-actions/contents/${{ env.TAG_VERSION_SCRIPT_DIR }}/go.mod" | jq -r '.content' | base64 -d > "${{ env.TAG_VERSION_SCRIPT_DIR }}/go.mod"
-          gh api "repos/kemadev/workflows-and-actions/contents/${{ env.TAG_VERSION_SCRIPT_DIR }}/go.sum" | jq -r '.content' | base64 -d > "${{ env.TAG_VERSION_SCRIPT_DIR }}/go.sum"
+          rm -rf .git
+          mv "${RUNNER_TEMP}/.git" .git
       - name: Set up Go
         id: setup-go
         uses: actions/setup-go@v5
