@@ -57,7 +57,7 @@ jobs:
         id: checkout-reusable-scripts
         env:
           GH_TOKEN: ${{ github.token }}
-        run:
+        run: |
           mkdir -p ${{ env.TAG_VERSION_SCRIPT_DIR }}
           gh api "repos/kemadev/workflows-and-actions/contents/${{ env.TAG_VERSION_SCRIPT_DIR }}/${{ env.TAG_VERSION_SCRIPT_NAME }}" | jq -r '.content' | base64 -d > "${{ env.TAG_VERSION_SCRIPT_DIR }}/${{ env.TAG_VERSION_SCRIPT_NAME }}"
           gh api "repos/kemadev/workflows-and-actions/contents/${{ env.TAG_VERSION_SCRIPT_DIR }}/go.mod" | jq -r '.content' | base64 -d > "${{ env.TAG_VERSION_SCRIPT_DIR }}/go.mod"
