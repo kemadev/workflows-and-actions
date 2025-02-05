@@ -58,29 +58,30 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
-      - name: Checkout reusable workflow scripts
-        id: checkout-reusable-scripts
-        uses: actions/checkout@v4
-        with:
-          repository: kemadev/workflows-and-actions
-          sparse-checkout: .github/script/reusable
-          path: ./foo
+      # - name: Checkout reusable workflow scripts
+      #   id: checkout-reusable-scripts
+      #   uses: actions/checkout@v4
+      #   with:
+      #     repository: kemadev/workflows-and-actions
+      #     sparse-checkout: .github/script/reusable
+      #     path: ${{ env.TAG_VERSION_SCRIPT_DIR }}
       - name: Set up Go
         id: setup-go
         uses: actions/setup-go@v5
         with:
-          go-version-file: ${{ env.TAG_VERSION_SCRIPT_DIR }}/foo/go.mod
-          cache-dependency-path: ${{ env.TAG_VERSION_SCRIPT_DIR }}/foo/go.sum
+          go-version-file: ${{ env.TAG_VERSION_SCRIPT_DIR }}/go.mod
+          cache-dependency-path: ${{ env.TAG_VERSION_SCRIPT_DIR }}/go.sum
       - name: Tag version
         id: tag
-        working-directory: ./foo/${{ env.TAG_VERSION_SCRIPT_DIR }}
+        working-directory: ${{ env.TAG_VERSION_SCRIPT_DIR }}
         env:
           GH_TOKEN: ${{ github.token }}
           FORCE_PATCH: ${{ github.event.inputs.force-patch }}
         # https://github.com/actions/checkout?tab=readme-ov-file#push-a-commit-using-the-built-in-token
         run: |
-          go run output-tag-version.go "${FORCE_PATCH}"
-          tag_version="$(cat ${RUNNER_TEMP}/${{ env.TAG_VERSION_FILE_NAME }} | tr -d '\n')"
+          # go run output-tag-version.go "${FORCE_PATCH}"
+          # tag_version="$(cat ${RUNNER_TEMP}/${{ env.TAG_VERSION_FILE_NAME }} | tr -d '\n')"
+          tag_version="dbg"
           git config user.name "${{ env.GHA_BOT_NAME }}"
           git config user.email "${{ env.GHA_BOT_EMAIL }}"
           git tag -a "${tag_version}" -m "Release ${tag_version}"
