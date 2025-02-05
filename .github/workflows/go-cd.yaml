@@ -76,7 +76,7 @@ jobs:
           cache-dependency-path: ${{ env.TAG_VERSION_SCRIPT_DIR }}/go.sum
       - name: Tag version
         id: tag
-        working-directory: reusable/${{ env.TAG_VERSION_SCRIPT_DIR }}
+        working-directory: ${{ env.TAG_VERSION_SCRIPT_DIR }}
         env:
           GH_TOKEN: ${{ github.token }}
           FORCE_PATCH: ${{ github.event.inputs.force-patch }}
