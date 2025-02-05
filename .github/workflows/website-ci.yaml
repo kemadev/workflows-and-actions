@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "deploy/**.go"
+  workflow_call: {}
   workflow_dispatch: {}
 
 defaults:
