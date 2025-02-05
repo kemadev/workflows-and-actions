@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log/slog"
 	"os"
@@ -9,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/caarlos0/svu/pkg/svu"
-	"github.com/google/go-github/v68/github"
 )
 
 var (
