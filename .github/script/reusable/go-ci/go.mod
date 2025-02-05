@@ -1,4 +1,4 @@
-module github.com/kemadev/workflows-and-actions/.github/script/go-ci
+module github.com/kemadev/workflows-and-actions/.github/script/reusable/go-ci
 
 go 1.23.4
 

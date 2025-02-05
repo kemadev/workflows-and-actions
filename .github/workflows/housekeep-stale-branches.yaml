@@ -19,6 +19,12 @@ jobs:
       issues: write
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout reusable workflow script
+        id: checkout-reusable-script
+        uses: actions/checkout@v4
+        with:
+          repository: kemadev/workflows-and-actions
+          sparse-checkout: .github/script/reusable/housekeep-stale-branches
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
@@ -26,4 +32,4 @@ jobs:
         id: warn-stale-branches
         env:
           GH_TOKEN: ${{ github.token }}
-        run: ./.github/script/housekeep-stale-branches/report-stale-branches.sh
+        run: ./.github/script/reusable/housekeep-stale-branches/report-stale-branches.sh

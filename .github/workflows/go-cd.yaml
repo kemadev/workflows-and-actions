@@ -22,7 +22,7 @@ on:
 
 env:
   CGO_ENABLED: 0
-  TAG_VERSION_SCRIPT_DIR: ./.github/script/go-cd
+  TAG_VERSION_SCRIPT_DIR: ./.github/script/reusable/go-cd
   TAG_VERSION_FILE_NAME: .tag-version
   ARTIFACT_NAME: build-outputs
   DEPLOYS_DIR: ./deploy
@@ -47,7 +47,7 @@ jobs:
       packages: write
     runs-on: ubuntu-latest
     outputs:
-      # Defined in ./.github/script/go-cd/output-tag-version.go
+      # Defined in ./.github/script/reusable/go-cd/output-tag-version.go
       NEW_MAJOR_VERSION: ${{ steps.tag.outputs.NEW_MAJOR_VERSION }}
       LATEST_VERSION: ${{ steps.tag.outputs.LATEST_VERSION }}
     environment: ${{ github.ref_name }}

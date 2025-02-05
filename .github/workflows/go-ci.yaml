@@ -75,7 +75,7 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     env:
-      COVERAGE_SCRIPT_DIR: ./.github/script/go-ci
+      COVERAGE_SCRIPT_DIR: ./.github/script/reusable/go-ci
     steps:
       - name: Checkout
         id: checkout

@@ -14,7 +14,7 @@ defaults:
 env:
   MOZ_HTTP_OBSERVATORY_REPO: mdn/mdn-http-observatory
   WEBSITE_SECURITY_REPORT_FILE: ./dist/website-security-report.json
-  SECURITY_SCRIPT_DIR: ./.github/script/website-ci
+  SECURITY_SCRIPT_DIR: ./.github/script/reusable/website-ci
 
 jobs:
   report-security:
@@ -27,6 +27,12 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
+      - name: Checkout reusable workflow script
+        id: checkout-reusable-script
+        uses: actions/checkout@v4
+        with:
+          repository: kemadev/workflows-and-actions
+          sparse-checkout: .github/script/reusable/reusable/website-ci
       - name: Get dependency package.json and package-lock.json
         id: get-deps-lockfile
         env:
@@ -61,8 +67,8 @@ jobs:
         id: setup-go
         uses: actions/setup-go@v5
         with:
-          go-version-file: ./.github/script/website-ci/go.mod
-          cache-dependency-path: ./.github/script/website-ci/go.sum
+          go-version-file: ./.github/script/reusable/website-ci/go.mod
+          cache-dependency-path: ./.github/script/reusable/website-ci/go.sum
       - name: Report security
         id: report-security
         # Run only on PRs, don't run on forks or dependabot as they don't have write access to the repository
