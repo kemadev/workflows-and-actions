@@ -52,19 +52,18 @@ jobs:
       LATEST_VERSION: ${{ steps.tag.outputs.LATEST_VERSION }}
     environment: ${{ github.ref_name }}
     steps:
-      - name: Checkout reusable workflow scripts
-        id: checkout-reusable-scripts
-        uses: actions/checkout@v4
-        with:
-          repository: kemadev/workflows-and-actions
-          sparse-checkout: .github/script/reusable
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           fetch-tags: true
-          filter: '!.github/script/reusable'
+      - name: Checkout reusable workflow scripts
+        id: checkout-reusable-scripts
+        uses: actions/checkout@v4
+        with:
+          repository: kemadev/workflows-and-actions
+          sparse-checkout: .github/script/reusable
       - name: Set up Go
         id: setup-go
         uses: actions/setup-go@v5
