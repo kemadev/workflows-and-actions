@@ -1,0 +1,31 @@
+# Read more about `labeler.yml` [here](https://github.com/actions/labeler)
+
+area/root:
+  - changed-files:
+      - any-glob-to-any-file: "*"
+
+area/worflows:
+  - changed-files:
+      - any-glob-to-any-file: [".github/workflows/**", ".github/actions/**"]
+
+area/dependencies:
+  - changed-files:
+      - any-glob-to-any-file: ["go.mod", "go.sum"]
+
+type/bug:
+  - head-branch: ["^bugfix/", "^hotfix/"]
+
+type/feature:
+  - head-branch: ["^feature/"]
+
+env/dev:
+  - head-branch: ["^env/dev"]
+
+env/next:
+  - head-branch: ["^env/next"]
+
+env/prod:
+  - head-branch: ["^env/prod"]
+
+env/other:
+  - head-branch: ["^env/", "!^env/dev", "!^env/next", "!^env/prod"]

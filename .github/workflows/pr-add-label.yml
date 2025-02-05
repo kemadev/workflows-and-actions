@@ -15,6 +15,12 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout labeler config
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          repository: kemadev/workflows-and-actions
+          sparse-checkout: .github/labeler.yml
       - name: Label Pull Request
         uses: actions/labeler@v5
         id: label
