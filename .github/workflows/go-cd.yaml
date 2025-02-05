@@ -53,6 +53,12 @@ jobs:
       LATEST_VERSION: ${{ steps.tag.outputs.LATEST_VERSION }}
     environment: ${{ github.ref_name }}
     steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true'
       - name: Checkout reusable workflow scripts
         id: checkout-reusable-scripts
         env:
@@ -62,12 +68,6 @@ jobs:
           gh api "repos/kemadev/workflows-and-actions/contents/${{ env.TAG_VERSION_SCRIPT_DIR }}/${{ env.TAG_VERSION_SCRIPT_NAME }}" | jq -r '.content' | base64 -d > "${{ env.TAG_VERSION_SCRIPT_DIR }}/${{ env.TAG_VERSION_SCRIPT_NAME }}"
           gh api "repos/kemadev/workflows-and-actions/contents/${{ env.TAG_VERSION_SCRIPT_DIR }}/go.mod" | jq -r '.content' | base64 -d > "${{ env.TAG_VERSION_SCRIPT_DIR }}/go.mod"
           gh api "repos/kemadev/workflows-and-actions/contents/${{ env.TAG_VERSION_SCRIPT_DIR }}/go.sum" | jq -r '.content' | base64 -d > "${{ env.TAG_VERSION_SCRIPT_DIR }}/go.sum"
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          fetch-tags: true'
       - name: Set up Go
         id: setup-go
         uses: actions/setup-go@v5
