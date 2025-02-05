@@ -59,21 +59,9 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true'
-      - name: Backup .git directory
-        id: backup-git-dir
-        run: |
-          cp -r .git "${RUNNER_TEMP}/.git"
       - name: Checkout reusable workflow scripts
         id: checkout-reusable-scripts
-        uses: actions/checkout@v4
-        with:
-          repository: kemadev/workflows-and-actions
-          sparse-checkout: .github/script/reusable
-      - name: Restore .git directory
-        id: restore-git-dir
-        run: |
-          rm -rf .git
-          mv "${RUNNER_TEMP}/.git" .git
+        uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts@main
       - name: Set up Go
         id: setup-go
         uses: actions/setup-go@v5
