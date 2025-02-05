@@ -54,11 +54,12 @@ jobs:
     steps:
       - name: Checkout reusable workflow scripts
         id: checkout-reusable-scripts
+        env:
+          GH_TOKEN: ${{ github.token }}
         run:
           gh api repos/kemadev/workflows-and-actions/contents/.github/script/reusable/go-cd/output-tag-version.go | jq -r '.content' | base64 -d > .github/script/reusable/go-cd/output-tag-version.go
           gh api repos/kemadev/workflows-and-actions/contents/.github/script/reusable/go-cd/go.mod | jq -r '.content' | base64 -d > .github/script/reusable/go-cd/go.mod
           gh api repos/kemadev/workflows-and-actions/contents/.github/script/reusable/go-cd/go.sum | jq -r '.content' | base64 -d > .github/script/reusable/go-cd/go.sum
-
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
