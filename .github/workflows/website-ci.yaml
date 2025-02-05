@@ -29,10 +29,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Checkout reusable workflow scripts
         id: checkout-reusable-scripts
-        uses: actions/checkout@v4
-        with:
-          repository: kemadev/workflows-and-actions
-          sparse-checkout: .github/script/reusable
+        uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts@main
       - name: Get dependency package.json and package-lock.json
         id: get-deps-lockfile
         env:

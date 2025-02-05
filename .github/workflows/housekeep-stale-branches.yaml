@@ -24,10 +24,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Checkout reusable workflow scripts
         id: checkout-reusable-scripts
-        uses: actions/checkout@v4
-        with:
-          repository: kemadev/workflows-and-actions
-          sparse-checkout: .github/script/reusable
+        uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts@main
       - name: Report stale branches
         id: warn-stale-branches
         env:
