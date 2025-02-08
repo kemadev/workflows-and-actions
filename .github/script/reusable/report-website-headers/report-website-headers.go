@@ -132,15 +132,15 @@ func parseWebsiteSecurityReport() (string, bool, error) {
 	var allTestsPassing = true
 	// Generate the table rows
 	for i, test := range sortedTests {
-		optimal := "❤️‍🩹"
+		optimal := ":mending_heart:"
 		if test.Expectation == test.Result {
-			optimal = "❤️"
+			optimal = ":heart:"
 		}
 		var passing string
 		if test.Pass {
-			passing = "✅"
+			passing = ":white_check_mark:"
 		} else {
-			passing = "💥"
+			passing = ":boom:"
 			allTestsPassing = false
 		}
 		report += fmt.Sprintf("| %s | %s | %s | %s | %s |\n", sortedTestNames[i], passing, optimal, test.Result, test.Expectation)

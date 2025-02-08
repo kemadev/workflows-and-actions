@@ -85,7 +85,7 @@ func percentCovered(p *cover.Profile) float64 {
 
 func parseCoverageReport(profiles []*cover.Profile) (string, error) {
 	var report string
-	report += fmt.Sprintf("## Test Coverage Report 🧪\n")
+	report += fmt.Sprintf("## Test Coverage Report :test_tube:\n")
 	report += fmt.Sprintf("\n")
 	report += fmt.Sprintf("| File Path | Coverage |\n")
 	report += fmt.Sprintf("| --------- | -------- |\n")
@@ -97,11 +97,11 @@ func parseCoverageReport(profiles []*cover.Profile) (string, error) {
 		var emoji string
 		switch {
 		case fileCoveragePercentage < 70:
-			emoji = "💔"
+			emoji = ":boom:"
 		case fileCoveragePercentage < 85:
-			emoji = "❤️‍🩹"
+			emoji = ":mending_heart:"
 		default:
-			emoji = "❤️"
+			emoji = ":heart:"
 		}
 		report += fmt.Sprintf("| %s | %s %.2f%% |\n", profile.FileName, emoji, fileCoveragePercentage)
 	}
