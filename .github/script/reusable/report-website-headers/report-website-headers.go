@@ -122,7 +122,7 @@ func parseWebsiteSecurityReport() (string, bool, error) {
 	// Sort the tests by name
 	sortedTests := make([]Test, 0, len(reportObject.Tests))
 	sortedTestNames := make([]string, 0, len(reportObject.Tests))
-	for testName, _ := range reportObject.Tests {
+	for testName := range reportObject.Tests {
 		sortedTestNames = append(sortedTestNames, testName)
 	}
 	sort.Strings(sortedTestNames)
