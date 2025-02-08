@@ -14,10 +14,10 @@ defaults:
 env:
   MOZ_HTTP_OBSERVATORY_REPO: mdn/mdn-http-observatory
   WEBSITE_SECURITY_REPORT_FILE: ./dist/website-security-report.json
-  SECURITY_SCRIPT_DIR: ./.github/script/reusable/website-ci
+  SECURITY_SCRIPT_DIR: ./.github/script/reusable/report-website-headers
 
 jobs:
-  report-security:
+  report-website-headers:
     name: Report security
     permissions:
       contents: read
@@ -64,10 +64,10 @@ jobs:
         id: setup-go
         uses: actions/setup-go@v5
         with:
-          go-version-file: ./.github/script/reusable/website-ci/go.mod
-          cache-dependency-path: ./.github/script/reusable/website-ci/go.sum
+          go-version-file: "${{ env.SECURITY_SCRIPT_DIR }}/go.mod"
+          cache-dependency-path: "${{ env.SECURITY_SCRIPT_DIR }}/go.sum"
       - name: Report security
-        id: report-security
+        id: report-website-headers
         # Run only on PRs, don't run on forks or dependabot as they don't have write access to the repository
         if: github.event_name == 'pull_request' && ! github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]'
         working-directory: ${{ env.SECURITY_SCRIPT_DIR }}
@@ -75,4 +75,4 @@ jobs:
           WEBSITE_SECURITY_REPORT_FILE: ../../../${{ env.WEBSITE_SECURITY_REPORT_FILE }}
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.number }}
-        run: go run report-security.go
+        run: go run report-website-headers.go

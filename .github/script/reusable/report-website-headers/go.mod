@@ -1,4 +1,4 @@
-module github.com/kemadev/workflows-and-actions/.github/script/reusable/website-ci
+module github.com/kemadev/workflows-and-actions/.github/script/reusable/report-website-headers
 
 go 1.23.4
 

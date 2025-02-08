@@ -1,4 +1,4 @@
-module github.com/kemadev/workflows-and-actions/.github/script/reusable/go-cd
+module github.com/kemadev/workflows-and-actions/.github/script/reusable/output-tag-version
 
 go 1.23.4
 

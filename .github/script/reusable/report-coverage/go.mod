@@ -1,4 +1,4 @@
-module github.com/kemadev/workflows-and-actions/.github/script/reusable/go-ci
+module github.com/kemadev/workflows-and-actions/.github/script/reusable/report-coverage
 
 go 1.23.4
 
