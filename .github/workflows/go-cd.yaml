@@ -22,7 +22,6 @@ on:
 
 env:
   CGO_ENABLED: 0
-  TAG_VERSION_SCRIPT_DIR: ./.github/script/reusable/output-tag-version
   TAG_VERSION_SCRIPT_NAME: output-tag-version.go
   TAG_VERSION_FILE_NAME: .tag-version
   ARTIFACT_NAME: build-outputs
@@ -58,30 +57,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          fetch-tags: true'
-      - name: Checkout reusable workflow scripts
-        id: checkout-reusable-scripts
-        uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts@main
-      - name: Set up Go
-        id: setup-go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: ${{ env.TAG_VERSION_SCRIPT_DIR }}/go.mod
-          cache-dependency-path: ${{ env.TAG_VERSION_SCRIPT_DIR }}/go.sum
+          fetch-tags: true
       - name: Tag version
         id: tag
-        working-directory: ${{ env.TAG_VERSION_SCRIPT_DIR }}
+        uses: kemadev/workflows-and-actions/.github/actions/tag-semver@main
         env:
           GH_TOKEN: ${{ github.token }}
           FORCE_PATCH: ${{ github.event.inputs.force-patch }}
-        # https://github.com/actions/checkout?tab=readme-ov-file#push-a-commit-using-the-built-in-token
-        run: |
-          go run "${{ env.TAG_VERSION_SCRIPT_NAME }}" "${FORCE_PATCH}"
-          tag_version="$(cat ${RUNNER_TEMP}/${{ env.TAG_VERSION_FILE_NAME }} | tr -d '\n')"
-          git config user.name "${{ env.GHA_BOT_NAME }}"
-          git config user.email "${{ env.GHA_BOT_EMAIL }}"
-          git tag -a "${tag_version}" -m "Release ${tag_version}"
-          git push --tags
 
   build-and-release:
     name: Build and release

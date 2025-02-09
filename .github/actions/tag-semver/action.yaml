@@ -1,0 +1,45 @@
+name: Tag SemVer
+description: Tag the repository with the next SemVer version
+
+author: kemadev
+branding:
+  icon: tag
+  color: blue
+
+outputs:
+  # Defined in ./.github/script/reusable/output-tag-version/output-tag-version.go
+  NEW_MAJOR_VERSION:
+    description: Whether the new version is a major version
+    value: ${{ steps.tag.outputs.NEW_MAJOR_VERSION }}
+  LATEST_VERSION:
+    description: Actual latest version
+    value: ${{ steps.tag.outputs.LATEST_VERSION }}
+
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout reusable workflow scripts
+      id: checkout-reusable-scripts
+      uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts@main
+    - name: Set up Go
+      id: setup-go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: ./.github/script/reusable/tag-version/go.mod
+        cache-dependency-path: ./.github/script/reusable/tag-version/go.sum
+    - name: Tag version
+      id: tag
+      shell: bash
+      working-directory: ./.github/script/reusable/tag-version
+      env:
+        GH_TOKEN: ${{ github.token }}
+        FORCE_PATCH: ${{ github.event.inputs.force-patch }}
+      # https://github.com/actions/checkout?tab=readme-ov-file#push-a-commit-using-the-built-in-token
+      run: |
+        go run "${{ env.TAG_VERSION_SCRIPT_NAME }}" "${FORCE_PATCH}"
+        tag_version="$(cat ${RUNNER_TEMP}/${{ env.TAG_VERSION_FILE_NAME }} | tr -d '\n')"
+        git config user.name "${{ env.GHA_BOT_NAME }}"
+        git config user.email "${{ env.GHA_BOT_EMAIL }}"
+        git tag -a "${tag_version}" -m "Release ${tag_version}"
+        git push --tags
