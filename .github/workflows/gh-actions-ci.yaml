@@ -22,6 +22,7 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
       - name: Lint workflow files
+        id: lint-workflow-files
         uses: docker://rhysd/actionlint:latest
         with:
           # Enable annotations, see https://github.com/rhysd/actionlint/blob/v1.7.7/docs/usage.md#example-error-annotation-on-github-actions

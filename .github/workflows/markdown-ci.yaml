@@ -1,0 +1,32 @@
+name: Markdown - CI
+
+on:
+  pull_request:
+    paths:
+      - "**/*.md"
+  workflow_call: {}
+  workflow_dispatch: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  lint-markdown-files:
+    name: Lint markdown files
+    permissions:
+      contents: read
+      checks: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Checkout reusable workflow scripts
+        id: checkout-reusable-scripts-and-configs
+        uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
+      - name: Lint markdown files
+        id: lint-markdown-files
+        uses: DavidAnson/markdownlint-cli2-action@v19.1.0
+        with:
+          config: ./config/reusable/.markdownlint.yaml

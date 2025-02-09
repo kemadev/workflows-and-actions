@@ -19,13 +19,9 @@ runs:
       uses: actions/checkout@v4
       with:
         repository: kemadev/workflows-and-actions
-        sparse-checkout: .github/script/reusable
-    - name: Checkout reusable workflow confgigs
-      id: checkout-reusable-scripts
-      uses: actions/checkout@v4
-      with:
-        repository: kemadev/workflows-and-actions
-        sparse-checkout: config/reusable
+        sparse-checkout:
+          - .github/script/reusable
+          - config/reusable
     - name: Restore .git directory
       shell: bash
       id: restore-git-dir

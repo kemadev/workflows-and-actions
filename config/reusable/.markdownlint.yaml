@@ -1,0 +1,6 @@
+MD013:
+  line_length: 400 # Allow up to 400 characters per line
+MD026:
+  punctuation: ",;" # Allow trailing headers punctuation other than these
+MD033: false # Allow inline HTML
+MD036: false # Allow emphasis instead of headings

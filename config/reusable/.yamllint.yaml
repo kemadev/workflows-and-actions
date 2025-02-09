@@ -1,0 +1,36 @@
+rules:
+  anchors: enable
+  braces:
+    forbid: non-empty
+  brackets:
+    forbid: non-empty
+  colons: enable
+  commas: enable
+  comments:
+    level: warning
+    min-spaces-from-content: 1
+  comments-indentation:
+    level: warning
+  document-end:
+    level: warning
+    present: false
+  document-start:
+    level: warning
+    present: false
+  empty-lines: enable
+  empty-values: enable
+  float-values: enable
+  hyphens: enable
+  indentation:
+    indent: 2
+  key-duplicates: enable
+  key-ordering: disable
+  line-length: enable
+  new-line-at-end-of-file: enable
+  new-lines: enable
+  octal-values:
+    level: warning
+  quoted-strings: enable
+  trailing-spaces: enable
+  truthy:
+    level: warning

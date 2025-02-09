@@ -39,6 +39,7 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
       - name: Scan code
+        id: scan-code
         env:
           FINDINGS_JSON_OUTPUT: ./dist/semgrep.json
         run: |

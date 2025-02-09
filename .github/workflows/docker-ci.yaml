@@ -24,13 +24,15 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
-      - name: Lint Dockerfile
+      - name: Lint Dockerfiles
+        id: lint-dockerfiles
         uses: hadolint/hadolint-action@master
         with:
           recursive: true
           format: json
           output-file: ${{ env.FINDINGS_JSON_OUTPUT }}
       - name: Report findings
+        id: report-findings
         run: |
           if [ -f "${FINDINGS_JSON_OUTPUT}" ] && [ "$(cat "${FINDINGS_JSON_OUTPUT}")" != "[]" ]; then
             jq -r '.[] | "::error file=\(.file),line=\(.line),col=\(.column)::\(.message) - \(.code)"' "${FINDINGS_JSON_OUTPUT}"

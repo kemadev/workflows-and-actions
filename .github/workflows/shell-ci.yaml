@@ -22,6 +22,7 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
       - name: Lint shell scripts
+        id: lint-shell-scripts
         env:
           FINDINGS_JSON_OUTPUT: ./dist/shellcheck.json
         run: |

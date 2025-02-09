@@ -1,0 +1,33 @@
+name: YAML - CI
+
+on:
+  pull_request:
+    paths:
+      - "**/*.yaml"
+      - "**/*.yml"
+  workflow_call: {}
+  workflow_dispatch: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  lint-yaml-files:
+    name: Lint YAML files
+    permissions:
+      contents: read
+      checks: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Checkout reusable workflow scripts
+        id: checkout-reusable-scripts-and-configs
+        uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
+      - name: Lint YAML files
+        id: lint-yaml-files
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          config_file: .github/workflows/config/reusable/.yamllint.yaml
