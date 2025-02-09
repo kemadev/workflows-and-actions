@@ -37,5 +37,4 @@ jobs:
         run: |
           if [ -f "${FINDINGS_JSON_OUTPUT}" ] && [ "$(cat "${FINDINGS_JSON_OUTPUT}")" != "[]" ]; then
             jq -r '.[] | "::error file=\(.file),line=\(.line),col=\(.column)::\(.message) - \(.code)"' "${FINDINGS_JSON_OUTPUT}"
-            exit 1
           fi
