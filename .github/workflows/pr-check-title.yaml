@@ -35,6 +35,6 @@ jobs:
             exit 0
           else
             echo "Title is not valid!"
-            echo "::error title=Bad PR title::It must be a conventional commit message, thus matching the regex: ${conventional_commit_regex}."
+            echo "::error title=Bad PR title::It must be a conventional commit message, thus matching the regex: ${conventional_commit_regex}. More information at https://www.conventionalcommits.org"
             exit 1
           fi

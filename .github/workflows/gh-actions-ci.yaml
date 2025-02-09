@@ -1,0 +1,28 @@
+name: GitHub Actions - CI
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/*"
+  workflow_call: {}
+  workflow_dispatch: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  lint-workflow-files:
+    name: Lint workflow files
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Lint workflow files
+        uses: docker://rhysd/actionlint:latest
+        with:
+          # Enable annotations, see https://github.com/rhysd/actionlint/blob/v1.7.7/docs/usage.md#example-error-annotation-on-github-actions
+          args: -format '{{range $err := .}}::error file={{$err.Filepath}},line={{$err.Line}},col={{$err.Column}}::{{$err.Message}}%0A```%0A{{replace $err.Snippet "\\n" "%0A"}}%0A```\n{{end}}'

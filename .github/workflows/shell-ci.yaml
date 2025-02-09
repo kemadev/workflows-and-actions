@@ -1,0 +1,35 @@
+name: Shell - CI
+
+on:
+  pull_request:
+    paths:
+      - "**/*.sh"
+  workflow_call: {}
+  workflow_dispatch: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  lint-shell-scripts:
+    name: Lint shell scripts
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Lint shell scripts
+        env:
+          FINDINGS_JSON_OUTPUT: ./dist/shellcheck.json
+        run: |
+          declare scan_returned_findings=false
+          shellcheck ./**/*.sh --format=json > "${FINDINGS_JSON_OUTPUT}" || scan_returned_findings=true
+          if [ "${scan_returned_findings}" = true ]; then
+            if [ -f "${FINDINGS_JSON_OUTPUT}" ]; then
+              jq -r '.[] | "::error file=\(.file),line=\(.line),endLine=\(.endLine),col=\(.column),endCol=\(.endColumn)::\(.message) - SC\(.code)"' "${FINDINGS_JSON_OUTPUT}"
+            fi
+            exit 1
+          fi
