@@ -30,7 +30,7 @@ jobs:
         env:
           EXCLUDED_FILES: ".github/FUNDING.yml .github/dependabot.yml"
         run: |
-          find . -name "*.yml" | grep -vFf <(echo $EXCLUDED_FILES | tr ' ' '\n')
+          find . -name "*.yml"
       - name: Lint YAML files
         id: lint-yaml-files
         uses: ibiqlik/action-yamllint@v3
