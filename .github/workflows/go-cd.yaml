@@ -107,10 +107,11 @@ jobs:
         env:
           BUILDS_DIR: ${{ github.workspace }}/cmd
           GORELEASER_CONFIG_TEMPLATE_DIR: ${{ github.workspace }}/config/reusable/release
-          GORELEASER_CONFIG_TEMPLATE_FILENAME: ${{ github.workspace }}/.goreleaser.yaml.go.tmpl
+          GORELEASER_CONFIG_TEMPLATE_FILENAME: .goreleaser.yaml.go.tmpl
           GORELEASER_CONFIG_OUTPUT_FILE: ${{ github.workspace }}/config/reusable/release/.goreleaser.yaml
         working-directory: .github/script/reusable/render-goreleaser-config
         run: |
+          mkdir -p ${{ env.GORELEASER_CONFIG_TEMPLATE_DIR }}
           go run render-goreleaser-config.go
       - name: Install syft
         id: install-syft
