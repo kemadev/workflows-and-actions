@@ -15,11 +15,10 @@ outputs:
     description: Actual latest version
     value: ${{ steps.tag.outputs.LATEST_VERSION }}
 
-
 runs:
   using: composite
   steps:
-    - name: Checkout reusable workflow scripts
+    - name: Checkout reusable workflow scripts and configs
       id: checkout-reusable-scripts-and-configs
       uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
     - name: Set up Go

@@ -1,4 +1,4 @@
-name: Checkout reusable scripts and configs
+name: Checkout reusable workflow scripts and configs
 description: Get reusable scripts and configs from the reusable workflows repository
 
 author: kemadev
@@ -9,7 +9,7 @@ branding:
 runs:
   using: composite
   steps:
-    - name: Checkout reusable workflow scripts
+    - name: Checkout reusable workflow scripts and configs
       id: checkout-reusable-scripts-and-configs
       uses: actions/checkout@v4
       with:

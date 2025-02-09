@@ -22,7 +22,7 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
-      - name: Checkout reusable workflow scripts
+      - name: Checkout reusable workflow scripts and configs
         id: checkout-reusable-scripts-and-configs
         uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
       - name: Report stale branches
