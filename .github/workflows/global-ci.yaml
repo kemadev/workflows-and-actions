@@ -72,7 +72,6 @@ jobs:
           VALIDATE_ALL_CODEBASE: true
           SAVE_SUPER_LINTER_OUTPUT: true
 
-          VALIDATE_GIT_COMMITLINT: false
           VALIDATE_ANSIBLE: false
           VALIDATE_ARM: false
           # VALIDATE_BASH: true
@@ -94,6 +93,7 @@ jobs:
           # VALIDATE_EDITORCONFIG: true
           # VALIDATE_ENV: true
           VALIDATE_GHERKIN: false
+          VALIDATE_GIT_COMMITLINT: false
           # VALIDATE_GIT_MERGE_CONFLICT_MARKERS: true
           # VALIDATE_GITHUB_ACTIONS: true
           VALIDATE_GITLEAKS: false
