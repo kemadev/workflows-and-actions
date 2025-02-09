@@ -27,7 +27,7 @@ jobs:
           # Can be restored anytime from <repo root URL>/activity?activity_type=branch_deletion
           delete-branch: true
           remove-stale-when-updated: true
-          days-before-stale: 30
+          days-before-stale: 0
           days-before-close: 7
           close-issue-reason: "not_planned"
           stale-issue-label: "status/stale"
