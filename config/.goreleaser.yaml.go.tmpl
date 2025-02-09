@@ -1,0 +1,98 @@
+version: 2
+
+# Build output directory
+dist: dist/goreleaser
+
+snapshot:
+  # Set a specific version name when using --snapshot, see https://goreleaser.com/customization/snapshots
+  version_template: "{{`{{ incpatch .Version }}`}}-devel"
+
+builds:
+  {{- range .Builds }}
+  - id: {{ .ID }}
+    main: ./{{ .CmdDir }}/{{ .ID }}
+    # Output binary in a subdirectory named after the target OS and architecture
+    binary: "./{{ .ID }}/{{`{{ .Target }}`}}/bootstrap"
+    # Disable unique dist directory, use templated binary name instead (see above)
+    no_unique_dist_dir: true
+    flags:
+      # Disable RPC support which was used for Go 1.x runtime, see https://docs.aws.amazon.com/lambda/latest/dg/golang-package.html#golang-package-mac-linux
+      - -tags=lambda.norpc
+    ldflags:
+      # Disable symbol table and debug information
+      - -s -w
+    env:
+      # Disable CGO as we only use pure Go
+      - CGO_ENABLED=0
+    goos:
+      # Lambda obviously runs on Linux
+      - linux
+    goarch:
+      # Lambda supports amd64 and arm64, see https://docs.aws.amazon.com/lambda/latest/dg/foundation-arch.html
+      - amd64
+      - arm64
+    goamd64:
+      # Lambda amd64 supports avx2 (thus runs on v3), see https://docs.aws.amazon.com/lambda/latest/dg/best-practices.html#function-configuration
+      - v3
+    goarm64:
+      # Lambda arm64 uses ARMv8.2 on Graviton2, see https://aws.amazon.com/blogs/compute/migrating-aws-lambda-functions-to-arm-based-aws-graviton2-processors/
+      - v8.2
+  {{- end }}
+
+archives:
+  {{- range .Builds }}
+  - id: {{ .ID }}
+    builds:
+      - {{ .ID }}
+    # Make the archive name unique
+    name_template: "{{ .ID }}_{{`{{ .Target }}`}}"
+    formats: ["zip"]
+    # Exclude all files from the archive, see https://goreleaser.com/customization/archive/#packaging-only-the-binaries
+    files:
+      - none*
+    # Place the binary in the root of the archive
+    strip_binary_directory: true
+  {{- end }}
+
+checksum:
+  algorithm: sha256
+  name_template: "{{`{{ .ProjectName }}`}}_{{`{{ .Version }}`}}_checksums_sha256.txt"
+
+sboms:
+  # Enable SBOMs for all builds
+  - id: default
+
+# binary_signs:
+#   - {}
+
+changelog:
+  use: github
+  groups:
+    - title: Breaking Changes 💥
+      regexp: '^.*?[[:word:]](\([[:word:]]+\))??!:.+$'
+      order: 0
+    - title: Security Updates 🔒
+      regexp: '^.*?security(\([[:word:]]+\))??!?:.+$'
+      order: 100
+    - title: New Features 🚀
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 200
+    - title: Performance Improvements ⚡
+      regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
+      order: 300
+    - title: Bug Fixes 🐛
+      regexp: '^.*?bug(\([[:word:]]+\))??!?:.+$'
+      order: 400
+    - title: Dependency Updates 📦
+      regexp: '^.*?chore(\(deps\))??!?:.+$'
+      order: 500
+    - title: Other Changes 🔄
+      order: 999
+
+release:
+  # Determine release or prerelease based on the tag
+  prerelease: auto
+  # Replace release notes if release already exists
+  mode: replace
+  # Also upload metadata files
+  include_meta: true
