@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       additional-args:
-        description: "Additional arguments to pass to the actionlint command"
+        description: Additional arguments to pass to the actionlint command
         required: false
         default: ""
 
