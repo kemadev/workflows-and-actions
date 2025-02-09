@@ -153,7 +153,7 @@ jobs:
         id: lint
         uses: golangci/golangci-lint-action@v6
         with:
-          args: --config ./config/lint/.golangci.yml
+          args: --config ./config/reusable/.golangci.yml
 
   scan-dependencies:
     name: Scan dependencies
@@ -168,11 +168,11 @@ jobs:
         uses: anchore/sbom-action@v0
         with:
           output-file: "${{ github.event.repository.name }}-sbom.spdx.json"
-          config: config/sbom/.syft.yaml
+          config: config/reusable/.syft.yaml
       - name: Scan SBOM
         uses: anchore/scan-action@v6
         env:
-          GRYPE_CONFIG: config/sbom/.grype.yaml
+          GRYPE_CONFIG: config/reusable/.grype.yaml
         with:
           sbom: "${{ github.event.repository.name }}-sbom.spdx.json"
           cache-db: true

@@ -41,6 +41,9 @@ env:
   GHA_BOT_NAME: github-actions[bot]
   GHA_BOT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
   GIT_DEPLOYMENT_SUCCESS_TAG_PREFIX: deploy-success-
+  GORELEASER_CONFIG_TEMPLATE_DIR: config/reusable/release
+  GORELEASER_CONFIG_TEMPLATE_FILENAME: .goreleaser.yaml.go.tmpl
+  GORELEASER_CONFIG_OUTPUT_FILE: config/reusable/release/.goreleaser.yaml
 
 concurrency:
   group: ${{ github.ref_name }}
@@ -91,11 +94,21 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Checkout reusable workflow scripts
+        id: checkout-reusable-scripts-and-configs
+        uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
       - name: Set up Go
         id: setup-go
         uses: actions/setup-go@v5
         with:
           go-version: stable
+      - name: Render goreleaser config
+        id: render-goreleaser-config
+        env:
+          BUILDS_DIR: ${{ github.workspace }}/cmd
+        working-directory: .github/scripts/reusable/render-goreleaser-config
+        run: |
+          go run render-goreleaser-config.go
       - name: Install syft
         id: install-syft
         # Setup Go already handles caching
@@ -105,7 +118,7 @@ jobs:
         id: release
         uses: goreleaser/goreleaser-action@v6
         with:
-          args: release --config config/release/.goreleaser.yaml --clean
+          args: release --config ${{ env.GORELEASER_CONFIG_OUTPUT_FILE }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload build artifacts

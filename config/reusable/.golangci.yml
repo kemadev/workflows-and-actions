@@ -1,0 +1,90 @@
+run:
+  tests: true
+  timeout: 3m
+  modules-download-mode: readonly
+
+linters:
+  disable-all: true
+  enable:
+    - asciicheck
+    - containedctx
+    - depguard
+    - dogsled
+    - dupword
+    - durationcheck
+    - err113
+    - errname
+    - errorlint
+    - exhaustruct
+    - forbidigo
+    - forcetypeassert
+    - funlen
+    - ginkgolinter
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - godox
+    - gofmt
+    - goheader
+    - goimports
+    - gomodguard
+    - gosec
+    - gosimple
+    - govet
+    - importas
+    - ineffassign
+    - makezero
+    - misspell
+    - mnd
+    - nonamedreturns
+    - predeclared
+    - recvcheck
+    - revive
+    - sloglint
+    - staticcheck
+    - stylecheck
+    - testifylint
+    - unconvert
+    - unused
+
+linters-settings:
+  depguard:
+    rules:
+      prevent_unmaintained_packages:
+        list-mode: lax # allow unless explicitely denied
+        files:
+          - $all
+          - "!$test"
+        allow:
+          - $gostd
+  errcheck:
+    check-blank: true
+    check-type-assertions: true
+  gocyclo:
+    min-complexity: 15
+
+issues:
+  exclude-use-default: true
+  exclude-case-sensitive: false
+  exclude-dirs-use-default: true
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  new: false
+  fix: false
+  whole-files: false
+  exclude-dirs:
+    - "asset"
+    - "bin"
+    - "build"
+    - "deploy"
+    - "example"
+    - "schema"
+    - "testdata"
+    - "tool"
+
+output:
+  print-issued-lines: true
+  print-linter-name: true
+  show-stats: true
+  sort-results: true
