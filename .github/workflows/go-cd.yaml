@@ -41,9 +41,9 @@ env:
   GHA_BOT_NAME: github-actions[bot]
   GHA_BOT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
   GIT_DEPLOYMENT_SUCCESS_TAG_PREFIX: deploy-success-
-  GORELEASER_CONFIG_TEMPLATE_DIR: config/reusable/release
+  GORELEASER_CONFIG_TEMPLATE_DIR: config/reusable
   GORELEASER_CONFIG_TEMPLATE_FILENAME: .goreleaser.yaml.go.tmpl
-  GORELEASER_CONFIG_OUTPUT_FILE: config/reusable/release/.goreleaser.yaml
+  GORELEASER_CONFIG_OUTPUT_FILE: config/reusable/.goreleaser.yaml
 
 concurrency:
   group: ${{ github.ref_name }}
@@ -106,9 +106,9 @@ jobs:
         id: render-goreleaser-config
         env:
           BUILDS_DIR: ${{ github.workspace }}/cmd
-          GORELEASER_CONFIG_TEMPLATE_DIR: ${{ github.workspace }}/config/reusable/release
+          GORELEASER_CONFIG_TEMPLATE_DIR: ${{ github.workspace }}/config/reusable
           GORELEASER_CONFIG_TEMPLATE_FILENAME: .goreleaser.yaml.go.tmpl
-          GORELEASER_CONFIG_OUTPUT_FILE: ${{ github.workspace }}/config/reusable/release/.goreleaser.yaml
+          GORELEASER_CONFIG_OUTPUT_FILE: ${{ github.workspace }}/config/reusable/.goreleaser.yaml
         working-directory: .github/script/reusable/render-goreleaser-config
         run: |
           mkdir -p ${{ env.GORELEASER_CONFIG_TEMPLATE_DIR }}
