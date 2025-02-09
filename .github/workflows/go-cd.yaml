@@ -22,7 +22,7 @@ on:
 
 env:
   CGO_ENABLED: 0
-  TAG_VERSION_SCRIPT_NAME: output-tag-version.go
+  TAG_VERSION_SCRIPT_NAME: output-tag-next-semver.go
   TAG_VERSION_FILE_NAME: .tag-version
   ARTIFACT_NAME: build-outputs
   DEPLOYS_DIR: ./deploy
@@ -47,7 +47,7 @@ jobs:
       packages: write
     runs-on: ubuntu-latest
     outputs:
-      # Defined in ./.github/script/reusable/output-tag-version/output-tag-version.go
+      # Defined in ./.github/script/reusable/output-tag-next-semver/output-tag-next-semver.go
       NEW_MAJOR_VERSION: ${{ steps.tag.outputs.NEW_MAJOR_VERSION }}
       LATEST_VERSION: ${{ steps.tag.outputs.LATEST_VERSION }}
     environment: ${{ github.ref_name }}

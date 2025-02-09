@@ -7,7 +7,7 @@ branding:
   color: blue
 
 outputs:
-  # Defined in ./.github/script/reusable/output-tag-version/output-tag-version.go
+  # Defined in ./.github/script/reusable/output-tag-next-semver/output-tag-next-semver.go
   NEW_MAJOR_VERSION:
     description: Whether the new version is a major version
     value: ${{ steps.tag.outputs.NEW_MAJOR_VERSION }}

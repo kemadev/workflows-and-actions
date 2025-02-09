@@ -1,4 +1,4 @@
-module github.com/kemadev/workflows-and-actions/.github/script/reusable/output-tag-version
+module github.com/kemadev/workflows-and-actions/.github/script/reusable/output-tag-next-semver
 
 go 1.23.4
 
