@@ -27,7 +27,7 @@ jobs:
         uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
       - name: Lint markdown files
         id: lint-markdown-files
-        uses: DavidAnson/markdownlint-cli2-action@v19.1.0
+        uses: DavidAnson/markdownlint-cli2-action@v19
         with:
           config: ./config/reusable/.markdownlint.yaml
           globs: "**/*.md"
