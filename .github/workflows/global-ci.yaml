@@ -55,6 +55,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      checks: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
