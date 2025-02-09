@@ -164,6 +164,9 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
+      - name: Checkout reusable workflow scripts
+        id: checkout-reusable-scripts-and-configs
+        uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
       - name: Create SBOM
         uses: anchore/sbom-action@v0
         with:
