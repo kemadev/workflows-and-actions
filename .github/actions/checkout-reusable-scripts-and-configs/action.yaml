@@ -21,3 +21,9 @@ runs:
       run: |
         cp -r "${{ github.workspace }}/dist/workflows-and-actions/.github/script/reusable" .github/script
         cp -r "${{ github.workspace }}/dist/workflows-and-actions/config/reusable" config
+    - name: Ignore git changes
+      id: ignore-git-changes
+      shell: bash
+      run: |
+        git update-index --assume-unchanged .github/script/reusable/*
+        git update-index --assume-unchanged config/reusable/*
