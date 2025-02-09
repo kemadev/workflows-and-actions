@@ -106,7 +106,7 @@ jobs:
         id: render-goreleaser-config
         env:
           BUILDS_DIR: ${{ github.workspace }}/cmd
-        working-directory: .github/scripts/reusable/render-goreleaser-config
+        working-directory: .github/script/reusable/render-goreleaser-config
         run: |
           go run render-goreleaser-config.go
       - name: Install syft
