@@ -74,14 +74,14 @@ issues:
   fix: false
   whole-files: false
   exclude-dirs:
-    - "asset"
-    - "bin"
-    - "build"
-    - "deploy"
-    - "example"
-    - "schema"
-    - "testdata"
-    - "tool"
+    - asset
+    - bin
+    - build
+    - deploy
+    - example
+    - schema
+    - testdata
+    - tool
 
 output:
   print-issued-lines: true
