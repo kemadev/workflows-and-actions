@@ -23,9 +23,9 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
-      # - name: Checkout reusable workflow scripts
-      #   id: checkout-reusable-scripts-and-configs
-      #   uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
+      - name: Checkout reusable workflow scripts
+        id: checkout-reusable-scripts-and-configs
+        uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
       - name: Warn about .yml files
         env:
           EXCLUDED_FILES: ".github/FUNDING.yml .github/dependabot.yml"
