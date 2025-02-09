@@ -19,5 +19,5 @@ runs:
       id: copy-reusable-scripts-and-configs
       shell: bash
       run: |
-        cp -r "${{ github.workspace }}/dist/workflows-and-actions/.github/script/reusable .github/script/reusable"
-        cp -r "${{ github.workspace }}/dist/workflows-and-actions/config/reusable config/reusable"
+        cp -r "${{ github.workspace }}/dist/workflows-and-actions/.github/script/reusable" .github/script/reusable
+        cp -r "${{ github.workspace }}/dist/workflows-and-actions/config/reusable" config/reusable
