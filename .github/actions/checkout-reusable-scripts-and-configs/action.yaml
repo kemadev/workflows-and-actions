@@ -1,5 +1,5 @@
-name: Checkout reusable scripts
-description: Get reusable scripts from the reusable workflows repository
+name: Checkout reusable scripts and configs
+description: Get reusable scripts and configs from the reusable workflows repository
 
 author: kemadev
 branding:
@@ -15,7 +15,7 @@ runs:
       run: |
         cp -r .git "${RUNNER_TEMP}/.git"
     - name: Checkout reusable workflow scripts
-      id: checkout-reusable-scripts
+      id: checkout-reusable-scripts-and-configs
       uses: actions/checkout@v4
       with:
         repository: kemadev/workflows-and-actions

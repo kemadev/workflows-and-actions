@@ -81,8 +81,8 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
       - name: Checkout reusable workflow scripts
-        id: checkout-reusable-scripts
-        uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts@main
+        id: checkout-reusable-scripts-and-configs
+        uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
       - name: Set up Go
         uses: actions/setup-go@v5
         id: setup-go
