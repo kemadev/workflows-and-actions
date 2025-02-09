@@ -1,0 +1,22 @@
+name: Global - CI
+
+on:
+  pull_request: {}
+  workflow_call: {}
+  workflow_dispatch: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  dummy:
+    name: Dummy
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dummy
+        id: dummy
+        run: |
+          dummy=$(problem)
