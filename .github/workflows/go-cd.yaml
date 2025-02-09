@@ -6,7 +6,18 @@ on:
       - env/prod
       - env/next
       # env/dev is deployed manually by developers on their local machines
-  workflow_call: {}
+  workflow_call:
+    inputs:
+      force-patch:
+        description: Force new patch version, creating a new tag and release
+        type: boolean
+        default: false
+        required: false
+      force-rollback:
+        description: Force rollback to specified git reference (use `latest` for latest successful deploy)
+        type: string
+        default: ""
+        required: false
   workflow_dispatch:
     inputs:
       force-patch:
