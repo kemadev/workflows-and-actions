@@ -26,5 +26,5 @@ jobs:
         uses: actions/labeler@v5
         id: label
         with:
-          configuration-path: config/labeler.yaml
+          configuration-path: config/reusable/labeler.yaml
           sync-labels: true
