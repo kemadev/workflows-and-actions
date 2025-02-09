@@ -26,12 +26,12 @@ runs:
       id: setup-go
       uses: actions/setup-go@v5
       with:
-        go-version-file: ./.github/script/reusable/tag-version/go.mod
-        cache-dependency-path: ./.github/script/reusable/tag-version/go.sum
+        go-version-file: ./.github/script/reusable/output-tag-next-semver/go.mod
+        cache-dependency-path: ./.github/script/reusable/output-tag-next-semver/go.sum
     - name: Tag version
       id: tag
       shell: bash
-      working-directory: ./.github/script/reusable/tag-version
+      working-directory: ./.github/script/reusable/output-tag-next-semver
       env:
         GH_TOKEN: ${{ github.token }}
         FORCE_PATCH: ${{ github.event.inputs.force-patch }}
