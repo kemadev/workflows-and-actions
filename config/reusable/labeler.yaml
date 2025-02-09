@@ -1,4 +1,4 @@
-# Read more about `labeler.yml` [here](https://github.com/actions/labeler)
+# Read more about `labeler.yaml` [here](https://github.com/actions/labeler)
 
 area/root:
   - changed-files:

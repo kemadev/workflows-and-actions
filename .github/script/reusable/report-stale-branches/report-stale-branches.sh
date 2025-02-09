@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Used in .github/workflows/housekeep-stale-branches.yml
+# Used in .github/workflows/housekeep-stale-branches.yaml
 
 # NOTE This script has not been ported to Go yet, as GitHub's GraphQL API lacks a good Go client library
 
