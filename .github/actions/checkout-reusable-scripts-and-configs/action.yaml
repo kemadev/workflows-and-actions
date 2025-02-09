@@ -14,10 +14,10 @@ runs:
       uses: actions/checkout@v4
       with:
         repository: kemadev/workflows-and-actions
-        path: ${{ runner.temp }}/workflows-and-actions
+        path: ${{ github.workspace }}/dist/workflows-and-actions
     - name: Copy reusable scripts and configs
       id: copy-reusable-scripts-and-configs
       shell: bash
       run: |
-        cp -r "${RUNNER_TEMP}/workflows-and-actions/.github/script/reusable" .github/script/reusable
-        cp -r "${RUNNER_TEMP}/workflows-and-actions/config/reusable" config/reusable
+        cp -r "${{ github.workspace }}/dist/workflows-and-actions/.github/script/reusable .github/script/reusable"
+        cp -r "${{ github.workspace }}/dist/workflows-and-actions/config/reusable config/reusable"
