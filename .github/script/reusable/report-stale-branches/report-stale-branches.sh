@@ -10,7 +10,7 @@ function check_and_set_variables {
 		exit 1
 	fi
 	export output_file="./dist/stale_issue_body.md"
-	export days_before_stale=30
+	export days_before_stale="${DAYS_BEFORE_STALE:-30}"
 	export issue_title="🧹 Stale branches"
 	export issue_body_identifier="<!-- gha:warn-stale-branches -->"
 }
