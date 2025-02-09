@@ -9,11 +9,6 @@ branding:
 runs:
   using: composite
   steps:
-    - name: Backup .git directory
-      id: backup-git-dir
-      shell: bash
-      run: |
-        cp -r .git "${RUNNER_TEMP}/.git"
     - name: Checkout reusable workflow scripts
       id: checkout-reusable-scripts-and-configs
       uses: actions/checkout@v4
@@ -22,12 +17,7 @@ runs:
         path: ${{ runner.temp }}/workflows-and-actions
     - name: Copy reusable scripts and configs
       id: copy-reusable-scripts-and-configs
+      shell: bash
       run: |
         cp -r "${RUNNER_TEMP}/workflows-and-actions/.github/script/reusable" .github/script/reusable
         cp -r "${RUNNER_TEMP}/workflows-and-actions/config/reusable" config/reusable
-    - name: Restore .git directory
-      shell: bash
-      id: restore-git-dir
-      run: |
-        rm -rf .git
-        mv "${RUNNER_TEMP}/.git" .git
