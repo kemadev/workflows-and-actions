@@ -28,7 +28,7 @@ jobs:
         uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
       - name: Warn about .yml files
         run: |
-          find . -name "*.yml" -exec echo "::warning file={}::Use .yaml instead of .yml" \;
+          find . -type f -name "*.yml" -exec echo "::warning file={},title=Unsupported .yml extension::Use .yaml instead of .yml" \;
       - name: Lint YAML files
         id: lint-yaml-files
         uses: ibiqlik/action-yamllint@v3
