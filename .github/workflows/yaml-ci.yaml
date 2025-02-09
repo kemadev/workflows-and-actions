@@ -32,3 +32,4 @@ jobs:
         with:
           config_file: config/reusable/.yamllint.yaml
           format: github
+          file_or_dir: "**/*.yaml **/*.yml"
