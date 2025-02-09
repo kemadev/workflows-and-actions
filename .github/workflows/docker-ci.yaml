@@ -32,6 +32,7 @@ jobs:
           format: json
           output-file: ${{ env.FINDINGS_JSON_OUTPUT }}
       - name: Report findings
+        if: always()
         id: report-findings
         run: |
           if [ -f "${FINDINGS_JSON_OUTPUT}" ] && [ "$(cat "${FINDINGS_JSON_OUTPUT}")" != "[]" ]; then
