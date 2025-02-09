@@ -3,7 +3,7 @@ name: Housekeep - Sync repository template
 on:
   schedule:
     # Each day at 3:00 AM
-    - cron: "0 3 * * *"
+    - cron: 0 3 * * *
   workflow_call: {}
   workflow_dispatch: {}
 

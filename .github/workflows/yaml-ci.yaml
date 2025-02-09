@@ -30,4 +30,5 @@ jobs:
         id: lint-yaml-files
         uses: ibiqlik/action-yamllint@v3
         with:
-          config_file: .github/workflows/config/reusable/.yamllint.yaml
+          config_file: config/reusable/.yamllint.yaml
+          format: github

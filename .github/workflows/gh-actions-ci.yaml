@@ -3,9 +3,14 @@ name: GitHub Actions - CI
 on:
   pull_request:
     paths:
-      - ".github/workflows/*"
+      - .github/workflows/*
   workflow_call: {}
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      additional-args:
+        description: "Additional arguments to pass to the actionlint command"
+        required: false
+        default: ""
 
 defaults:
   run:
@@ -24,7 +29,9 @@ jobs:
       - name: Lint workflow files
         id: lint-workflow-files
         uses: docker://rhysd/actionlint:latest
+        env:
+          ADDITIONAL_ARGS: ${{ github.event.inputs.additional-args }}
         with:
           # Enable annotations, see https://github.com/rhysd/actionlint/blob/v1.7.7/docs/usage.md#example-error-annotation-on-github-actions
           args: |
-            -format "{{range $err := .}}::error file={{$err.Filepath}},line={{$err.Line}},col={{$err.Column}}::{{$err.Message}}%0A```%0A{{replace $err.Snippet \"\\n\" \"%0A\"}}%0A```\n{{end}}"
+            -format "{{range $err := .}}::error file={{$err.Filepath}},line={{$err.Line}},col={{$err.Column}}::{{$err.Message}}%0A```%0A{{replace $err.Snippet \"\\n\" \"%0A\"}}%0A```\n{{end}}" ${{ env.ADDITIONAL_ARGS }}

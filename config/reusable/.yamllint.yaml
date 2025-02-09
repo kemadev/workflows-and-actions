@@ -1,9 +1,11 @@
 rules:
   anchors: enable
   braces:
+    level: warning
     forbid: non-empty
   brackets:
-    forbid: non-empty
+    level: warning
+    forbid: false
   colons: enable
   commas: enable
   comments:
@@ -22,15 +24,20 @@ rules:
   float-values: enable
   hyphens: enable
   indentation:
-    indent: 2
+    spaces: 2
   key-duplicates: enable
   key-ordering: disable
-  line-length: enable
+  line-length:
+    level: warning
+    max: 400
   new-line-at-end-of-file: enable
   new-lines: enable
   octal-values:
     level: warning
-  quoted-strings: enable
+  quoted-strings:
+    level: warning
+    required: only-when-needed
   trailing-spaces: enable
   truthy:
     level: warning
+    check-keys: false

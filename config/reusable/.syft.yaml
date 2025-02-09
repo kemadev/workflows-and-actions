@@ -1,6 +1,5 @@
 output:
-  - "spdx-json"
-exclude: [
-    # Ignore IaC files as they are usually not relevant to the application's security
-    "./deploy/**",
-  ]
+  - spdx-json
+exclude:
+  # Ignore IaC files as they are usually not relevant to the application's security
+  - ./deploy/**
