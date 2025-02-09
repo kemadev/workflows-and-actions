@@ -27,8 +27,10 @@ jobs:
       #   id: checkout-reusable-scripts-and-configs
       #   uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
       - name: Warn about .yml files
+        env:
+          EXCLUDED_FILES: ".github/FUNDING.yml .github/dependabot.yml"
         run: |
-          find . -type f -name "*.yml" -exec echo "::warning file={},title=Unsupported .yml extension::Use .yaml instead of .yml" \;
+          find . -name "*.yml" | grep -vFf <(echo $EXCLUDED_FILES | tr ' ' '\n') | xargs -I % echo "::warning file=%,title=Unsupported .yml extension::File is using .yml extension. Please rename to .yaml"
       - name: Lint YAML files
         id: lint-yaml-files
         uses: ibiqlik/action-yamllint@v3
