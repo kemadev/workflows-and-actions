@@ -29,5 +29,5 @@ jobs:
         id: warn-stale-branches
         env:
           GH_TOKEN: ${{ github.token }}
-          DAYS_BEFORE_STALE: 0
+          DAYS_BEFORE_STALE: 30
         run: ./.github/script/reusable/report-stale-branches/report-stale-branches.sh
