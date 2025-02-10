@@ -90,7 +90,7 @@ func main() {
 	startDate := time.Now()
 	log.Println("Rendering goreleaser config")
 	checkVariables()
-	dirs, err := listDirs(BUILDS_DIR)
+	dirs, err := listDirs(BUILDS_DIR_PARENT + "/" + BUILDS_DIR)
 	if err != nil {
 		logFatal("Failed to list directories", err)
 	}
