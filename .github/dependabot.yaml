@@ -1,0 +1,35 @@
+# Read more about `dependabot.yml` [here](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file)
+
+version: 2
+
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    commit-message:
+      prefix: "chore(deps): dependabot - actions "
+    schedule:
+      interval: "daily"
+      timezone: "Etc/UTC"
+      time: "03:00"
+    # assignees: [""]
+    # reviewers: [""]
+    labels: ["area/dependencies", "status/needs-triage", "complexity/low"]
+    pull-request-branch-name:
+      separator: "-"
+  - package-ecosystem: "gomod"
+    directories:
+      - "/"
+      - "/.github/script/*"
+      - "/.github/script/reusable*"
+      - "/deploy/*"
+    commit-message:
+      prefix: "chore(deps): dependabot - go "
+    schedule:
+      interval: "daily"
+      timezone: "Etc/UTC"
+      time: "03:00"
+    # assignees: [""]
+    # reviewers: [""]
+    labels: ["area/dependencies", "status/needs-triage", "complexity/low"]
+    pull-request-branch-name:
+      separator: "-"
