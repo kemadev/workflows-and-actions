@@ -112,6 +112,10 @@ jobs:
         run: |
           mkdir -p ${{ env.GORELEASER_CONFIG_TEMPLATE_DIR }}
           go run render-goreleaser-config.go
+      - name: Debug config
+        id: debug-config
+        run: |
+          cat ${{ env.GORELEASER_CONFIG_OUTPUT_FILE }}
       - name: Install syft
         id: install-syft
         # Setup Go already handles caching
