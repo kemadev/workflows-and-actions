@@ -115,7 +115,9 @@ jobs:
       - name: Debug config
         id: debug-config
         run: |
+          echo builds dir $BUILDS_DIR
           cat ${{ env.GORELEASER_CONFIG_OUTPUT_FILE }}
+          env
       - name: Install syft
         id: install-syft
         # Setup Go already handles caching
