@@ -108,6 +108,7 @@ jobs:
           GORELEASER_CONFIG_TEMPLATE_DIR: ${{ github.workspace }}/config/reusable
           GORELEASER_CONFIG_TEMPLATE_FILENAME: .goreleaser.yaml.go.tmpl
           GORELEASER_CONFIG_OUTPUT_FILE: ${{ github.workspace }}/config/reusable/.goreleaser.yaml
+          BUILDS_DIR_PARENT: ${{ github.workspace }}
         working-directory: .github/script/reusable/render-goreleaser-config
         run: |
           mkdir -p ${{ env.GORELEASER_CONFIG_TEMPLATE_DIR }}

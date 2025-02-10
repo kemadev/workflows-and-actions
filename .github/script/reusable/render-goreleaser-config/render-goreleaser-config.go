@@ -14,6 +14,8 @@ var (
 	GORELEASER_CONFIG_TEMPLATE_FILENAME = os.Getenv("GORELEASER_CONFIG_TEMPLATE_FILENAME")
 	// Path this script should output the rendered goreleaser config file to
 	GORELEASER_CONFIG_OUTPUT_FILE = os.Getenv("GORELEASER_CONFIG_OUTPUT_FILE")
+	// Parent directory containing the directories to build
+	BUILDS_DIR_PARENT = os.Getenv("BUILDS_DIR_PARENT")
 	// Directory containing the directories to build
 	BUILDS_DIR = os.Getenv("BUILDS_DIR")
 )
@@ -34,6 +36,9 @@ func checkVariables() error {
 	}
 	if BUILDS_DIR == "" {
 		logFatal("BUILDS_DIR is not set", nil)
+	}
+	if BUILDS_DIR_PARENT == "" {
+		logFatal("BUILDS_DIR_PARENT is not set", nil)
 	}
 	return nil
 }
