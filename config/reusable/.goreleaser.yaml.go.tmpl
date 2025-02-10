@@ -10,9 +10,9 @@ snapshot:
 builds:
   {{- range .Builds }}
   - id: {{ .ID }}
-    main: {{ .CmdDir }}/{{ .ID }}
+    main: ./{{ .CmdDir }}/{{ .ID }}
     # Output binary in a subdirectory named after the target OS and architecture
-    binary: "{{ .ID }}/{{`{{ .Target }}`}}/bootstrap"
+    binary: "./{{ .ID }}/{{`{{ .Target }}`}}/bootstrap"
     # Disable unique dist directory, use templated binary name instead (see above)
     no_unique_dist_dir: true
     flags:
