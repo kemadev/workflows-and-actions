@@ -118,6 +118,8 @@ jobs:
           echo builds dir $BUILDS_DIR
           cat ${{ env.GORELEASER_CONFIG_OUTPUT_FILE }}
           env
+          pwd
+          ls -Rla
       - name: Install syft
         id: install-syft
         # Setup Go already handles caching
