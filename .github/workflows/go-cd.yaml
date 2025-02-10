@@ -42,7 +42,6 @@ env:
   GHA_BOT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
   GIT_DEPLOYMENT_SUCCESS_TAG_PREFIX: deploy-success-
   GORELEASER_CONFIG_TEMPLATE_DIR: config/reusable
-  GORELEASER_CONFIG_TEMPLATE_FILENAME: .goreleaser.yaml.go.tmpl
   GORELEASER_CONFIG_OUTPUT_FILE: config/reusable/.goreleaser.yaml
 
 concurrency:
