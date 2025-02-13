@@ -1,9 +1,5 @@
 # Read more about `labeler.yaml` [here](https://github.com/actions/labeler)
 
-area/root:
-  - changed-files:
-      - any-glob-to-any-file: "*"
-
 area/worflows:
   - changed-files:
       - any-glob-to-any-file: [.github/workflows/**, .github/actions/**]
@@ -28,4 +24,4 @@ env/prod:
   - head-branch: [^env/prod]
 
 env/other:
-  - head-branch: ["^env", "!^env/dev", "!^env/next", "!^env/prod"] # yamllint disable-line rule:quoted-strings
+  - head-branch: ['^env', '!^env/dev', '!^env/next', '!^env/prod'] # yamllint disable-line rule:quoted-strings
