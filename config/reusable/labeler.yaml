@@ -24,4 +24,4 @@ env/prod:
   - head-branch: [^env/prod]
 
 env/other:
-  - head-branch: [^env, '!^env/dev', '!^env/next', '!^env/prod']
+  - head-branch: ['^env', '!^env/dev', '!^env/next', '!^env/prod'] # yamllint disable-line rule:quoted-strings
