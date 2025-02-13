@@ -36,6 +36,7 @@ rules:
     level: warning
   quoted-strings:
     level: warning
+    quote-type: single
     required: only-when-needed
   trailing-spaces: enable
   truthy:
