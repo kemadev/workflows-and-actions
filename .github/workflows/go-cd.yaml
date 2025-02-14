@@ -87,6 +87,7 @@ jobs:
       contents: write
       packages: write
       attestations: write
+      id-token: write
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
     steps:
