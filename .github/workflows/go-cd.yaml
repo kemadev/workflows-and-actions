@@ -129,7 +129,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/attest-build-provenance@v2
         with:
-          subject-checksums: ./dist/checksums.txt
+          subject-checksums: ${{ env.GORELEASER_DIST_DIR }}/${GITHUB_REPOSITORY//\//-}_${{ needs.tag-version.outputs.LATEST_VERSION }}_checksums_sha256.txt
       - name: Upload build artifacts
         id: upload-build-artifacts
         uses: actions/upload-artifact@v4
