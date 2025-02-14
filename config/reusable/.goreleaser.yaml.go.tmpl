@@ -1,7 +1,7 @@
 version: 2
 
 # Build output directory
-dist: dist
+dist: dist/goreleaser
 
 snapshot:
   # Set a specific version name when using --snapshot, see https://goreleaser.com/customization/snapshots
@@ -56,11 +56,11 @@ archives:
 
 checksum:
   algorithm: sha256
-  name_template: 'checksums.txt'
+  name_template: '{{`{{ .ProjectName }}`}}_{{`{{ .Version }}`}}_checksums_sha256.txt'
 
-# sboms:
-#   # Enable SBOMs for all builds
-#   - id: default
+sboms:
+  # Enable SBOMs for all builds
+  - id: default
 
 # binary_signs:
 #   - {}
