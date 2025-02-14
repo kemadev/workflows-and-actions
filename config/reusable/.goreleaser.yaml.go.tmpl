@@ -5,14 +5,14 @@ dist: dist/goreleaser
 
 snapshot:
   # Set a specific version name when using --snapshot, see https://goreleaser.com/customization/snapshots
-  version_template: "{{`{{ incpatch .Version }}`}}-devel"
+  version_template: '{{`{{ incpatch .Version }}`}}-devel'
 
 builds:
   {{- range .Builds }}
   - id: {{ .ID }}
     main: ./{{ .CmdDir }}/{{ .ID }}
     # Output binary in a subdirectory named after the target OS and architecture
-    binary: "./{{ .ID }}/{{`{{ .Target }}`}}/bootstrap"
+    binary: ./{{ .ID }}/{{`{{ .Target }}`}}/bootstrap
     # Disable unique dist directory, use templated binary name instead (see above)
     no_unique_dist_dir: true
     flags:
@@ -45,8 +45,8 @@ archives:
     builds:
       - {{ .ID }}
     # Make the archive name unique
-    name_template: "{{ .ID }}_{{`{{ .Target }}`}}"
-    formats: ["zip"]
+    name_template: '{{ .ID }}_{{`{{ .Target }}`}}'
+    formats: ['zip']
     # Exclude all files from the archive, see https://goreleaser.com/customization/archive/#packaging-only-the-binaries
     files:
       - none*
@@ -56,7 +56,7 @@ archives:
 
 checksum:
   algorithm: sha256
-  name_template: "{{`{{ .ProjectName }}`}}_{{`{{ .Version }}`}}_checksums_sha256.txt"
+  name_template: 'checksums.txt'
 
 sboms:
   # Enable SBOMs for all builds
@@ -69,22 +69,22 @@ changelog:
   use: github
   groups:
     - title: Breaking Changes 💥
-      regexp: '^.*?[[:word:]](\([[:word:]]+\))??!:.+$'
+      regexp: ^.*?[[:word:]](\([[:word:]]+\))??!:.+$
       order: 0
     - title: Security Updates 🔒
-      regexp: '^.*?security(\([[:word:]]+\))??!?:.+$'
+      regexp: ^.*?security(\([[:word:]]+\))??!?:.+$
       order: 100
     - title: New Features 🚀
-      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      regexp: ^.*?feat(\([[:word:]]+\))??!?:.+$
       order: 200
     - title: Performance Improvements ⚡
-      regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
+      regexp: ^.*?perf(\([[:word:]]+\))??!?:.+$
       order: 300
     - title: Bug Fixes 🐛
-      regexp: '^.*?bug(\([[:word:]]+\))??!?:.+$'
+      regexp: ^.*?bug(\([[:word:]]+\))??!?:.+$
       order: 400
     - title: Dependency Updates 📦
-      regexp: '^.*?chore(\(deps\))??!?:.+$'
+      regexp: ^.*?chore(\(deps\))??!?:.+$
       order: 500
     - title: Other Changes 🔄
       order: 999
