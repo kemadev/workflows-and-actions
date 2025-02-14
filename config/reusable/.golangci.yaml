@@ -55,7 +55,7 @@ linters-settings:
         list-mode: lax # allow unless explicitely denied
         files:
           - $all
-          - "!$test"
+          - '!$test'
         allow:
           - $gostd
   errcheck:
