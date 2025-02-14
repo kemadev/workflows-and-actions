@@ -124,7 +124,7 @@ jobs:
         id: release
         uses: goreleaser/goreleaser-action@v6
         with:
-          args: release --config ${{ env.GORELEASER_CONFIG_OUTPUT_FILE }} --clean
+          args: release --config ${{ env.GORELEASER_CONFIG_OUTPUT_FILE }} --clean --skip validate
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # Inspired by https://github.com/goreleaser/example-slsa-provenance/blob/master/.github/workflows/goreleaser.yml#L42-L50
