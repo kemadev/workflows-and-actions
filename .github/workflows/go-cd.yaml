@@ -16,7 +16,7 @@ on:
       force-rollback:
         description: Force rollback to specified git reference (use `latest` for latest successful deploy)
         type: string
-        default: ""
+        default: ''
         required: false
   workflow_dispatch:
     inputs:
@@ -28,7 +28,7 @@ on:
       force-rollback:
         description: Force rollback to specified git reference (use `latest` for latest successful deploy)
         type: string
-        default: ""
+        default: ''
         required: false
 
 env:

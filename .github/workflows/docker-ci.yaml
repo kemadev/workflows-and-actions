@@ -3,7 +3,7 @@ name: Docker - CI
 on:
   pull_request:
     paths:
-      - "**/*Dockerfile"
+      - '**/*Dockerfile'
   workflow_call: {}
   workflow_dispatch: {}
 

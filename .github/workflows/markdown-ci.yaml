@@ -3,7 +3,7 @@ name: Markdown - CI
 on:
   pull_request:
     paths:
-      - "**/*.md"
+      - '**/*.md'
   workflow_call: {}
   workflow_dispatch: {}
 
@@ -30,4 +30,4 @@ jobs:
         uses: DavidAnson/markdownlint-cli2-action@v19
         with:
           config: ./config/reusable/.markdownlint.yaml
-          globs: "**/*.md"
+          globs: '**/*.md'

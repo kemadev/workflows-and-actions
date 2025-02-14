@@ -3,8 +3,8 @@ name: YAML - CI
 on:
   pull_request:
     paths:
-      - "**/*.yaml"
-      - "**/*.yml"
+      - '**/*.yaml'
+      - '**/*.yml'
   workflow_call: {}
   workflow_dispatch: {}
 
@@ -37,4 +37,4 @@ jobs:
         with:
           config_file: config/reusable/.yamllint.yaml
           format: github
-          file_or_dir: "**/*.yaml"
+          file_or_dir: '**/*.yaml'
