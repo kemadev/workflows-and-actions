@@ -125,6 +125,9 @@ jobs:
           args: release --config ${{ env.GORELEASER_CONFIG_OUTPUT_FILE }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-checksums: ./dist/checksums.txt
       - name: Upload build artifacts
         id: upload-build-artifacts
         uses: actions/upload-artifact@v4
