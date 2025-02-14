@@ -127,6 +127,15 @@ jobs:
           args: release --config ${{ env.GORELEASER_CONFIG_OUTPUT_FILE }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Inspired by https://github.com/goreleaser/example-slsa-provenance/blob/master/.github/workflows/goreleaser.yml#L42-L50
+      - name: Get checksums
+        id: get-checksums
+        env:
+          ARTIFACTS: ${{ steps.release.outputs.artifacts }}
+        run: |
+          set -euo pipefail
+          checksum_file="$(echo "${ARTIFACTS}" | jq -r '.[] | select (.type=="Checksum") | .path')"
+          echo "hashes=$(cat "${checksum_file}" | base64 -w0)" >> "${GITHUB_OUTPUT}"
       - uses: actions/attest-build-provenance@v2
         with:
           subject-checksums: ${{ env.GORELEASER_DIST_DIR }}/${GITHUB_REPOSITORY//\//-}_${{ needs.tag-version.outputs.LATEST_VERSION }}_checksums_sha256.txt
