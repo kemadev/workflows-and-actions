@@ -138,7 +138,7 @@ jobs:
           echo "hashes=$(cat "${checksum_file}" | base64 -w0)" >> "${GITHUB_OUTPUT}"
       - uses: actions/attest-build-provenance@v2
         with:
-          subject-checksums: ${{ env.GORELEASER_DIST_DIR }}/${GITHUB_REPOSITORY//\//-}_${{ needs.tag-version.outputs.LATEST_VERSION }}_checksums_sha256.txt
+          subject-checksums: ${{ steps.get-checksums.outputs.artifacts }}
       - name: Upload build artifacts
         id: upload-build-artifacts
         uses: actions/upload-artifact@v4
