@@ -45,7 +45,7 @@ archives:
     builds:
       - {{ .ID }}
     # Make the archive name unique
-    name_template: '{{ .ID }}_{{`{{ .Target }}`}}'
+    name_template: {{ .ID }}_{{`{{ .Target }}`}}
     formats: ['zip']
     # Exclude all files from the archive, see https://goreleaser.com/customization/archive/#packaging-only-the-binaries
     files:
