@@ -21,6 +21,9 @@ var (
 )
 
 func logFatal(msg string, err error) {
+	if err == nil {
+		log.Fatalf("::error title=%s::", msg)
+	}
 	log.Fatalf("::error title=%s::%s", msg, err.Error())
 }
 
