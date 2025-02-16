@@ -13,6 +13,7 @@ env:
   CGO_ENABLED: 0
   COVERAGE_ARTIFACT_NAME: test-coverage
   COVERAGE_FILE_NAME: coverage.out
+  REUSABLE_CONFIGS_DIR: config/reusable
 
 defaults:
   run:
@@ -156,7 +157,7 @@ jobs:
         id: lint
         uses: golangci/golangci-lint-action@v6
         with:
-          args: --config config/reusable/.golangci.yaml
+          args: --config ${{ env.REUSABLE_CONFIGS_DIR }}/.golangci.yaml
 
   scan-dependencies:
     name: Scan dependencies
@@ -174,11 +175,11 @@ jobs:
         uses: anchore/sbom-action@v0
         with:
           output-file: ${{ github.event.repository.name }}-sbom.spdx.json
-          config: config/reusable/.syft.yaml
+          config: ${{ env.REUSABLE_CONFIGS_DIR }}/.syft.yaml
       - name: Scan SBOM
         uses: anchore/scan-action@v6
         env:
-          GRYPE_CONFIG: config/reusable/.grype.yaml
+          GRYPE_CONFIG: ${{ env.REUSABLE_CONFIGS_DIR }}/.grype.yaml
         with:
           sbom: ${{ github.event.repository.name }}-sbom.spdx.json
           cache-db: true
