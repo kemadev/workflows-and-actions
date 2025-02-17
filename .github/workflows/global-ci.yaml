@@ -44,7 +44,7 @@ jobs:
           FINDINGS_JSON_OUTPUT: ./dist/semgrep.json
         run: |
           declare scan_returned_findings=false
-          semgrep scan --metrics=off --error --json-output "${FINDINGS_JSON_OUTPUT}" --config "p/default" || scan_returned_findings=true
+          semgrep scan --metrics=off --error --json-output "${FINDINGS_JSON_OUTPUT}" --config 'p/default' --config 'p/gitlab' --config 'p/golang' --config 'p/cwe-top-25' --config 'p/owasp-top-ten' --config 'p/r2c-security-audit' || scan_returned_findings=true
           if [ "${scan_returned_findings}" = true ]; then
             if [ -f "${FINDINGS_JSON_OUTPUT}" ]; then
               jq -r '.results[] | "::error file=\(.path),line=\(.start.line),col=\(.start.col),endLine=\(.end.line),endCol=\(.end.col)::\(.extra.message) - \(.check_id)"' "${FINDINGS_JSON_OUTPUT}"
