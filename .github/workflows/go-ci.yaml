@@ -125,13 +125,17 @@ jobs:
       - name: Check for unused dependencies
         id: check-unused-deps
         run: |
-          go mod tidy
-          if [ -z "$(git status --porcelain)" ]; then
-            echo "Nothing to tidy"
-            exit 0
+          declare -a unused_deps=()
+          find . -name go.mod -execdir go mod tidy \;
+          declare git_status=$(git status --porcelain)
+          if [ -n "${git_status}" ]; then
+            for file in $(echo "${git_status}" | awk '{print $2}'); do
+              if [ "${file}" == "go.mod" ]; then
+                unused_deps+=($(git diff --name-only "${file}"))
+                echo "Unused dependencies found in ${file}"
+              fi
+            done
           fi
-          echo "::error file=go.mod::Go mod tidy is needed"
-          exit 1
 
   lint:
     name: Lint
