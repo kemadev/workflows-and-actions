@@ -21,6 +21,10 @@ function check_and_set_variables {
 		echo "CONCLUSION is not set"
 		exit 1
 	fi
+	if [ -z "${HEAD_BRANCH:-}" ]; then
+		echo "HEAD_BRANCH is not set"
+		exit 1
+	fi
 	export output_file="./dist/failed-workflows.md"
 	export issue_title=":rotating_light: Failed workflows"
 	export issue_body_identifier="<!-- gha:report-failed-workflows -->"
