@@ -28,7 +28,7 @@ jobs:
           delete-branch: true
           remove-stale-when-updated: true
           days-before-stale: 30
-          days-before-close: 7
+          days-before-close: 30
           close-issue-reason: not_planned
           stale-issue-label: status/stale
           stale-pr-label: status/stale
