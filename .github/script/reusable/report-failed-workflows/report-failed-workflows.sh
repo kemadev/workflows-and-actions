@@ -9,22 +9,6 @@ function check_and_set_variables {
 		echo "GITHUB_REPOSITORY is not set"
 		exit 1
 	fi
-	if [ -z "${URL:-}" ]; then
-		echo "URL is not set"
-		exit 1
-	fi
-	if [ -z "${NAME:-}" ]; then
-		echo "NAME is not set"
-		exit 1
-	fi
-	if [ -z "${CONCLUSION:-}" ]; then
-		echo "CONCLUSION is not set"
-		exit 1
-	fi
-	if [ -z "${HEAD_BRANCH:-}" ]; then
-		echo "HEAD_BRANCH is not set"
-		exit 1
-	fi
 	export output_file="./dist/failed-workflows.md"
 	export issue_title=":rotating_light: Failed workflows"
 	export issue_body_identifier="<!-- gha:report-failed-workflows -->"
@@ -47,7 +31,21 @@ function compute_issue_body {
 		echo "| Workflow | Branch | Conclusion |"
 		echo "|----------|--------|------------|"
 		echo
-		echo "| [${NAME}](${URL}) | ${HEAD_BRANCH} | ${CONCLUSION} |"
+		echo
+
+		echo GH_TOKEN - "${GH_TOKEN}"
+		echo WORKFLOW_URL - "${WORKFLOW_URL}"
+		echo WORKFLOW_ID - "${WORKFLOW_ID}"
+		echo NAME - "${NAME}"
+		echo CONCLUSION - "${CONCLUSION}"
+		echo HEAD_BRANCH - "${HEAD_BRANCH}"
+		echo CREATED_AT - "${CREATED_AT}"
+		echo HTML_URL - "${HTML_URL}"
+		echo JOBS_URL - "${JOBS_URL}"
+		echo LOGS_URL - "${LOGS_URL}"
+		echo NODE_ID - "${NODE_ID}"
+		echo RUN_NUMBER - "${RUN_NUMBER}"
+		echo UPDATED_AT - "${UPDATED_AT}"
 	} >"${output_file}"
 }
 
