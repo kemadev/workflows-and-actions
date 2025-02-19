@@ -143,7 +143,6 @@ jobs:
 
   check-gomod-name:
     name: Check go.mod name
-    needs: setup-shared-go-cache
     permissions:
       contents: read
     runs-on: ubuntu-latest
