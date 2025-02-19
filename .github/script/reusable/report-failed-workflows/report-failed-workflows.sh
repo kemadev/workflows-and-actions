@@ -31,7 +31,7 @@ function check_and_set_variables {
 }
 
 function get_workflow_infos() {
-	export at_least_one_workflow_failed=1
+	export at_least_one_workflow_failed=0
 }
 
 function compute_issue_body {
