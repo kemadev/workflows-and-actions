@@ -46,6 +46,8 @@ function compute_issue_body {
 		echo
 		echo "| Workflow | Branch | Conclusion |"
 		echo "|----------|--------|------------|"
+		echo
+		echo "| [${NAME}](${URL}) | ${HEAD_BRANCH} | ${CONCLUSION} |"
 	} >"${output_file}"
 }
 
