@@ -154,7 +154,7 @@ jobs:
       - name: Check go.mod name
         id: check-go-mod-name
         run: |
-          declare github_base_domain="github.com"
+          declare github_base_domain="${GITHUB_SERVER_URL/https:\/\//}"
           declare -a go_mod_file_bad_name=()
           declare -a go_mod_files
           mapfile -t go_mod_files < <(find . -name 'go.mod' | sed 's|./||')
