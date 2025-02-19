@@ -24,6 +24,7 @@ jobs:
         id: stale
         with:
           enable-statistics: true
+          exempt-all-milestones: true
           # Can be restored anytime from <repo root URL>/activity?activity_type=branch_deletion
           delete-branch: true
           remove-stale-when-updated: true
