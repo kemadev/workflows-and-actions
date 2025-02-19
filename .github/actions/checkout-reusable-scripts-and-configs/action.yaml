@@ -25,5 +25,5 @@ runs:
       id: ignore-git-changes
       shell: bash
       run: |
-        git update-index --assume-unchanged .github/script/reusable/README.md
-        git update-index --assume-unchanged config/reusable/README.md
+        git update-index --assume-unchanged .github/script/reusable/PURPOSE.md
+        git update-index --assume-unchanged config/reusable/PURPOSE.md
