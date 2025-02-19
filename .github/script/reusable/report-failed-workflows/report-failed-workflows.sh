@@ -15,7 +15,7 @@ function check_and_set_variables {
 }
 
 function get_workflow_infos() {
-	export at_least_one_workflow_failed=0
+	export at_least_one_workflow_failed=1
 }
 
 function compute_issue_body {
@@ -33,19 +33,22 @@ function compute_issue_body {
 		echo
 		echo
 
-		echo GH_TOKEN - "${GH_TOKEN}"
-		echo WORKFLOW_URL - "${WORKFLOW_URL}"
-		echo WORKFLOW_ID - "${WORKFLOW_ID}"
-		echo NAME - "${NAME}"
-		echo CONCLUSION - "${CONCLUSION}"
-		echo HEAD_BRANCH - "${HEAD_BRANCH}"
-		echo CREATED_AT - "${CREATED_AT}"
-		echo HTML_URL - "${HTML_URL}"
-		echo JOBS_URL - "${JOBS_URL}"
-		echo LOGS_URL - "${LOGS_URL}"
-		echo NODE_ID - "${NODE_ID}"
-		echo RUN_NUMBER - "${RUN_NUMBER}"
-		echo UPDATED_AT - "${UPDATED_AT}"
+		echo NAME - "{NAME}"
+		echo CONCLUSION - "{CONCLUSION}"
+		echo HEAD_BRANCH - "{HEAD_BRANCH}"
+		echo CREATED_AT - "{CREATED_AT}"
+		echo HTML_URL - "{HTML_URL}"
+		echo UPDATED_AT - "{UPDATED_AT}"
+		echo ACTOR_LOGIN - "{ACTOR_LOGIN}"
+		echo ACTOR_NAME - "{ACTOR_NAME}"
+		echo ACTOR_TYPE - "{ACTOR_TYPE}"
+		echo ACTOR_HTML_URL - "{ACTOR_HTML_URL}"
+		echo PULL_REQUESTS - "{PULL_REQUESTS}"
+		echo TRIGGERING_ACTOR_LOGIN - "{TRIGGERING_ACTOR_LOGIN}"
+		echo TRIGGERING_ACTOR_NAME - "{TRIGGERING_ACTOR_NAME}"
+		echo TRIGGERING_ACTOR_TYPE - "{TRIGGERING_ACTOR_TYPE}"
+		echo TRIGGERING_ACTOR_HTML_URL - "{TRIGGERING_ACTOR_HTML_URL}"
+		echo DISPLAY_TITLE - "{DISPLAY_TITLE}"
 	} >"${output_file}"
 }
 
