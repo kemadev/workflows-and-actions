@@ -29,7 +29,7 @@ var (
 
 const (
 	// Production branch
-	prodBranch = "env/prod"
+	prodBranch = "main"
 	// Prerelease prefix
 	preReleasePrefix = "next"
 )

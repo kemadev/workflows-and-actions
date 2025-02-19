@@ -3,9 +3,9 @@ name: Go - CD
 on:
   push:
     branches:
-      - env/prod
-      - env/next
-      # env/dev is deployed manually by developers on their local machines
+      # - main
+      - next
+      # dev is deployed manually by developers on their local machines
   workflow_call:
     inputs:
       force-patch:

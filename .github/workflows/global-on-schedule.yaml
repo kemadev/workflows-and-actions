@@ -1,4 +1,4 @@
-name: Docker - CI
+name: Report on workflow run
 
 on:
   workflow_run:
@@ -6,6 +6,8 @@ on:
       - '*'
     types:
       - completed
+    branches:
+      - main
 
 defaults:
   run:
