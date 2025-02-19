@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Used in .github/workflows/housekeep-stale-branches.yaml
+# Used in .github/workflows/report-failed-workflows.yaml
 
 # NOTE This script has not been ported to Go yet, as GitHub's GraphQL API lacks a good Go client library
 
@@ -9,35 +9,21 @@ function check_and_set_variables {
 		echo "GITHUB_REPOSITORY is not set"
 		exit 1
 	fi
-	export output_file="./dist/stale_issue_body.md"
-	export days_before_stale="${DAYS_BEFORE_STALE:-30}"
-	export issue_title=":broom: Stale branches"
-	export issue_body_identifier="<!-- gha:report-stale-branches -->"
-}
-
-function list_stale_branches {
-	local default_branch
-	default_branch="$(git branch --show-current)"
-	export -a stale_branches_names
-	export -a stale_branches_authors
-	export -a stale_branches_dates
-	export at_least_one_branch_is_stale=1
-	for branch in $(git branch --all --format="%(refname:short)" --sort=committerdate); do
-		if [ "${branch}" != "${default_branch}" ]; then
-			local last_commit_date
-			last_commit_date="$(git log -1 --format=%cd --date=short "${branch}")"
-			local days_since_last_commit
-			days_since_last_commit="$((("$(date +%s)" - "$(date -d "${last_commit_date}" +%s)") / 86400))"
-			if ((days_since_last_commit >= days_before_stale)); then
-				at_least_one_branch_is_stale=0
-				local author
-				author="$(git log -1 --format="%an" "${branch}")"
-				stale_branches_names+=("${branch:-undefined}")
-				stale_branches_authors+=("${author:-undefined}")
-				stale_branches_dates+=("${last_commit_date:-undefined}")
-			fi
-		fi
-	done
+	if [ -z "${URL:-}" ]; then
+		echo "URL is not set"
+		exit 1
+	fi
+	if [ -z "${NAME:-}" ]; then
+		echo "NAME is not set"
+		exit 1
+	fi
+	if [ -z "${CONCLUSION:-}" ]; then
+		echo "CONCLUSION is not set"
+		exit 1
+	fi
+	export output_file="./dist/failed-workflows.md"
+	export issue_title=":rotating_light: Failed workflows"
+	export issue_body_identifier="<!-- gha:report-failed-workflows -->"
 }
 
 function compute_issue_body {
@@ -115,7 +101,7 @@ function main {
 	set -euo pipefail
 
 	check_and_set_variables
-	list_stale_branches
+	get_workflow_infos
 	compute_issue_body
 	create_or_update_issue
 }
