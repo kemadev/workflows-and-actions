@@ -37,7 +37,7 @@ jobs:
           labels-to-remove-when-unstale: status/stale
           # labels-to-add-when-unstale: ''
           # labels-to-remove-when-stale: ''
-          stale-issue-message: This issue has been automatically marked as stale because it has not had recent activity. It will be closed in 7 days if no further activity occurs. If you think this is still a valid issue, please add a comment to prevent closure. Thank you for your contributions.
-          stale-pr-message: This pull request has been automatically marked as stale because it has not had recent activity. It will be closed in 7 days if no further activity occurs. If you think this is still a valid pull request, please add a comment to prevent closure. Thank you for your contributions.
-          close-issue-message: This issue has been automatically closed due to inactivity. If you think this is still a valid issue, please open a new issue and reference this one. Thank you for your contributions.
-          close-pr-message: This pull request has been automatically closed due to inactivity. If you think this is still a valid pull request, please open a new pull request and reference this one. Thank you for your contributions.
+          stale-issue-message: This issue has been automatically marked as stale because it has not had recent activity. It will be closed in 7 days if no further activity occurs. If you think this is still a valid issue, please add a comment to prevent closure. Thank you for your contributions!
+          stale-pr-message: This pull request has been automatically marked as stale because it has not had recent activity. It will be closed in 7 days if no further activity occurs. If you think this is still a valid pull request, please add a comment to prevent closure. Thank you for your contributions!
+          close-issue-message: This issue has been automatically closed due to inactivity. If you think this is still a valid issue, please open a new issue and reference this one. Thank you for your contributions!
+          close-pr-message: This pull request has been automatically closed due to inactivity. If you think this is still a valid pull request, please open a new pull request and reference this one. Thank you for your contributions!
