@@ -9,9 +9,55 @@ function check_and_set_variables {
 		echo "GITHUB_REPOSITORY is not set"
 		exit 1
 	fi
+	if [ -z "${HEAD_BRANCH:-}" ]; then
+		echo "HEAD_BRANCH is not set"
+		exit 1
+	fi
+	if [ -z "${WORKFLOW_NAME:-}" ]; then
+		echo "WORKFLOW_NAME is not set"
+		exit 1
+	fi
+	if [ -z "${WORKFLOW_RUN_TITLE:-}" ]; then
+		echo "WORKFLOW_RUN_TITLE is not set"
+		exit 1
+	fi
+	if [ -z "${CONCLUSION:-}" ]; then
+		echo "CONCLUSION is not set"
+		exit 1
+	fi
+	if [ -z "${HTML_URL:-}" ]; then
+		echo "HTML_URL is not set"
+		exit 1
+	fi
+	if [ -z "${CREATED_AT:-}" ]; then
+		echo "CREATED_AT is not set"
+		exit 1
+	fi
+	if [ -z "${UPDATED_AT:-}" ]; then
+		echo "UPDATED_AT is not set"
+		exit 1
+	fi
+	if [ -z "${ACTOR_TYPE:-}" ]; then
+		echo "ACTOR_TYPE is not set"
+		exit 1
+	fi
+	if [ -z "${ACTOR_HTML_URL:-}" ]; then
+		echo "ACTOR_HTML_URL is not set"
+		exit 1
+	fi
+	if [ -z "${TRIGGERING_ACTOR_TYPE:-}" ]; then
+		echo "TRIGGERING_ACTOR_TYPE is not set"
+		exit 1
+	fi
+	if [ -z "${TRIGGERING_ACTOR_HTML_URL:-}" ]; then
+		echo "TRIGGERING_ACTOR_HTML_URL is not set"
+		exit 1
+	fi
 	export output_file="./dist/failed-workflows.md"
 	export issue_title=":rotating_light: Failed workflows"
 	export issue_body_identifier="<!-- gha:report-failed-workflows -->"
+	export workflow_name_placeholder="WORKFLOW_NAME_PLACEHOLDER"
+	export issue_workflow_delemiter_identifier="<!-- gha:report-failed-workflows-${workflow_name_placeholder} -->"
 }
 
 function get_workflow_infos() {
@@ -19,6 +65,8 @@ function get_workflow_infos() {
 }
 
 function compute_issue_body {
+	local initial_issue_body
+	initial_issue_body="$(gh issue view "${issue_number}" --json body --jq ".body")"
 	mkdir -p "$(dirname "${output_file}")"
 	{
 		echo "${issue_body_identifier}"
@@ -31,8 +79,7 @@ function compute_issue_body {
 		echo "| Workflow | Branch | Conclusion |"
 		echo "|----------|--------|------------|"
 		echo
-		echo
-
+		echo "${WORKFLOW_NAME} - [${WORKFLOW_RUN_TITLE}](${HTML_URL}) (${CREATED_AT} - ${UPDATED_AT}) | ${CONCLUSION} | [${ACTOR_TYPE}](${ACTOR_HTML_URL}) | [${TRIGGERING_ACTOR_TYPE}](${TRIGGERING_ACTOR_HTML_URL}) |"
 		# HEAD_BRANCH
 		# WORKFLOW_NAME
 		# WORKFLOW_RUN_TITLE
@@ -65,10 +112,11 @@ function create_or_update_issue {
 	}
 }' | jq -r '.data.search.edges[0].node.number')"
 	if [ "${issue_number}" == "null" ]; then
-		issue_number="$(gh issue create --title "${issue_title}" -F "${output_file}" | grep -oP '(?<=/issues/)\d+')"
-	else
-		gh issue edit "${issue_number}" -F "${output_file}"
+		issue_number="$(gh issue create --title "${issue_title}" | grep -oP '(?<=/issues/)\d+')"
+		export issue_number
 	fi
+	compute_issue_body
+	gh issue edit "${issue_number}" -F "${output_file}"
 	gh issue pin "${issue_number}"
 	local issue_status
 	issue_status="$(gh issue view "${issue_number}" --json state --jq ".state")"
@@ -88,7 +136,6 @@ function main {
 
 	check_and_set_variables
 	get_workflow_infos
-	compute_issue_body
 	create_or_update_issue
 }
 
