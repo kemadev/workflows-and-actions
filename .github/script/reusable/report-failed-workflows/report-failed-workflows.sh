@@ -56,8 +56,7 @@ function check_and_set_variables {
 	export output_file="./dist/failed-workflows.md"
 	export issue_title=":rotating_light: Failed workflows"
 	export issue_body_identifier="<!-- gha:report-failed-workflows -->"
-	export workflow_name_placeholder="WORKFLOW_NAME_PLACEHOLDER"
-	export issue_workflow_delemiter_identifier="<!-- gha:report-failed-workflows-${workflow_name_placeholder} -->"
+	export current_workflow_delemiter_identifier="<!-- gha:report-failed-workflows-${WORKFLOW_NAME} -->"
 }
 
 function get_workflow_infos() {
@@ -67,6 +66,14 @@ function get_workflow_infos() {
 function compute_issue_body {
 	local initial_issue_body
 	initial_issue_body="$(gh issue view "${issue_number}" --json body --jq ".body")"
+	local all_workflows_lines
+	all_workflows_lines="$(echo "${initial_issue_body}" | grep -oP "${current_workflow_delemiter_identifier}.*")"
+	local workflow_lines_without_current_workflow
+	workflow_lines_without_current_workflow="$(echo "${all_workflows_lines}" | sed -n "/${current_workflow_delemiter_identifier}/q;p")"
+	local workflow_line
+	workflow_line="${current_workflow_delemiter_identifier}| ${WORKFLOW_NAME} | ${CONCLUSION} | [${WORKFLOW_RUN_TITLE}](${HTML_URL}) | ${CREATED_AT} - ${UPDATED_AT} | [${ACTOR_TYPE}](${ACTOR_HTML_URL}) | [${TRIGGERING_ACTOR_TYPE}](${TRIGGERING_ACTOR_HTML_URL}) |"
+	local final_workflows_lines
+	final_workflows_lines="$(echo -e "${workflow_lines_without_current_workflow}\n${workflow_line}")"
 	mkdir -p "$(dirname "${output_file}")"
 	{
 		echo "${issue_body_identifier}"
@@ -76,21 +83,9 @@ function compute_issue_body {
 		echo
 		echo "The following workflows have failed:"
 		echo
-		echo "| Workflow | Branch | Conclusion |"
-		echo "|----------|--------|------------|"
-		echo
-		echo "${WORKFLOW_NAME} - [${WORKFLOW_RUN_TITLE}](${HTML_URL}) (${CREATED_AT} - ${UPDATED_AT}) | ${CONCLUSION} | [${ACTOR_TYPE}](${ACTOR_HTML_URL}) | [${TRIGGERING_ACTOR_TYPE}](${TRIGGERING_ACTOR_HTML_URL}) |"
-		# HEAD_BRANCH
-		# WORKFLOW_NAME
-		# WORKFLOW_RUN_TITLE
-		# CONCLUSION
-		# HTML_URL
-		# CREATED_AT
-		# UPDATED_AT
-		# ACTOR_TYPE
-		# ACTOR_HTML_URL
-		# TRIGGERING_ACTOR_TYPE
-		# TRIGGERING_ACTOR_HTML_URL
+		echo "| Workflow | Conclusion | Run | Time | Actor | Triggering Actor |"
+		echo "| -------- | ---------- | --- | ---- | ----- | ---------------- |"
+		echo "${final_workflows_lines}"
 	} >"${output_file}"
 }
 
