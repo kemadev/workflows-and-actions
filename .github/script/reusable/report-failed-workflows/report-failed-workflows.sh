@@ -68,7 +68,7 @@ function compute_issue_body {
 	initial_issue_body="$(gh issue view "${issue_number}" --json body --jq ".body")"
 	local ARRAY_SEPARATOR="| -------- | ---------- | --- | ---- | ----- | ---------------- |"
 	local all_workflows_lines
-	all_workflows_lines="$(echo "${initial_issue_body}" | grep -oP "|${current_workflow_delemiter_identifier}.*" || echo "")"
+	all_workflows_lines="$(echo "${initial_issue_body}" | grep -oP "${ARRAY_SEPARATOR}.*" || echo "")"
 	local workflow_lines_without_current_workflow
 	workflow_lines_without_current_workflow="$(echo "${all_workflows_lines}" | sed -n "/${current_workflow_delemiter_identifier}/q;p")"
 
