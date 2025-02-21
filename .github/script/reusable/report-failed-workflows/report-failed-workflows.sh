@@ -70,8 +70,9 @@ function compute_issue_body {
 	local all_workflows_lines
 	all_workflows_lines="$(echo "${initial_issue_body}" | grep -oP "${ARRAY_SEPARATOR}.*" || echo "")"
 	echo "All workflows lines: ${all_workflows_lines}"
+	local current_workflow_delemiter_identifier_in_array_form="|${current_workflow_delemiter_identifier}"
 	local workflow_lines_without_current_workflow
-	workflow_lines_without_current_workflow="$(echo "${all_workflows_lines}" | sed -n "/|${current_workflow_delemiter_identifier}/q;p")"
+	workflow_lines_without_current_workflow="$(echo "${all_workflows_lines}" | sed -n "/${current_workflow_delemiter_identifier_in_array_form}/q;p")"
 	echo "Workflow lines without current workflow: ${workflow_lines_without_current_workflow}"
 
 	local created_at_human_readable
@@ -80,7 +81,7 @@ function compute_issue_body {
 	updated_at_human_readable="$(date -d "${UPDATED_AT}" --utc)"
 
 	local workflow_line
-	workflow_line="|${current_workflow_delemiter_identifier} ${WORKFLOW_NAME} | ${CONCLUSION} | [${WORKFLOW_RUN_TITLE}](${HTML_URL}) | ${created_at_human_readable} - ${updated_at_human_readable} | ${ACTOR_HTML_URL} | ${TRIGGERING_ACTOR_HTML_URL} |"
+	workflow_line="${current_workflow_delemiter_identifier_in_array_form} ${WORKFLOW_NAME} | ${CONCLUSION} | [${WORKFLOW_RUN_TITLE}](${HTML_URL}) | ${created_at_human_readable} - ${updated_at_human_readable} | ${ACTOR_HTML_URL} | ${TRIGGERING_ACTOR_HTML_URL} |"
 	local final_workflows_lines
 	final_workflows_lines="$(echo -e "${workflow_lines_without_current_workflow}${workflow_line}")"
 	mkdir -p "$(dirname "${output_file}")"
