@@ -66,6 +66,7 @@ function get_workflow_infos() {
 function compute_issue_body {
 	local initial_issue_body
 	initial_issue_body="$(gh issue view "${issue_number}" --json body --jq ".body")"
+	local ARRAY_SEPARATOR="| -------- | ---------- | --- | ---- | ----- | ---------------- |"
 	local all_workflows_lines
 	all_workflows_lines="$(echo "${initial_issue_body}" | grep -oP "|${current_workflow_delemiter_identifier}.*" || echo "")"
 	local workflow_lines_without_current_workflow
@@ -79,7 +80,7 @@ function compute_issue_body {
 	local workflow_line
 	workflow_line="|${current_workflow_delemiter_identifier} ${WORKFLOW_NAME} | ${CONCLUSION} | [${WORKFLOW_RUN_TITLE}](${HTML_URL}) | ${created_at_human_readable} - ${updated_at_human_readable} | ${ACTOR_HTML_URL} | ${TRIGGERING_ACTOR_HTML_URL} |"
 	local final_workflows_lines
-	final_workflows_lines="$(echo -e "${workflow_lines_without_current_workflow}\n${workflow_line}")"
+	final_workflows_lines="$(echo -e "${workflow_lines_without_current_workflow}${workflow_line}")"
 	mkdir -p "$(dirname "${output_file}")"
 	{
 		echo "${issue_body_identifier}"
@@ -90,7 +91,7 @@ function compute_issue_body {
 		echo "The following workflows have failed:"
 		echo
 		echo "| Workflow | Conclusion | Run | Time | Actor | Triggering Actor |"
-		echo "| -------- | ---------- | --- | ---- | ----- | ---------------- |"
+		echo "${ARRAY_SEPARATOR}"
 		echo "${final_workflows_lines}"
 	} >"${output_file}"
 }
