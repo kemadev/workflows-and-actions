@@ -67,7 +67,7 @@ function compute_issue_body {
 	local initial_issue_body
 	initial_issue_body="$(gh issue view "${issue_number}" --json body --jq ".body")"
 	local all_workflows_lines
-	all_workflows_lines="$(echo "${initial_issue_body}" | grep -oP "${current_workflow_delemiter_identifier}.*" || echo "")"
+	all_workflows_lines="$(echo "${initial_issue_body}" | grep -oP "|${current_workflow_delemiter_identifier}.*" || echo "")"
 	local workflow_lines_without_current_workflow
 	workflow_lines_without_current_workflow="$(echo "${all_workflows_lines}" | sed -n "/${current_workflow_delemiter_identifier}/q;p")"
 
@@ -77,7 +77,7 @@ function compute_issue_body {
 	updated_at_human_readable="$(date -d "${UPDATED_AT}" --utc)"
 
 	local workflow_line
-	workflow_line="${current_workflow_delemiter_identifier}| ${WORKFLOW_NAME} | ${CONCLUSION} | [${WORKFLOW_RUN_TITLE}](${HTML_URL}) | ${created_at_human_readable} - ${updated_at_human_readable} | ${ACTOR_HTML_URL} | ${TRIGGERING_ACTOR_HTML_URL} |"
+	workflow_line="|${current_workflow_delemiter_identifier} ${WORKFLOW_NAME} | ${CONCLUSION} | [${WORKFLOW_RUN_TITLE}](${HTML_URL}) | ${created_at_human_readable} - ${updated_at_human_readable} | ${ACTOR_HTML_URL} | ${TRIGGERING_ACTOR_HTML_URL} |"
 	local final_workflows_lines
 	final_workflows_lines="$(echo -e "${workflow_lines_without_current_workflow}\n${workflow_line}")"
 	mkdir -p "$(dirname "${output_file}")"
