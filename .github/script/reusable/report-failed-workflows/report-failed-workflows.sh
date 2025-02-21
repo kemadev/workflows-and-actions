@@ -64,14 +64,14 @@ function get_workflow_infos() {
 }
 
 function compute_issue_body {
-	export initial_issue_body
+	local initial_issue_body
 	initial_issue_body="$(gh issue view "${issue_number}" --json body --jq ".body")"
-	export ARRAY_SEPARATOR="| -------- | ---------- | --- | ---- | ----- | ---------------- |"
-	export all_workflows_lines
-	all_workflows_lines="$(echo "${initial_issue_body}" | sed -n "/${ARRAY_SEPARATOR}/"',$p' | grep -v "${ARRAY_SEPARATOR}")"
+	local ARRAY_SEPARATOR="| -------- | ---------- | --- | ---- | ----- | ---------------- |"
+	local all_workflows_lines
+	all_workflows_lines="$(echo "${initial_issue_body}" | sed -n "/${ARRAY_SEPARATOR}/"',$p')"
 	echo "All workflows lines: ${all_workflows_lines}"
-	export current_workflow_delemiter_identifier_in_array_form="|${current_workflow_delemiter_identifier}"
-	export workflow_lines_without_current_workflow
+	local current_workflow_delemiter_identifier_in_array_form="|${current_workflow_delemiter_identifier}"
+	local workflow_lines_without_current_workflow
 	workflow_lines_without_current_workflow="$(echo "${all_workflows_lines}" | sed -n "/${current_workflow_delemiter_identifier_in_array_form}/q;p")"
 	echo "Workflow lines without current workflow: ${workflow_lines_without_current_workflow}"
 
