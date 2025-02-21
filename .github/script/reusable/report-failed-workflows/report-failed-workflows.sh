@@ -69,8 +69,10 @@ function compute_issue_body {
 	local ARRAY_SEPARATOR="| -------- | ---------- | --- | ---- | ----- | ---------------- |"
 	local all_workflows_lines
 	all_workflows_lines="$(echo "${initial_issue_body}" | grep -oP "${ARRAY_SEPARATOR}.*" || echo "")"
+	echo "All workflows lines: ${all_workflows_lines}"
 	local workflow_lines_without_current_workflow
-	workflow_lines_without_current_workflow="$(echo "${all_workflows_lines}" | sed -n "/${current_workflow_delemiter_identifier}/q;p")"
+	workflow_lines_without_current_workflow="$(echo "${all_workflows_lines}" | sed -n "/|${current_workflow_delemiter_identifier}/q;p")"
+	echo "Workflow lines without current workflow: ${workflow_lines_without_current_workflow}"
 
 	local created_at_human_readable
 	created_at_human_readable="$(date -d "${CREATED_AT}" --utc)"
