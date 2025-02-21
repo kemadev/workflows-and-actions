@@ -67,12 +67,9 @@ function compute_issue_body {
 	local initial_issue_body
 	initial_issue_body="$(gh issue view "${issue_number}" --json body --jq ".body")"
 	local all_workflows_lines
-	echo "1"
-	all_workflows_lines="$(echo "${initial_issue_body}" | grep -oP "${current_workflow_delemiter_identifier}.*")"
-	echo "2"
+	all_workflows_lines="$(echo "${initial_issue_body}" | grep -oP "${current_workflow_delemiter_identifier}.*" || echo "")"
 	local workflow_lines_without_current_workflow
 	workflow_lines_without_current_workflow="$(echo "${all_workflows_lines}" | sed -n "/${current_workflow_delemiter_identifier}/q;p")"
-	echo "3"
 
 	local created_at_human_readable
 	created_at_human_readable="$(date -d "${CREATED_AT}" --utc)"
