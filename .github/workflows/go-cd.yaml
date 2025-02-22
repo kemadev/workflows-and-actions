@@ -3,7 +3,7 @@ name: Go - CD
 on:
   push:
     branches:
-      # - main
+      - main
       - next
       # dev is deployed manually by developers on their local machines
   workflow_call:
@@ -79,15 +79,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           FORCE_PATCH: ${{ github.event.inputs.force-patch }}
 
-  build-and-release:
-    name: Build and release
+  build-code:
+    name: Build code
     needs: tag-version
     if: ${{ github.event.inputs.force-rollback == '' }}
     permissions:
       contents: write
       packages: write
-      attestations: write
-      id-token: write
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
     steps:
@@ -121,22 +119,15 @@ jobs:
         # Setup Go already handles caching
         run: |
           go install github.com/anchore/syft/cmd/syft@latest
-      - name: Release version
-        id: release
+      - name: Build code
+        id: build
         uses: goreleaser/goreleaser-action@v6
         with:
-          args: release --config ${{ env.GORELEASER_CONFIG_OUTPUT_FILE }} --clean --skip validate
+          args: release --config ${{ env.GORELEASER_CONFIG_OUTPUT_FILE }} --clean --skip announce --skip publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # Inspired by https://github.com/goreleaser/example-slsa-provenance/blob/master/.github/workflows/goreleaser.yml#L42-L50
-      - name: Get checksums
-        id: get-checksums
-        env:
-          ARTIFACTS: ${{ steps.release.outputs.artifacts }}
-        run: |
-          set -euo pipefail
-          checksum_file="$(echo "${ARTIFACTS}" | jq -r '.[] | select (.type=="Checksum") | .path')"
-          echo "checksums=$(cat "${checksum_file}" | base64 -w0)" >> "${GITHUB_OUTPUT}"
+          GORELEASER_PREVIOUS_TAG: v0.0.0-dummy
+          GORELEASER_CURRENT_TAG: v0.0.1-dummy
       - name: Upload build artifacts
         id: upload-build-artifacts
         uses: actions/upload-artifact@v4
@@ -146,9 +137,42 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+  release:
+    name: Release
+    needs: build-code
+    if: ${{ github.event.inputs.force-rollback == '' }}
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Download build artifacts
+        id: download-build-artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          release-type: go
+          config-file: .config/reusable/release-please-config.yaml
+          manifest-file: .config/reusable/release-please-manifest.yaml
+      - name: Upload artifacts
+        id: upload-artifacts
+        if: ${{ steps.release.outputs.release_created }}
+        run:
+          rm "${{ env.GORELEASER_DIST_DIR }}/artifacts.json"
+          rm "${{ env.GORELEASER_DIST_DIR }}/config.yaml"
+          rm "${{ env.GORELEASER_DIST_DIR }}/metadata.json"
+          gh release upload "${{ steps.release.outputs.tag_name }}" "${{ env.GORELEASER_DIST_DIR }}/*"
+
   get-deploys-list:
     name: Get deploys list
-    needs: build-and-release
+    needs: build-code
     if: ${{ github.event.inputs.force-rollback != '' || success() }}
     runs-on: ubuntu-latest
     permissions:
