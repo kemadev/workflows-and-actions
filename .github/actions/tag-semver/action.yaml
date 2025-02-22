@@ -6,6 +6,9 @@ branding:
   icon: tag
   color: blue
 
+env:
+  TAG_VERSION_SCRIPT_DIR: ./.github/script/reusable/output-tag-next-semver
+
 outputs:
   # Defined in ./.github/script/reusable/output-tag-next-semver/output-tag-next-semver.go
   NEW_MAJOR_VERSION:
@@ -25,18 +28,18 @@ runs:
       id: setup-go
       uses: actions/setup-go@v5
       with:
-        go-version-file: ./.github/script/reusable/output-tag-next-semver/go.mod
-        cache-dependency-path: ./.github/script/reusable/output-tag-next-semver/go.sum
+        go-version-file: ${{ env.TAG_VERSION_SCRIPT_DIR}}/go.mod
+        cache-dependency-path: ${{ env.TAG_VERSION_SCRIPT_DIR}}/go.sum
     - name: Tag version
       id: tag
       shell: bash
-      working-directory: ./.github/script/reusable/output-tag-next-semver
+      working-directory: ${{ env.TAG_VERSION_SCRIPT_DIR}}
       env:
         GH_TOKEN: ${{ github.token }}
         FORCE_PATCH: ${{ github.event.inputs.force-patch }}
       # https://github.com/actions/checkout?tab=readme-ov-file#push-a-commit-using-the-built-in-token
       run: |
-        go run "${{ env.TAG_VERSION_SCRIPT_NAME }}" "${FORCE_PATCH}"
+        go run ./... "${FORCE_PATCH}"
         tag_version="$(cat ${RUNNER_TEMP}/${{ env.TAG_VERSION_FILE_NAME }} | tr -d '\n')"
         git config user.name "${{ env.GHA_BOT_NAME }}"
         git config user.email "${{ env.GHA_BOT_EMAIL }}"

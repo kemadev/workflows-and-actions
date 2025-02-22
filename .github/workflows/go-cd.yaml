@@ -103,7 +103,8 @@ jobs:
         id: setup-go
         uses: actions/setup-go@v5
         with:
-          go-version: stable
+          go-version: ${{ env.GORELEASER_CONFIG_TEMPLATE_DIR }}/go.mod
+          cache-dependency-path: ${{ env.GORELEASER_CONFIG_TEMPLATE_DIR }}/go.sum
       - name: Render goreleaser config
         id: render-goreleaser-config
         env:
@@ -114,7 +115,7 @@ jobs:
         working-directory: .github/script/reusable/render-goreleaser-config
         run: |
           mkdir -p ${{ env.GORELEASER_CONFIG_TEMPLATE_DIR }}
-          go run render-goreleaser-config.go
+          go run ./...
       - name: Install syft
         id: install-syft
         # Setup Go already handles caching

@@ -11,7 +11,7 @@ on:
 
 env:
   CGO_ENABLED: 0
-  COVERAGE_ARTIFACT_NAME: test-coverage
+  TEST_COVERAGE_ARTIFACT_NAME: test-coverage
   COVERAGE_FILE_NAME: coverage.out
   REUSABLE_CONFIGS_DIR: config/reusable
 
@@ -63,7 +63,7 @@ jobs:
       - name: Upload test coverage artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.COVERAGE_ARTIFACT_NAME }}
+          name: ${{ env.TEST_COVERAGE_ARTIFACT_NAME }}
           path: ${{ env.COVERAGE_FILE_PARENT_DIR }}
           if-no-files-found: error
           retention-days: 1
@@ -76,7 +76,7 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     env:
-      COVERAGE_SCRIPT_DIR: ./.github/script/reusable/report-coverage
+      TEST_COVERAGE_SCRIPT_DIR: ./.github/script/reusable/report-coverage
     steps:
       - name: Checkout
         id: checkout
@@ -88,23 +88,24 @@ jobs:
         uses: actions/setup-go@v5
         id: setup-go
         with:
-          go-version-file: ${{ env.COVERAGE_SCRIPT_DIR }}/go.mod
-          cache-dependency-path: ${{ env.COVERAGE_SCRIPT_DIR }}/go.sum
+          go-version-file: ${{ env.TEST_COVERAGE_SCRIPT_DIR }}/go.mod
+          cache-dependency-path: ${{ env.TEST_COVERAGE_SCRIPT_DIR }}/go.sum
       - name: Download test coverage artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.COVERAGE_ARTIFACT_NAME }}
-          path: ${{ env.COVERAGE_SCRIPT_DIR }}
+          name: ${{ env.TEST_COVERAGE_ARTIFACT_NAME }}
+          path: ${{ env.TEST_COVERAGE_SCRIPT_DIR }}
       - name: Report test coverage
         id: report-test-coverage
         # Don't run on forks or dependabot as they don't have write access to the repository
         if: github.event_name == 'pull_request' && ! github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]'
-        working-directory: ${{ env.COVERAGE_SCRIPT_DIR }}
+        working-directory: ${{ env.TEST_COVERAGE_SCRIPT_DIR }}
         env:
           COVERAGE_FILE: ./${{ env.COVERAGE_FILE_NAME }}
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.number }}
-        run: go run report-coverage.go
+        run: |
+          go run ./...
 
   check-clean-gomod:
     name: Clean go.mod
