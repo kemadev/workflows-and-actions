@@ -19,8 +19,8 @@ import (
 const (
 	issueTitle                    = ":rotating_light: Failed workflows"
 	issueBodyIdentifier           = "<!-- gha:report-failed-workflows -->"
-	workflowsInfosIdentifierStart = "<!-- gha:report-failed-workflows-workflows-infos START -->"
-	workflowsInfosIdentifierEnd   = "<!-- gha:report-failed-workflows-workflows-infos END -->"
+	workflowsInfosIdentifierStart = "<!-- gha:report-failed-workflows-workflows-infos START\n"
+	workflowsInfosIdentifierEnd   = "\ngha:report-failed-workflows-workflows-infos END -->"
 )
 
 type staleBranch struct {
@@ -230,7 +230,7 @@ func computeIssueBody() {
 		buffer.WriteString("| Workflow | Conclusion | Run | Time | Actor | Triggering Actor |\n")
 		buffer.WriteString("| -------- | ---------- | --- | ---- | ----- | ---------------- |\n")
 		for _, workflow := range allWorkflows.WorkflowsInfos {
-			buffer.WriteString(fmt.Sprintf("| %s | %s | [%s](%s) | %s | [%s](%s) | [%s](%s) |\n", workflow.WorkflowName, workflow.Conclusion, workflow.WorkflowRunTitle, workflow.HtmlUrl, workflow.UpdatedAt, workflow.ActorType, workflow.ActorHtmlUrl, workflow.TriggeringActorType, workflow.TriggeringActorHtmlUrl))
+			buffer.WriteString(fmt.Sprintf("| %s | %s | [%s](%s) | %s | %s (%s) | %s (%s) |\n", workflow.WorkflowName, workflow.Conclusion, workflow.WorkflowRunTitle, workflow.HtmlUrl, workflow.UpdatedAt, workflow.ActorHtmlUrl, workflow.ActorType, workflow.TriggeringActorHtmlUrl, workflow.TriggeringActorType))
 		}
 	}
 	issueBody = buffer.String()
