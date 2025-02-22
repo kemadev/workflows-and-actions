@@ -65,34 +65,34 @@ sboms:
 # binary_signs:
 #   - {}
 
-changelog:
-  use: github
-  groups:
-    - title: Breaking Changes 💥
-      regexp: ^.*?[[:word:]](\([[:word:]]+\))??!:.+$
-      order: 0
-    - title: Security Updates 🔒
-      regexp: ^.*?security(\([[:word:]]+\))??!?:.+$
-      order: 100
-    - title: New Features 🚀
-      regexp: ^.*?feat(\([[:word:]]+\))??!?:.+$
-      order: 200
-    - title: Performance Improvements ⚡
-      regexp: ^.*?perf(\([[:word:]]+\))??!?:.+$
-      order: 300
-    - title: Bug Fixes 🐛
-      regexp: ^.*?bug(\([[:word:]]+\))??!?:.+$
-      order: 400
-    - title: Dependency Updates 📦
-      regexp: ^.*?chore(\(deps\))??!?:.+$
-      order: 500
-    - title: Other Changes 🔄
-      order: 999
+# changelog:
+#   use: github
+#   groups:
+#     - title: Breaking Changes 💥
+#       regexp: ^.*?[[:word:]](\([[:word:]]+\))??!:.+$
+#       order: 0
+#     - title: Security Updates 🔒
+#       regexp: ^.*?security(\([[:word:]]+\))??!?:.+$
+#       order: 100
+#     - title: New Features 🚀
+#       regexp: ^.*?feat(\([[:word:]]+\))??!?:.+$
+#       order: 200
+#     - title: Performance Improvements ⚡
+#       regexp: ^.*?perf(\([[:word:]]+\))??!?:.+$
+#       order: 300
+#     - title: Bug Fixes 🐛
+#       regexp: ^.*?bug(\([[:word:]]+\))??!?:.+$
+#       order: 400
+#     - title: Dependency Updates 📦
+#       regexp: ^.*?chore(\(deps\))??!?:.+$
+#       order: 500
+#     - title: Other Changes 🔄
+#       order: 999
 
-release:
-  # Determine release or prerelease based on the tag
-  prerelease: auto
-  # Replace release notes if release already exists
-  mode: replace
-  # Also upload metadata files
-  include_meta: true
+# release:
+#   # Determine release or prerelease based on the tag
+#   prerelease: auto
+#   # Replace release notes if release already exists
+#   mode: replace
+#   # Also upload metadata files
+#   include_meta: true
