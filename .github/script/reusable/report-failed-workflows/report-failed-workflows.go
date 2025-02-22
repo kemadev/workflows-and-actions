@@ -230,7 +230,9 @@ func computeIssueBody() {
 		buffer.WriteString("| Workflow | Conclusion | Run | Time | Actor | Triggering Actor |\n")
 		buffer.WriteString("| -------- | ---------- | --- | ---- | ----- | ---------------- |\n")
 		for _, workflow := range allWorkflows.WorkflowsInfos {
-			buffer.WriteString(fmt.Sprintf("| %s | %s | [%s](%s) | %s | %s (%s) | %s (%s) |\n", workflow.WorkflowName, workflow.Conclusion, workflow.WorkflowRunTitle, workflow.HtmlUrl, workflow.UpdatedAt, workflow.ActorHtmlUrl, workflow.ActorType, workflow.TriggeringActorHtmlUrl, workflow.TriggeringActorType))
+			if workflow.Conclusion != "success" {
+				buffer.WriteString(fmt.Sprintf("| %s | %s | [%s](%s) | %s | %s (%s) | %s (%s) |\n", workflow.WorkflowName, workflow.Conclusion, workflow.WorkflowRunTitle, workflow.HtmlUrl, workflow.UpdatedAt, workflow.ActorHtmlUrl, workflow.ActorType, workflow.TriggeringActorHtmlUrl, workflow.TriggeringActorType))
+			}
 		}
 	}
 	issueBody = buffer.String()
