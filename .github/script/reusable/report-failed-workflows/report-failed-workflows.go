@@ -74,7 +74,7 @@ type allWorkflowsInfos struct {
 
 func initLogger() {
 	var logLevel slog.Level
-	if os.Getenv("ACTIONS_STEP_DEBUG") == "true" {
+	if os.Getenv("RUNNER_DEBUG") == "true" {
 		logLevel = slog.LevelDebug
 	} else {
 		logLevel = slog.LevelInfo
