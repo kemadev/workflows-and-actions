@@ -109,7 +109,6 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-
   release:
     name: Release
     needs: build-code
@@ -136,15 +135,15 @@ jobs:
           release-type: go
           config-file: .config/reusable/release-please-config.yaml
           manifest-file: .config/reusable/release-please-manifest.yaml
-      - name: Upload artifacts
-        id: upload-artifacts
+      - name: Upload release artifacts
+        id: upload-release-artifacts
         if: ${{ steps.release.outputs.release_created }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          ls -Rla
           declare artifacts
           artifacts=$(jq '.[] | select(.type == "Archive" or .type == "Binary" or .type == "SBOM") | .path' ${{ env.GORELEASER_DIST_DIR }}/artifacts.json | tr '\n' ' ')
+          chmod +x ${artifacts}
           gh release upload "${{ steps.release.outputs.tag_name }}" ${artifacts}
 
   get-deploys-list:
