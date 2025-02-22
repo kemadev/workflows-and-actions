@@ -35,7 +35,7 @@ var (
 	githubRepository         = os.Getenv("GITHUB_REPOSITORY")
 	repoOwner                string
 	repoName                 string
-	ghToken                  = os.Getenv("GH_TOKEN")
+	ghToken                  = os.Getenv("GITHUB_TOKEN")
 	issueBody                string
 	repo                     *git.Repository
 	atLeastOneWorkflowFailed = false
