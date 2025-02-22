@@ -34,7 +34,6 @@ on:
 env:
   CGO_ENABLED: 0
   TAG_VERSION_SCRIPT_NAME: output-tag-next-semver.go
-  TAG_VERSION_FILE_NAME: .tag-version
   ARTIFACT_NAME: build-outputs
   DEPLOYS_DIR: ./deploy
   GORELEASER_DIST_DIR: ./dist/goreleaser
@@ -53,35 +52,8 @@ defaults:
     shell: bash
 
 jobs:
-  tag-version:
-    name: Tag version
-    if: ${{ github.event.inputs.force-rollback == '' }}
-    permissions:
-      contents: write
-      packages: write
-    runs-on: ubuntu-latest
-    outputs:
-      # Defined in ./.github/script/reusable/output-tag-next-semver/output-tag-next-semver.go
-      NEW_MAJOR_VERSION: ${{ steps.tag.outputs.NEW_MAJOR_VERSION }}
-      LATEST_VERSION: ${{ steps.tag.outputs.LATEST_VERSION }}
-    environment: ${{ github.ref_name }}
-    steps:
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          fetch-tags: true
-      - name: Tag version
-        id: tag
-        uses: kemadev/workflows-and-actions/.github/actions/tag-semver@main
-        env:
-          GH_TOKEN: ${{ github.token }}
-          FORCE_PATCH: ${{ github.event.inputs.force-patch }}
-
   build-code:
     name: Build code
-    needs: tag-version
     if: ${{ github.event.inputs.force-rollback == '' }}
     permissions:
       contents: write
