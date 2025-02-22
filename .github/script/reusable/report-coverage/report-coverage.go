@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"log/slog"
@@ -84,11 +85,11 @@ func percentCovered(p *cover.Profile) float64 {
 }
 
 func parseCoverageReport(profiles []*cover.Profile) (string, error) {
-	var report string
-	report += fmt.Sprintf("## Test Coverage Report :test_tube:\n")
-	report += fmt.Sprintf("\n")
-	report += fmt.Sprintf("| File Path | Coverage |\n")
-	report += fmt.Sprintf("| --------- | -------- |\n")
+	var buffer bytes.Buffer
+	buffer.WriteString(fmt.Sprintf("## Test Coverage Report :test_tube:\n"))
+	buffer.WriteString(fmt.Sprintf("\n"))
+	buffer.WriteString(fmt.Sprintf("| File Path | Coverage |\n"))
+	buffer.WriteString(fmt.Sprintf("| --------- | -------- |\n"))
 	for _, profile := range profiles {
 		fileCoveragePercentage := percentCovered(profile)
 		filenameWithoutRepoPath := strings.Split(profile.FileName, repoName+"/")[1]
@@ -103,9 +104,9 @@ func parseCoverageReport(profiles []*cover.Profile) (string, error) {
 		default:
 			emoji = ":heart:"
 		}
-		report += fmt.Sprintf("| %s | %s %.2f%% |\n", profile.FileName, emoji, fileCoveragePercentage)
+		buffer.WriteString(fmt.Sprintf("| %s | %s %.2f%% |\n", profile.FileName, emoji, fileCoveragePercentage))
 	}
-	return report, nil
+	return buffer.String(), nil
 }
 
 func updatePrWithCoverageReport(report string) error {
