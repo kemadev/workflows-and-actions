@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/caarlos0/svu/pkg/svu"
 )
@@ -33,6 +34,16 @@ const (
 	// Prerelease prefix
 	preReleasePrefix = "next"
 )
+
+func initLogger() {
+	var logLevel slog.Level
+	if os.Getenv("RUNNER_DEBUG") == "1" {
+		logLevel = slog.LevelDebug
+	} else {
+		logLevel = slog.LevelInfo
+	}
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel})))
+}
 
 func checkVariables() error {
 	if ghToken == "" {
@@ -103,6 +114,11 @@ func outputTagVersion(version string) error {
 }
 
 func main() {
+	startTime := time.Now()
+	defer func() {
+		slog.Info("Execution time", slog.String("duration", time.Since(startTime).String()))
+	}()
+	initLogger()
 	err := checkVariables()
 	if err != nil {
 		slog.Error(err.Error())

@@ -1,7 +1,8 @@
 package main
 
 import (
-	"log"
+	"fmt"
+	"log/slog"
 	"os"
 	"text/template"
 	"time"
@@ -20,28 +21,31 @@ var (
 	BUILDS_DIR = os.Getenv("BUILDS_DIR")
 )
 
-func logFatal(msg string, err error) {
-	if err == nil {
-		log.Fatalf("::error title=%s::", msg)
+func initLogger() {
+	var logLevel slog.Level
+	if os.Getenv("RUNNER_DEBUG") == "1" {
+		logLevel = slog.LevelDebug
+	} else {
+		logLevel = slog.LevelInfo
 	}
-	log.Fatalf("::error title=%s::%s", msg, err.Error())
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel})))
 }
 
 func checkVariables() error {
 	if GORELEASER_CONFIG_TEMPLATE_DIR == "" {
-		logFatal("GORELEASER_CONFIG_TEMPLATE_DIR is not set", nil)
+		return fmt.Errorf("GORELEASER_CONFIG_TEMPLATE_DIR is not set")
 	}
 	if GORELEASER_CONFIG_TEMPLATE_FILENAME == "" {
-		logFatal("GORELEASER_CONFIG_TEMPLATE_FILENAME is not set", nil)
+		return fmt.Errorf("GORELEASER_CONFIG_TEMPLATE_FILENAME is not set")
 	}
 	if GORELEASER_CONFIG_OUTPUT_FILE == "" {
-		logFatal("GORELEASER_CONFIG_OUTPUT_FILE is not set", nil)
+		return fmt.Errorf("GORELEASER_CONFIG_OUTPUT_FILE is not set")
 	}
 	if BUILDS_DIR == "" {
-		logFatal("BUILDS_DIR is not set", nil)
+		return fmt.Errorf("BUILDS_DIR is not set")
 	}
 	if BUILDS_DIR_PARENT == "" {
-		logFatal("BUILDS_DIR_PARENT is not set", nil)
+		return fmt.Errorf("BUILDS_DIR_PARENT is not set")
 	}
 	return nil
 }
@@ -60,10 +64,10 @@ func listDirs(root string) ([]string, error) {
 	return dirs, nil
 }
 
-func renderGoreleaserConfig(dirs []string) {
+func renderGoreleaserConfig(dirs []string) error {
 	outputFile, err := os.Create(GORELEASER_CONFIG_OUTPUT_FILE)
 	if err != nil {
-		logFatal("Failed to create goreleaser config file", err)
+		return err
 	}
 	type Build struct {
 		ID     string
@@ -81,22 +85,35 @@ func renderGoreleaserConfig(dirs []string) {
 	}
 	tmpl := template.Must(template.New(GORELEASER_CONFIG_TEMPLATE_FILENAME).ParseFiles(GORELEASER_CONFIG_TEMPLATE_DIR + "/" + GORELEASER_CONFIG_TEMPLATE_FILENAME))
 	if tmpl == nil {
-		logFatal("Failed to parse goreleaser config template", nil)
+		return fmt.Errorf("Failed to parse goreleaser config template")
 	}
 	err = tmpl.Execute(outputFile, data)
 	if err != nil {
-		logFatal("Failed to render goreleaser config", err)
+		return err
 	}
+	return nil
 }
 
 func main() {
-	startDate := time.Now()
-	log.Println("Rendering goreleaser config")
-	checkVariables()
+	startTime := time.Now()
+	defer func() {
+		slog.Info("Execution time", slog.String("duration", time.Since(startTime).String()))
+	}()
+	initLogger()
+	err := checkVariables()
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
 	dirs, err := listDirs(BUILDS_DIR_PARENT + "/" + BUILDS_DIR)
 	if err != nil {
-		logFatal("Failed to list directories", err)
+		slog.Error(err.Error())
+		os.Exit(1)
 	}
-	renderGoreleaserConfig(dirs)
-	log.Printf("Rendering goreleaser config took %v\n", time.Since(startDate))
+	err = renderGoreleaserConfig(dirs)
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
+	slog.Info("Rendered goreleaser config")
 }

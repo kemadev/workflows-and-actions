@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/go-github/v68/github"
 	"golang.org/x/tools/cover"
@@ -32,6 +33,16 @@ const (
 	coverageCommentDelimiterStart = "<!-- START gha:coverage-report -->"
 	coverageCommentDelimiterEnd   = "<!-- END gha:coverage-report -->"
 )
+
+func initLogger() {
+	var logLevel slog.Level
+	if os.Getenv("RUNNER_DEBUG") == "1" {
+		logLevel = slog.LevelDebug
+	} else {
+		logLevel = slog.LevelInfo
+	}
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel})))
+}
 
 func checkVariables() error {
 	if ghToken == "" {
@@ -66,6 +77,7 @@ func generateCoverageReport() ([]*cover.Profile, error) {
 	if err != nil {
 		return nil, err
 	}
+	slog.Debug(fmt.Sprintf("Parsed %d coverage profiles", len(profiles)))
 	return profiles, nil
 }
 
@@ -81,6 +93,7 @@ func percentCovered(p *cover.Profile) float64 {
 	if total == 0 {
 		return 0
 	}
+	slog.Debug(fmt.Sprintf("Profile %s: %d/%d", p.FileName, covered, total))
 	return float64(covered) / float64(total) * 100
 }
 
@@ -106,6 +119,8 @@ func parseCoverageReport(profiles []*cover.Profile) (string, error) {
 		}
 		buffer.WriteString(fmt.Sprintf("| %s | %s %.2f%% |\n", profile.FileName, emoji, fileCoveragePercentage))
 	}
+	buffer.WriteString(fmt.Sprintf("\n"))
+	slog.Debug("Generated coverage report", slog.String("report", buffer.String()))
 	return buffer.String(), nil
 }
 
@@ -146,6 +161,7 @@ func updatePrWithCoverageReport(report string) error {
 	editedPr := &github.PullRequest{
 		Body: &body,
 	}
+	slog.Debug("Updating pull request", slog.String("body", body))
 	_, resp, err = client.PullRequests.Edit(context.TODO(), repoOwner, repoName, prNumberInt, editedPr)
 	if err != nil {
 		return err
@@ -158,6 +174,11 @@ func updatePrWithCoverageReport(report string) error {
 }
 
 func main() {
+	startTime := time.Now()
+	defer func() {
+		slog.Info("Execution time", slog.String("duration", time.Since(startTime).String()))
+	}()
+	initLogger()
 	err := checkVariables()
 	if err != nil {
 		slog.Error(err.Error())
