@@ -43,7 +43,7 @@ var (
 
 func initLogger() {
 	var logLevel slog.Level
-	if os.Getenv("RUNNER_DEBUG") == "true" {
+	if os.Getenv("RUNNER_DEBUG") == "1" {
 		logLevel = slog.LevelDebug
 	} else {
 		logLevel = slog.LevelInfo
