@@ -40,6 +40,7 @@ env:
   GHA_BOT_NAME: github-actions[bot]
   GHA_BOT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
   GIT_DEPLOYMENT_SUCCESS_TAG_PREFIX: deploy-success-
+  GORELEASER_RENDER_CONFIG_SCRIPT_DIR: .github/script/reusable/render-goreleaser-config
   GORELEASER_CONFIG_TEMPLATE_DIR: config/reusable
   GORELEASER_CONFIG_OUTPUT_FILE: config/reusable/.goreleaser.yaml
   BUILDS_DIR: cmd
@@ -73,8 +74,8 @@ jobs:
         id: setup-go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GORELEASER_CONFIG_TEMPLATE_DIR }}/go.mod
-          cache-dependency-path: ${{ env.GORELEASER_CONFIG_TEMPLATE_DIR }}/go.sum
+          go-version: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}/go.mod
+          cache-dependency-path: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}/go.sum
       - name: Render goreleaser config
         id: render-goreleaser-config
         env:
@@ -82,7 +83,7 @@ jobs:
           GORELEASER_CONFIG_TEMPLATE_FILENAME: .goreleaser.yaml.go.tmpl
           GORELEASER_CONFIG_OUTPUT_FILE: ${{ github.workspace }}/config/reusable/.goreleaser.yaml
           BUILDS_DIR_PARENT: ${{ github.workspace }}
-        working-directory: .github/script/reusable/render-goreleaser-config
+        working-directory: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}
         run: |
           mkdir -p ${{ env.GORELEASER_CONFIG_TEMPLATE_DIR }}
           go run ./...
