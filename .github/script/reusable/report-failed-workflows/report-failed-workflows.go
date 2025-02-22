@@ -203,8 +203,7 @@ func computeIssueBody() error {
 	}
 	workflowsInfosBytes, err := json.Marshal(allWorkflows)
 	if err != nil {
-		slog.Error("Failed to marshal workflows infos", slog.String("error", err.Error()))
-		os.Exit(1)
+		return fmt.Errorf("Failed to marshal workflows infos: %s", err)
 	}
 
 	var buffer bytes.Buffer
