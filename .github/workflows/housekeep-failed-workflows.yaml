@@ -94,17 +94,17 @@ jobs:
         id: report-failed-workflows
         working-directory: ${{ env.HOUSEKEEP_FAILED_WORKFLOWS_SCRIPT_DIR }}
         env:
-          GH_TOKEN: ${{ github.token }}
-          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
-          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
-          WORKFLOW_RUN_TITLE: ${{ github.event.workflow_run.display_title }}
-          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
-          HTML_URL: ${{ github.event.workflow_run.html_url }}
-          CREATED_AT: ${{ github.event.workflow_run.created_at }}
-          UPDATED_AT: ${{ github.event.workflow_run.updated_at }}
-          ACTOR_TYPE: ${{ github.event.workflow_run.actor.type }}
-          ACTOR_HTML_URL: ${{ github.event.workflow_run.actor.html_url }}
-          TRIGGERING_ACTOR_TYPE: ${{ github.event.workflow_run.triggering_actor.type }}
-          TRIGGERING_ACTOR_HTML_URL: ${{ github.event.workflow_run.triggering_actor.html_url }}
+          GH_TOKEN: ${{ inputs.GH_TOKEN }}
+          HEAD_BRANCH: ${{ inputs.HEAD_BRANCH }}
+          WORKFLOW_NAME: ${{ inputs.WORKFLOW_NAME }}
+          WORKFLOW_RUN_TITLE: ${{ inputs.WORKFLOW_RUN_TITLE }}
+          CONCLUSION: ${{ inputs.CONCLUSION }}
+          HTML_URL: ${{ inputs.HTML_URL }}
+          CREATED_AT: ${{ inputs.CREATED_AT }}
+          UPDATED_AT: ${{ inputs.UPDATED_AT }}
+          ACTOR_TYPE: ${{ inputs.ACTOR_TYPE }}
+          ACTOR_HTML_URL: ${{ inputs.ACTOR_HTML_URL }}
+          TRIGGERING_ACTOR_TYPE: ${{ inputs.TRIGGERING_ACTOR_TYPE }}
+          TRIGGERING_ACTOR_HTML_URL: ${{ inputs.TRIGGERING_ACTOR_HTML_URL }}
         run: |
           go run ./...
