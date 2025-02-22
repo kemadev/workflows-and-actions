@@ -8,7 +8,6 @@ on:
       - completed
     branches:
       - main
-  workflow_dispatch: {}
   workflow_call:
     inputs:
       GH_TOKEN:
