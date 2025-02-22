@@ -41,17 +41,17 @@ var (
 	atLeastOneWorkflowFailed = false
 	issueNumber              int
 
-	headBranch             string
-	workflowName           string
-	workflowRunTitle       string
-	conclusion             string
-	htmlUrl                string
-	createdAt              string
-	updatedAt              string
-	actorType              string
-	actorHtmlUrl           string
-	triggeringActorType    string
-	triggeringActorHtmlUrl string
+	headBranch             string = os.Getenv("HEAD_BRANCH")
+	workflowName           string = os.Getenv("WORKFLOW_NAME")
+	workflowRunTitle       string = os.Getenv("WORKFLOW_RUN_TITLE")
+	conclusion             string = os.Getenv("CONCLUSION")
+	htmlUrl                string = os.Getenv("HTML_URL")
+	createdAt              string = os.Getenv("CREATED_AT")
+	updatedAt              string = os.Getenv("UPDATED_AT")
+	actorType              string = os.Getenv("ACTOR_TYPE")
+	actorHtmlUrl           string = os.Getenv("ACTOR_HTML_URL")
+	triggeringActorType    string = os.Getenv("TRIGGERING_ACTOR_TYPE")
+	triggeringActorHtmlUrl string = os.Getenv("TRIGGERING_ACTOR_HTML_URL")
 )
 
 type workflowInfos struct {
