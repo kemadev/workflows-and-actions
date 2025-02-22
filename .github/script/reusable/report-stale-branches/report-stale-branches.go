@@ -51,22 +51,21 @@ func initLogger() {
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel})))
 }
 
-func checkAndSetVariables() {
+func checkAndSetVariables() error {
 	slog.Debug("START checkAndSetVariables")
 	if githubRepository == "" {
-		slog.Error("GITHUB_REPOSITORY is not set")
-		os.Exit(1)
+		return fmt.Errorf("GITHUB_REPOSITORY is not set")
 	}
 	repoOwner = strings.Split(githubRepository, "/")[0]
 	repoName = strings.Split(githubRepository, "/")[1]
 	if ghToken == "" {
-		slog.Error("GH_TOKEN is not set")
-		os.Exit(1)
+		return fmt.Errorf("GH_TOKEN is not set")
 	}
 	if days, exists := os.LookupEnv("DAYS_BEFORE_STALE"); exists {
 		daysBeforeStale, _ = strconv.Atoi(days)
 	}
 	slog.Debug("END checkAndSetVariables", slog.Group("variables", slog.Any("githubRepository", githubRepository), slog.Int("daysBeforeStale", daysBeforeStale)))
+	return nil
 }
 
 func initGithubClient() {
@@ -75,43 +74,39 @@ func initGithubClient() {
 	slog.Debug("END initGithubClient")
 }
 
-func initGitClient() {
+func initGitClient() error {
 	slog.Debug("START initGitClient")
 	r, err := git.PlainOpenWithOptions(".", &git.PlainOpenOptions{DetectDotGit: true})
 	if err != nil {
-		slog.Error("Failed to open git repository", slog.String("error", err.Error()))
-		os.Exit(1)
+		return err
 	}
 	repo = r
 	slog.Debug("END initGitClient")
+	return nil
 }
 
-func listStaleBranches() {
+func listStaleBranches() error {
 	slog.Debug("START listStaleBranches")
 	head, err := repo.Head()
 	if err != nil {
-		slog.Error("Failed to get HEAD", slog.String("error", err.Error()))
-		os.Exit(1)
+		return err
 	}
 	currentBranch := head.Name()
 	slog.Info("Current branch", slog.String("currentBranch", currentBranch.Short()))
 	branches, err := repo.Branches()
 	if err != nil {
-		slog.Error("Failed to get branches", slog.String("error", err.Error()))
-		os.Exit(1)
+		return err
 	}
 
 	err = branches.ForEach(func(branch *plumbing.Reference) error {
 		if branch.Name() != currentBranch {
 			cIter, err := repo.Log(&git.LogOptions{From: branch.Hash()})
 			if err != nil {
-				slog.Error("Failed to get commits", slog.String("error", err.Error()))
-				os.Exit(1)
+				return err
 			}
 			commits, err := cIter.Next()
 			if err != nil {
-				slog.Error("Failed to get commit", slog.String("error", err.Error()))
-				os.Exit(1)
+				return err
 			}
 			lastCommitDate := commits.Author.When.Format("2006-01-02")
 			daysSinceLastCommit := time.Since(commits.Author.When).Hours() / 24
@@ -126,10 +121,10 @@ func listStaleBranches() {
 		return nil
 	})
 	if err != nil {
-		slog.Error("Failed to iterate branches", slog.String("error", err.Error()))
-		os.Exit(1)
+		return err
 	}
 	slog.Debug("END listStaleBranches", slog.Group("staleBranches", slog.Any("staleBranches", staleBranches)))
+	return nil
 }
 
 func computeIssueBody() {
@@ -157,18 +152,25 @@ func computeIssueBody() {
 	slog.Debug("END computeIssueBody", slog.String("issueBody", issueBody))
 }
 
-func createOrUpdateIssue() {
+func createOrUpdateIssue() error {
 	slog.Debug("START createOrUpdateIssue")
-	issueNumber := getIssueNumber()
+	issueNumber, err := getIssueNumber()
+	if err != nil {
+		return err
+	}
 	if issueNumber == -1 {
 		slog.Info("Issue not found, creating a new one")
-		issueNumber = createIssue()
+		issueNumber, err = createIssue()
+		if err != nil {
+			return err
+		}
 		slog.Info("Issue created", slog.Int("issueNumber", issueNumber))
 	} else {
 		updateIssue(issueNumber)
 	}
 	pinIssue(issueNumber)
 	slog.Debug("END createOrUpdateIssue", slog.Int("issueNumber", issueNumber))
+	return nil
 }
 
 func main() {
@@ -177,25 +179,39 @@ func main() {
 		slog.Info("Execution time", slog.String("duration", time.Since(startTime).String()))
 	}()
 	initLogger()
-	checkAndSetVariables()
+	err := checkAndSetVariables()
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
 	initGithubClient()
-	initGitClient()
-	listStaleBranches()
+	err = initGitClient()
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
+	err = listStaleBranches()
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
 	computeIssueBody()
-	createOrUpdateIssue()
+	err = createOrUpdateIssue()
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
 	slog.Info("Workflow completed successfully")
 }
 
-func getIssueNumber() int {
+func getIssueNumber() (int, error) {
 	slog.Debug("START getIssueNumber")
 	issues, resp, err := gh.Search.Issues(context.TODO(), "is:issue in:title "+issueTitle+" repo:"+githubRepository, nil)
 	if err != nil {
-		slog.Error("Failed to get issue number", slog.String("error", err.Error()))
-		os.Exit(1)
+		return -1, err
 	}
 	if resp.StatusCode != 200 {
-		slog.Error("Failed to get issue number", slog.String("status", resp.Status))
-		os.Exit(1)
+		return -1, fmt.Errorf("Failed to search issues")
 	}
 	issueNumber := -1
 	for _, issue := range issues.Issues {
@@ -206,10 +222,10 @@ func getIssueNumber() int {
 		}
 	}
 	slog.Debug("END getIssueNumber", slog.Int("issueNumber", issueNumber))
-	return issueNumber
+	return issueNumber, nil
 }
 
-func createIssue() int {
+func createIssue() (int, error) {
 	slog.Debug("START createIssue")
 	i := github.IssueRequest{
 		Title: github.Ptr(issueTitle),
@@ -217,19 +233,17 @@ func createIssue() int {
 	}
 	issue, resp, err := gh.Issues.Create(context.TODO(), repoOwner, repoName, &i)
 	if err != nil {
-		slog.Error("Failed to create issue", slog.String("error", err.Error()))
-		os.Exit(1)
+		return -1, err
 	}
 	if resp.StatusCode != 201 {
-		slog.Error("Failed to create issue", slog.String("status", resp.Status))
-		os.Exit(1)
+		return -1, fmt.Errorf("Failed to create issue")
 	}
 	issueNumber := issue.GetNumber()
 	slog.Debug("END createIssue", slog.Int("issueNumber", issueNumber))
-	return issueNumber
+	return issueNumber, nil
 }
 
-func updateIssue(issueNumber int) {
+func updateIssue(issueNumber int) error {
 	slog.Debug("START updateIssue")
 	var issueDesiredStatus string
 	if atLeastOneBranchIsStale {
@@ -243,15 +257,14 @@ func updateIssue(issueNumber int) {
 	}
 	_, resp, err := gh.Issues.Edit(context.TODO(), repoOwner, repoName, issueNumber, &i)
 	if err != nil {
-		slog.Error("Failed to update issue", slog.String("error", err.Error()))
-		os.Exit(1)
+		return err
 	}
 	if resp.StatusCode != 200 {
-		slog.Error("Failed to update issue", slog.String("status", resp.Status))
-		os.Exit(1)
+		return fmt.Errorf("Failed to update issue")
 	}
 	slog.Info("Issue updated", slog.Int("issueNumber", issueNumber))
 	slog.Debug("END updateIssue")
+	return nil
 }
 
 func pinIssue(issueNumber int) {
