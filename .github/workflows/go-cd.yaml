@@ -128,6 +128,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.GORELEASER_DIST_DIR }}
       - uses: googleapis/release-please-action@v4
         id: release
         with:
@@ -138,11 +139,10 @@ jobs:
         id: upload-artifacts
         if: ${{ steps.release.outputs.release_created }}
         run: |
-          # rm "${{ env.GORELEASER_DIST_DIR }}/artifacts.json"
-          # rm "${{ env.GORELEASER_DIST_DIR }}/config.yaml"
-          # rm "${{ env.GORELEASER_DIST_DIR }}/metadata.json"
-          ls -lRa
-          # gh release upload "${{ steps.release.outputs.tag_name }}" "${{ env.GORELEASER_DIST_DIR }}/*"
+          rm "${{ env.GORELEASER_DIST_DIR }}/artifacts.json"
+          rm "${{ env.GORELEASER_DIST_DIR }}/config.yaml"
+          rm "${{ env.GORELEASER_DIST_DIR }}/metadata.json"
+          gh release upload "${{ steps.release.outputs.tag_name }}" "${{ env.GORELEASER_DIST_DIR }}/*"
 
   get-deploys-list:
     name: Get deploys list
