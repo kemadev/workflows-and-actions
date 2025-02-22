@@ -82,63 +82,51 @@ func initLogger() {
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel})))
 }
 
-func checkAndSetVariables() {
+func checkAndSetVariables() error {
 	slog.Debug("START checkAndSetVariables")
 	if githubRepository == "" {
-		slog.Error("GITHUB_REPOSITORY is not set")
-		os.Exit(1)
+		return fmt.Errorf("GITHUB_REPOSITORY is not set")
 	}
 	repoOwner = strings.Split(githubRepository, "/")[0]
 	repoName = strings.Split(githubRepository, "/")[1]
 	if headBranch == "" {
-		slog.Error("HEAD_BRANCH is not set")
-		os.Exit(1)
+		return fmt.Errorf("HEAD_BRANCH is not set")
 	}
 	if workflowName == "" {
-		slog.Error("WORKFLOW_NAME is not set")
-		os.Exit(1)
+		return fmt.Errorf("WORKFLOW_NAME is not set")
 	}
 	if workflowRunTitle == "" {
-		slog.Error("WORKFLOW_RUN_TITLE is not set")
-		os.Exit(1)
+		return fmt.Errorf("WORKFLOW_RUN_TITLE is not set")
 	}
 	if conclusion == "" {
-		slog.Error("CONCLUSION is not set")
-		os.Exit(1)
+		return fmt.Errorf("CONCLUSION is not set")
 	}
 	if htmlUrl == "" {
-		slog.Error("HTML_URL is not set")
-		os.Exit(1)
+		return fmt.Errorf("HTML_URL is not set")
 	}
 	if createdAt == "" {
-		slog.Error("CREATED_AT is not set")
-		os.Exit(1)
+		return fmt.Errorf("CREATED_AT is not set")
 	}
 	if updatedAt == "" {
-		slog.Error("UPDATED_AT is not set")
-		os.Exit(1)
+		return fmt.Errorf("UPDATED_AT is not set")
 	}
 	if actorType == "" {
-		slog.Error("ACTOR_TYPE is not set")
-		os.Exit(1)
+		return fmt.Errorf("ACTOR_TYPE is not set")
 	}
 	if actorHtmlUrl == "" {
-		slog.Error("ACTOR_HTML_URL is not set")
-		os.Exit(1)
+		return fmt.Errorf("ACTOR_HTML_URL is not set")
 	}
 	if triggeringActorType == "" {
-		slog.Error("TRIGGERING_ACTOR_TYPE is not set")
-		os.Exit(1)
+		return fmt.Errorf("TRIGGERING_ACTOR_TYPE is not set")
 	}
 	if triggeringActorHtmlUrl == "" {
-		slog.Error("TRIGGERING_ACTOR_HTML_URL is not set")
-		os.Exit(1)
+		return fmt.Errorf("TRIGGERING_ACTOR_HTML_URL is not set")
 	}
 	if ghToken == "" {
-		slog.Error("GH_TOKEN is not set")
-		os.Exit(1)
+		return fmt.Errorf("GH_TOKEN is not set")
 	}
 	slog.Debug("END checkAndSetVariables", slog.Group("variables", slog.Any("githubRepository", githubRepository), slog.Any("repoOwner", repoOwner), slog.Any("repoName", repoName), slog.Any("headBranch", headBranch), slog.Any("workflowName", workflowName), slog.Any("workflowRunTitle", workflowRunTitle), slog.Any("conclusion", conclusion), slog.Any("htmlUrl", htmlUrl), slog.Any("createdAt", createdAt), slog.Any("updatedAt", updatedAt), slog.Any("actorType", actorType), slog.Any("actorHtmlUrl", actorHtmlUrl), slog.Any("triggeringActorType", triggeringActorType), slog.Any("triggeringActorHtmlUrl", triggeringActorHtmlUrl)))
+	return nil
 }
 
 func initGithubClient() {
@@ -147,18 +135,18 @@ func initGithubClient() {
 	slog.Debug("END initGithubClient")
 }
 
-func initGitClient() {
+func initGitClient() error {
 	slog.Debug("START initGitClient")
 	r, err := git.PlainOpenWithOptions(".", &git.PlainOpenOptions{DetectDotGit: true})
 	if err != nil {
-		slog.Error("Failed to open git repository", slog.String("error", err.Error()))
-		os.Exit(1)
+		return fmt.Errorf("Failed to open git repository: %s", err)
 	}
 	repo = r
 	slog.Debug("END initGitClient")
+	return nil
 }
 
-func parseWorkflowsInfos() allWorkflowsInfos {
+func parseWorkflowsInfos() (allWorkflowsInfos, error) {
 	slog.Debug("START parseWorkflowsInfos")
 	workflowsInfos := allWorkflowsInfos{}
 	workflowInfosStartIndex := strings.Index(issueBody, workflowsInfosIdentifierStart)
@@ -167,24 +155,21 @@ func parseWorkflowsInfos() allWorkflowsInfos {
 		workflowsInfosString := issueBody[workflowInfosStartIndex+len(workflowsInfosIdentifierStart) : workflowInfosEndIndex]
 		err := json.Unmarshal([]byte(workflowsInfosString), &workflowsInfos)
 		if err != nil {
-			slog.Error("Failed to parse workflows infos", slog.String("error", err.Error()))
-			os.Exit(1)
+			return allWorkflowsInfos{}, fmt.Errorf("Failed to unmarshal workflows infos: %s", err)
 		}
 	}
 	slog.Debug("END parseWorkflowsInfos", slog.Any("workflowsInfos", workflowsInfos))
-	return workflowsInfos
+	return workflowsInfos, nil
 }
 
-func computeIssueBody() {
+func computeIssueBody() error {
 	slog.Debug("START computeIssueBody")
 	currentIssue, resp, err := gh.Issues.Get(context.TODO(), repoOwner, repoName, issueNumber)
 	if err != nil {
-		slog.Error("Failed to get issue body", slog.String("error", err.Error()))
-		os.Exit(1)
+		return fmt.Errorf("Failed to get issue body: %s", err)
 	}
 	if resp.StatusCode != 200 {
-		slog.Error("Failed to get issue body", slog.String("status", resp.Status))
-		os.Exit(1)
+		return fmt.Errorf("Failed to get issue body: %s", resp.Status)
 	}
 	issueBody = currentIssue.GetBody()
 	newWorkflow := workflowInfos{
@@ -200,7 +185,10 @@ func computeIssueBody() {
 		TriggeringActorType:    triggeringActorType,
 		TriggeringActorHtmlUrl: triggeringActorHtmlUrl,
 	}
-	allWorkflows := parseWorkflowsInfos()
+	allWorkflows, err := parseWorkflowsInfos()
+	if err != nil {
+		return fmt.Errorf("Failed to parse workflows infos: %s", err)
+	}
 	if allWorkflows.WorkflowsInfos == nil {
 		allWorkflows.WorkflowsInfos = make(map[string]workflowInfos)
 	}
@@ -238,31 +226,46 @@ func computeIssueBody() {
 	issueBody = buffer.String()
 	slog.Info("Issue body computed", slog.String("issueBody", issueBody))
 	slog.Debug("END computeIssueBody", slog.String("issueBody", issueBody))
+	return nil
 }
 
-func createIssueIfNeeded() {
+func createIssueIfNeeded() error {
 	slog.Debug("START createIssueIfNeeded")
-	issueNumber = getIssueNumber()
+	issueNumber, err := getIssueNumber()
+	if err != nil {
+		return fmt.Errorf("Failed to get issue number: %s", err)
+	}
 	if issueNumber == -1 {
 		slog.Info("Issue not found, creating a new one")
-		issueNumber = createIssue()
+		issueNumber, err = createIssue()
+		if err != nil {
+			return fmt.Errorf("Failed to create issue: %s", err)
+		}
 		slog.Info("Issue created", slog.Int("issueNumber", issueNumber))
 	}
 	slog.Debug("END createIssueIfNeeded", slog.Int("issueNumber", issueNumber))
+	return nil
 }
 
-func createOrUpdateIssue() {
+func createOrUpdateIssue() error {
 	slog.Debug("START createOrUpdateIssue")
-	issueNumber = getIssueNumber()
+	issueNumber, err := getIssueNumber()
+	if err != nil {
+		return fmt.Errorf("Failed to get issue number: %s", err)
+	}
 	if issueNumber == -1 {
 		slog.Info("Issue not found, creating a new one")
-		issueNumber = createIssue()
+		issueNumber, err := createIssue()
+		if err != nil {
+			return fmt.Errorf("Failed to create issue: %s", err)
+		}
 		slog.Info("Issue created", slog.Int("issueNumber", issueNumber))
 	} else {
 		updateIssue(issueNumber)
 	}
 	pinIssue(issueNumber)
 	slog.Debug("END createOrUpdateIssue", slog.Int("issueNumber", issueNumber))
+	return nil
 }
 
 func main() {
@@ -271,25 +274,43 @@ func main() {
 		slog.Info("Execution time", slog.String("duration", time.Since(startTime).String()))
 	}()
 	initLogger()
-	checkAndSetVariables()
+	err := checkAndSetVariables()
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
 	initGithubClient()
-	initGitClient()
-	createIssueIfNeeded()
-	computeIssueBody()
-	createOrUpdateIssue()
+	err = initGitClient()
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
+	err = createIssueIfNeeded()
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
+	err = computeIssueBody()
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
+	err = createOrUpdateIssue()
+	if err != nil {
+		slog.Error(err.Error())
+		os.Exit(1)
+	}
 	slog.Info("Workflow completed successfully")
 }
 
-func getIssueNumber() int {
+func getIssueNumber() (int, error) {
 	slog.Debug("START getIssueNumber")
 	issues, resp, err := gh.Search.Issues(context.TODO(), "is:issue in:title "+issueTitle+" repo:"+githubRepository, nil)
 	if err != nil {
-		slog.Error("Failed to get issue number", slog.String("error", err.Error()))
-		os.Exit(1)
+		return -1, fmt.Errorf("Failed to get issue number: %s", err)
 	}
 	if resp.StatusCode != 200 {
-		slog.Error("Failed to get issue number", slog.String("status", resp.Status))
-		os.Exit(1)
+		return -1, fmt.Errorf("Failed to get issue number: %s", resp.Status)
 	}
 	issueNumber := -1
 	for _, issue := range issues.Issues {
@@ -300,10 +321,10 @@ func getIssueNumber() int {
 		}
 	}
 	slog.Debug("END getIssueNumber", slog.Int("issueNumber", issueNumber))
-	return issueNumber
+	return issueNumber, nil
 }
 
-func createIssue() int {
+func createIssue() (int, error) {
 	slog.Debug("START createIssue")
 	i := github.IssueRequest{
 		Title: github.Ptr(issueTitle),
@@ -311,19 +332,17 @@ func createIssue() int {
 	}
 	issue, resp, err := gh.Issues.Create(context.TODO(), repoOwner, repoName, &i)
 	if err != nil {
-		slog.Error("Failed to create issue", slog.String("error", err.Error()))
-		os.Exit(1)
+		return -1, fmt.Errorf("Failed to create issue: %s", err)
 	}
 	if resp.StatusCode != 201 {
-		slog.Error("Failed to create issue", slog.String("status", resp.Status))
-		os.Exit(1)
+		return -1, fmt.Errorf("Failed to create issue: %s", resp.Status)
 	}
 	issueNumber := issue.GetNumber()
 	slog.Debug("END createIssue", slog.Int("issueNumber", issueNumber))
-	return issueNumber
+	return issueNumber, nil
 }
 
-func updateIssue(issueNumber int) {
+func updateIssue(issueNumber int) error {
 	slog.Debug("START updateIssue")
 	var issueDesiredStatus string
 	if atLeastOneWorkflowFailed {
@@ -337,15 +356,14 @@ func updateIssue(issueNumber int) {
 	}
 	_, resp, err := gh.Issues.Edit(context.TODO(), repoOwner, repoName, issueNumber, &i)
 	if err != nil {
-		slog.Error("Failed to update issue", slog.String("error", err.Error()))
-		os.Exit(1)
+		return fmt.Errorf("Failed to update issue: %s", err)
 	}
 	if resp.StatusCode != 200 {
-		slog.Error("Failed to update issue", slog.String("status", resp.Status))
-		os.Exit(1)
+		return fmt.Errorf("Failed to update issue: %s", resp.Status)
 	}
 	slog.Info("Issue updated", slog.Int("issueNumber", issueNumber))
 	slog.Debug("END updateIssue")
+	return nil
 }
 
 func pinIssue(issueNumber int) {
