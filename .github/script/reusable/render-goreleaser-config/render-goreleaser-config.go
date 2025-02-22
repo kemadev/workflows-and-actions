@@ -61,6 +61,7 @@ func listDirs(root string) ([]string, error) {
 			dirs = append(dirs, file.Name())
 		}
 	}
+	slog.Info("Listed directories", slog.String("root", root), slog.Int("count", len(dirs)))
 	return dirs, nil
 }
 
@@ -91,6 +92,7 @@ func renderGoreleaserConfig(dirs []string) error {
 	if err != nil {
 		return err
 	}
+	slog.Info("Rendered goreleaser config", slog.String("outputFile", GORELEASER_CONFIG_OUTPUT_FILE))
 	return nil
 }
 

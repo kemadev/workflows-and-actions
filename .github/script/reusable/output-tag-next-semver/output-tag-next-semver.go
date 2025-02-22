@@ -80,8 +80,10 @@ func checkForcePatchVersion() (bool, error) {
 		if err != nil {
 			return false, err
 		}
+		slog.Debug("Force patch version argument provided", slog.Bool("forcePatchVersion", forcePatchVersion))
 		return forcePatchVersion, nil
 	}
+	slog.Debug("No force patch version argument provided")
 	return false, nil
 }
 
@@ -91,12 +93,14 @@ func getNextVersion(forcePatchVersion bool) (string, error) {
 		if err != nil {
 			return "", err
 		}
+		slog.Debug("Next version is pre-release", slog.String("nextVersion", nextVersion))
 		return nextVersion, nil
 	}
 	nextVersion, err := svu.Next(svu.WithPrefix("v"), svu.WithForcePatchIncrement(forcePatchVersion))
 	if err != nil {
 		return "", err
 	}
+	slog.Debug("Next version is release", slog.String("nextVersion", nextVersion))
 	return nextVersion, nil
 }
 
@@ -110,6 +114,7 @@ func outputTagVersion(version string) error {
 	if err != nil {
 		return err
 	}
+	slog.Debug("Outputted tag version to file", slog.String("tagVersionFileName", tagVersionFileName))
 	return nil
 }
 
