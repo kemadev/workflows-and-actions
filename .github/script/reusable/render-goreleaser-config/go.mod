@@ -1,3 +1,3 @@
 module github.com/kemadev/workflows-and-actions/.github/script/reusable/render-goreleaser-configs
 
-go 1.23.3
+go 1.23.4
