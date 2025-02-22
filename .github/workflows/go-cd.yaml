@@ -138,9 +138,9 @@ jobs:
         id: upload-artifacts
         if: ${{ steps.release.outputs.release_created }}
         run: |
-          rm "${{ env.GORELEASER_DIST_DIR }}/artifacts.json"
-          rm "${{ env.GORELEASER_DIST_DIR }}/config.yaml"
-          rm "${{ env.GORELEASER_DIST_DIR }}/metadata.json"
+          # rm "${{ env.GORELEASER_DIST_DIR }}/artifacts.json"
+          # rm "${{ env.GORELEASER_DIST_DIR }}/config.yaml"
+          # rm "${{ env.GORELEASER_DIST_DIR }}/metadata.json"
           gh release upload "${{ steps.release.outputs.tag_name }}" "${{ env.GORELEASER_DIST_DIR }}/*"
 
   get-deploys-list:
