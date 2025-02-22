@@ -19,7 +19,7 @@ runs:
       id: copy-reusable-scripts-and-configs
       shell: bash
       run: |
-        cp -r "${{ github.workspace }}/dist/workflows-and-actions/.github/script/reusable" .github/script
+        cp -r "${{ github.workspace }}/dist/workflows-and-actions/.github/script/reusable" .github/script/reusable
         cp -r "${{ github.workspace }}/dist/workflows-and-actions/config/reusable" config/reusable
     - name: Ignore git changes
       id: ignore-git-changes
