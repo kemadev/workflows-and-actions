@@ -129,8 +129,9 @@ jobs:
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: ${{ env.GORELEASER_DIST_DIR }}
-      - uses: googleapis/release-please-action@v4
+      - name: Release
         id: release
+        uses: googleapis/release-please-action@v4
         with:
           release-type: go
           config-file: .config/reusable/release-please-config.yaml
