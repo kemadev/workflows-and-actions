@@ -76,17 +76,35 @@ jobs:
     permissions:
       contents: read
       issues: write
-    uses: kemadev/workflows-and-actions/.github/workflows/housekeep-failed-workflows.yaml@main
-    with:
-      GH_TOKEN: ${{ github.token }}
-      HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
-      WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
-      WORKFLOW_RUN_TITLE: ${{ github.event.workflow_run.display_title }}
-      CONCLUSION: ${{ github.event.workflow_run.conclusion }}
-      HTML_URL: ${{ github.event.workflow_run.html_url }}
-      CREATED_AT: ${{ github.event.workflow_run.created_at }}
-      UPDATED_AT: ${{ github.event.workflow_run.updated_at }}
-      ACTOR_TYPE: ${{ github.event.workflow_run.actor.type }}
-      ACTOR_HTML_URL: ${{ github.event.workflow_run.actor.html_url }}
-      TRIGGERING_ACTOR_TYPE: ${{ github.event.workflow_run.triggering_actor.type }}
-      TRIGGERING_ACTOR_HTML_URL: ${{ github.event.workflow_run.triggering_actor.html_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Checkout reusable workflow scripts and configs
+        id: checkout-reusable-scripts-and-configs
+        uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
+      - name: Set up Go
+        id: setup-go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ env.HOUSEKEEP_FAILED_WORKFLOWS_SCRIPT_DIR}}/go.mod
+          cache-dependency-path: ${{ env.HOUSEKEEP_FAILED_WORKFLOWS_SCRIPT_DIR}}/go.sum
+      - name: Report failed workflows
+        id: report-failed-workflows
+        working-directory: ${{ env.HOUSEKEEP_FAILED_WORKFLOWS_SCRIPT_DIR }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+          WORKFLOW_RUN_TITLE: ${{ github.event.workflow_run.display_title }}
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          HTML_URL: ${{ github.event.workflow_run.html_url }}
+          CREATED_AT: ${{ github.event.workflow_run.created_at }}
+          UPDATED_AT: ${{ github.event.workflow_run.updated_at }}
+          ACTOR_TYPE: ${{ github.event.workflow_run.actor.type }}
+          ACTOR_HTML_URL: ${{ github.event.workflow_run.actor.html_url }}
+          TRIGGERING_ACTOR_TYPE: ${{ github.event.workflow_run.triggering_actor.type }}
+          TRIGGERING_ACTOR_HTML_URL: ${{ github.event.workflow_run.triggering_actor.html_url }}
+        run: |
+          go run ./...
