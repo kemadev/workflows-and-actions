@@ -272,7 +272,7 @@ func main() {
 	checkAndSetVariables()
 	initGithubClient()
 	initGitClient()
-	createOrUpdateIssue()
+	createIssueIfNeeded()
 	computeIssueBody()
 	createOrUpdateIssue()
 	slog.Info("Workflow completed successfully")
