@@ -10,10 +10,6 @@ on:
       - main
   workflow_call:
     inputs:
-      GH_TOKEN:
-        description: 'GitHub token'
-        type: string
-        required: true
       HEAD_BRANCH:
         description: 'Head branch'
         type: string
@@ -93,7 +89,7 @@ jobs:
         id: report-failed-workflows
         working-directory: ${{ env.HOUSEKEEP_FAILED_WORKFLOWS_SCRIPT_DIR }}
         env:
-          GH_TOKEN: ${{ inputs.GH_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           HEAD_BRANCH: ${{ inputs.HEAD_BRANCH }}
           WORKFLOW_NAME: ${{ inputs.WORKFLOW_NAME }}
           WORKFLOW_RUN_TITLE: ${{ inputs.WORKFLOW_RUN_TITLE }}
