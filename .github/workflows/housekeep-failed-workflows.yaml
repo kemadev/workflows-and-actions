@@ -1,0 +1,92 @@
+name: Housekeep - Report failed workflows
+
+on:
+  workflow_run:
+    workflows:
+      - '*'
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch: {}
+  workflow_call:
+    inputs:
+      GH_TOKEN:
+        description: 'GitHub token'
+        type: string
+        required: true
+      HEAD_BRANCH:
+        description: 'Head branch'
+        type: string
+        required: true
+      WORKFLOW_NAME:
+        description: 'Workflow name'
+        type: string
+        required: true
+      WORKFLOW_RUN_TITLE:
+        description: 'Workflow run title'
+        type: string
+        required: true
+      CONCLUSION:
+        description: 'Conclusion'
+        type: string
+        required: true
+      HTML_URL:
+        description: 'HTML URL'
+        type: string
+        required: true
+      CREATED_AT:
+        description: 'Created at'
+        type: string
+        required: true
+      UPDATED_AT:
+        description: 'Updated at'
+        type: string
+        required: true
+      ACTOR_TYPE:
+        description: 'Actor type'
+        type: string
+        required: true
+      ACTOR_HTML_URL:
+        description: 'Actor HTML URL'
+        type: string
+        required: true
+      TRIGGERING_ACTOR_TYPE:
+        description: 'Triggering actor type'
+        type: string
+        required: true
+      TRIGGERING_ACTOR_HTML_URL:
+        description: 'Triggering actor HTML URL'
+        type: string
+        required: true
+
+defaults:
+  run:
+    shell: bash
+
+# Avoid parallel edit of the Issue
+concurrency: housekeep-report-failed-workflows
+
+env:
+  HOUSEKEEP_FAILED_WORKFLOWS_SCRIPT_DIR: .github/script/reusable/report-failed-workflows
+
+jobs:
+  report-failed-workflows:
+    name: Report failed workflows
+    permissions:
+      contents: read
+      issues: write
+    uses: kemadev/workflows-and-actions/.github/workflows/housekeep-failed-workflows.yaml@main
+    with:
+      GH_TOKEN: ${{ github.token }}
+      HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+      WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+      WORKFLOW_RUN_TITLE: ${{ github.event.workflow_run.display_title }}
+      CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+      HTML_URL: ${{ github.event.workflow_run.html_url }}
+      CREATED_AT: ${{ github.event.workflow_run.created_at }}
+      UPDATED_AT: ${{ github.event.workflow_run.updated_at }}
+      ACTOR_TYPE: ${{ github.event.workflow_run.actor.type }}
+      ACTOR_HTML_URL: ${{ github.event.workflow_run.actor.html_url }}
+      TRIGGERING_ACTOR_TYPE: ${{ github.event.workflow_run.triggering_actor.type }}
+      TRIGGERING_ACTOR_HTML_URL: ${{ github.event.workflow_run.triggering_actor.html_url }}
