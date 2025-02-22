@@ -238,6 +238,17 @@ func computeIssueBody() {
 	slog.Debug("END computeIssueBody", slog.String("issueBody", issueBody))
 }
 
+func createIssueIfNeeded() {
+	slog.Debug("START createIssueIfNeeded")
+	issueNumber = getIssueNumber()
+	if issueNumber == -1 {
+		slog.Info("Issue not found, creating a new one")
+		issueNumber = createIssue()
+		slog.Info("Issue created", slog.Int("issueNumber", issueNumber))
+	}
+	slog.Debug("END createIssueIfNeeded", slog.Int("issueNumber", issueNumber))
+}
+
 func createOrUpdateIssue() {
 	slog.Debug("START createOrUpdateIssue")
 	issueNumber = getIssueNumber()
