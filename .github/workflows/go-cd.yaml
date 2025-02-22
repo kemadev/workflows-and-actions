@@ -141,7 +141,8 @@ jobs:
           # rm "${{ env.GORELEASER_DIST_DIR }}/artifacts.json"
           # rm "${{ env.GORELEASER_DIST_DIR }}/config.yaml"
           # rm "${{ env.GORELEASER_DIST_DIR }}/metadata.json"
-          gh release upload "${{ steps.release.outputs.tag_name }}" "${{ env.GORELEASER_DIST_DIR }}/*"
+          ls -lRa
+          # gh release upload "${{ steps.release.outputs.tag_name }}" "${{ env.GORELEASER_DIST_DIR }}/*"
 
   get-deploys-list:
     name: Get deploys list
