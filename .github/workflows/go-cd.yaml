@@ -137,7 +137,7 @@ jobs:
       - name: Upload artifacts
         id: upload-artifacts
         if: ${{ steps.release.outputs.release_created }}
-        run:
+        run: |
           rm "${{ env.GORELEASER_DIST_DIR }}/artifacts.json"
           rm "${{ env.GORELEASER_DIST_DIR }}/config.yaml"
           rm "${{ env.GORELEASER_DIST_DIR }}/metadata.json"
