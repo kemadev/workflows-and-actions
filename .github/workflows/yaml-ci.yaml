@@ -1,6 +1,9 @@
 name: YAML - CI
 
 on:
+  schedule:
+    # Each day at 3:00 AM
+    - cron: 0 3 * * *
   pull_request:
     paths:
       - '**/*.yaml'
