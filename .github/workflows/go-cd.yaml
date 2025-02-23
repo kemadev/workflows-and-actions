@@ -44,6 +44,7 @@ env:
   GORELEASER_CONFIG_TEMPLATE_DIR: config/reusable
   GORELEASER_CONFIG_OUTPUT_FILE: config/reusable/.goreleaser.yaml
   BUILDS_DIR: cmd
+  RELEASE_PLEASE_CONFIG_FILE: config/reusable/release-please-config.json
 
 concurrency:
   group: ${{ github.ref_name }}
@@ -132,15 +133,15 @@ jobs:
         id: add-prerelease-attribute
         if: ${{ github.event.base_ref != 'main' }}
         run: |
-          jq '. + {"prerelease":true}' ./config/reusable/release-please-config.json > ./config/reusable/release-please-config.json.tmp
-          mv ./config/reusable/release-please-config.json.tmp ./config/reusable/release-please-config.json
+          jq '. + {"prerelease":true}' ${{ env.RELEASE_PLEASE_CONFIG_FILE }}}} > ${{ env.RELEASE_PLEASE_CONFIG_FILE }}}}.tmp
+          mv ${{ env.RELEASE_PLEASE_CONFIG_FILE }}.tmp ${{ env.RELEASE_PLEASE_CONFIG_FILE }}}
       - name: Release
         id: release
         uses: googleapis/release-please-action@v4
         with:
           release-type: go
-          config-file: .config/reusable/release-please-config.yaml
-          manifest-file: .config/reusable/release-please-manifest.yaml
+          config-file: ${{ env.RELEASE_PLEASE_CONFIG_FILE }}
+          manifest-file: config/release-please-manifest.json
       - name: Upload release artifacts
         id: upload-release-artifacts
         if: ${{ steps.release.outputs.release_created }}
