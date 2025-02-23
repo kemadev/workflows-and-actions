@@ -128,6 +128,12 @@ jobs:
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: ${{ env.GORELEASER_DIST_DIR }}
+      - name: Add prerelease attribute
+        id: add-prerelease-attribute
+        if: ${{ github.event.base_ref != 'main' }}
+        run: |
+          jq '. + {"prerelease":true}' ./config/reusable/release-please-config.json > ./config/reusable/release-please-config.json.tmp
+          mv ./config/reusable/release-please-config.json.tmp ./config/reusable/release-please-config.json
       - name: Release
         id: release
         uses: googleapis/release-please-action@v4
