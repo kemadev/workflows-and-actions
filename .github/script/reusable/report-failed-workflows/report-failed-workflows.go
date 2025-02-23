@@ -314,7 +314,7 @@ func getIssueNumber() (int, error) {
 	if resp.StatusCode != 200 {
 		return -1, fmt.Errorf("Failed to get issue number: %s", resp.Status)
 	}
-	issueNumber := -1
+	issueNumber = -1
 	for _, issue := range issues.Issues {
 		if strings.Contains(issue.GetBody(), issueBodyIdentifier) {
 			issueNumber = issue.GetNumber()
