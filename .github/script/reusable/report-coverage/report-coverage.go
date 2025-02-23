@@ -105,7 +105,11 @@ func parseCoverageReport(profiles []*cover.Profile) (string, error) {
 	buffer.WriteString(fmt.Sprintf("| --------- | -------- |\n"))
 	for _, profile := range profiles {
 		fileCoveragePercentage := percentCovered(profile)
-		filenameWithoutRepoPath := strings.Split(profile.FileName, repoName+"/")[1]
+		filenameWithoutRepoPathArray := strings.Split(profile.FileName, repoName+"/")
+		if len(filenameWithoutRepoPathArray) < 2 {
+			return "", fmt.Errorf("Failed to extract file path from coverage profile: %s", profile.FileName)
+		}
+		filenameWithoutRepoPath := filenameWithoutRepoPathArray[1]
 		// https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#setting-a-warning-message
 		fmt.Println("::warning file=" + filenameWithoutRepoPath + " title=Poor test coverage::" + fmt.Sprintf("Coverage on file %s: %.2f%%", filenameWithoutRepoPath, fileCoveragePercentage))
 		var emoji string
