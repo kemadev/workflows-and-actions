@@ -133,7 +133,7 @@ jobs:
         id: add-prerelease-attribute
         if: ${{ github.event.base_ref != 'main' }}
         run: |
-          jq '. + {"prerelease":true}' ${{ env.RELEASE_PLEASE_CONFIG_FILE }}}} > ${{ env.RELEASE_PLEASE_CONFIG_FILE }}}}.tmp
+          jq '. + {"prerelease":true}' ${{ env.RELEASE_PLEASE_CONFIG_FILE }} > ${{ env.RELEASE_PLEASE_CONFIG_FILE }}.tmp
           mv ${{ env.RELEASE_PLEASE_CONFIG_FILE }}.tmp ${{ env.RELEASE_PLEASE_CONFIG_FILE }}}
       - name: Release
         id: release
