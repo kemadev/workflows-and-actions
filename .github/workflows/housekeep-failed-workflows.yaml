@@ -11,47 +11,47 @@ on:
   workflow_call:
     inputs:
       HEAD_BRANCH:
-        description: 'Head branch'
+        description: Head branch
         type: string
         required: true
       WORKFLOW_NAME:
-        description: 'Workflow name'
+        description: Workflow name
         type: string
         required: true
       WORKFLOW_RUN_TITLE:
-        description: 'Workflow run title'
+        description: Workflow run title
         type: string
         required: true
       CONCLUSION:
-        description: 'Conclusion'
+        description: Conclusion
         type: string
         required: true
       HTML_URL:
-        description: 'HTML URL'
+        description: HTML URL
         type: string
         required: true
       CREATED_AT:
-        description: 'Created at'
+        description: Created at
         type: string
         required: true
       UPDATED_AT:
-        description: 'Updated at'
+        description: Updated at
         type: string
         required: true
       ACTOR_TYPE:
-        description: 'Actor type'
+        description: Actor type
         type: string
         required: true
       ACTOR_HTML_URL:
-        description: 'Actor HTML URL'
+        description: Actor HTML URL
         type: string
         required: true
       TRIGGERING_ACTOR_TYPE:
-        description: 'Triggering actor type'
+        description: Triggering actor type
         type: string
         required: true
       TRIGGERING_ACTOR_HTML_URL:
-        description: 'Triggering actor HTML URL'
+        description: Triggering actor HTML URL
         type: string
         required: true
 
