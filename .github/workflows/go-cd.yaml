@@ -142,7 +142,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           declare artifacts
-          artifacts=$(jq '.[] | select(.type == "Archive" or .type == "SBOM") | .path' ${{ env.GORELEASER_DIST_DIR }}/artifacts.json | tr -d '"' | tr '\n' ' ')
+          artifacts=$(jq '.[] | select(.type == "Archive" or .type == "SBOM" or .type == "Checksum") | .path' ${{ env.GORELEASER_DIST_DIR }}/artifacts.json | tr -d '"' | tr '\n' ' ')
           gh release upload "${{ steps.release.outputs.tag_name }}" ${artifacts}
 
   get-deploys-list:
