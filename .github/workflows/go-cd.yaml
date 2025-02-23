@@ -123,6 +123,9 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
+      - name: Checkout reusable workflow scripts and configs
+        id: checkout-reusable-scripts-and-configs
+        uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
       - name: Download build artifacts
         id: download-build-artifacts
         uses: actions/download-artifact@v4
