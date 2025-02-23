@@ -240,12 +240,6 @@ jobs:
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: ${{ env.GORELEASER_DIST_DIR }}
-      - name: Add prerelease attribute
-        id: add-prerelease-attribute
-        if: ${{ github.event.base_ref != 'ff' }}
-        run: |
-          jq '. + {"prerelease":true}' ${{ env.RELEASE_PLEASE_CONFIG_FILE }} > ${{ env.RELEASE_PLEASE_CONFIG_FILE }}.tmp
-          mv ${{ env.RELEASE_PLEASE_CONFIG_FILE }}.tmp ${{ env.RELEASE_PLEASE_CONFIG_FILE }}}
       - name: Release
         id: release
         uses: googleapis/release-please-action@v4
