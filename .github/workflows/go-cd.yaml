@@ -281,6 +281,9 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
+      - name: Checkout reusable workflow scripts and configs
+        id: checkout-reusable-scripts-and-configs
+        uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
       - name: Checkout to latest sucessful deploy
         id: checkout-to-latest-sucessful-deploy
         env:
@@ -294,12 +297,32 @@ jobs:
             checkout_target="${FORCE_ROLLBACK}"
           fi
           git checkout "${checkout_target}"
-      - name: Download build artifacts
-        id: download-build-artifacts
+      - name: Set up Go
+        id: setup-go-goreleaser
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}/go.mod
+          cache-dependency-path: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}/go.sum
+      - name: Render goreleaser config
+        id: render-goreleaser-config
         env:
-          GH_TOKEN: ${{ github.token }}
+          GORELEASER_CONFIG_TEMPLATE_DIR: ${{ github.workspace }}/config/reusable
+          GORELEASER_CONFIG_TEMPLATE_FILENAME: .goreleaser.yaml.go.tmpl
+          GORELEASER_CONFIG_OUTPUT_FILE: ${{ github.workspace }}/config/reusable/.goreleaser.yaml
+          BUILDS_DIR_PARENT: ${{ github.workspace }}
+        working-directory: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}
         run: |
-          gh release download "${checkout_target}" --dir "${{ env.GORELEASER_DIST_DIR }}"
+          mkdir -p ${{ env.GORELEASER_CONFIG_TEMPLATE_DIR }}
+          go run ./...
+      - name: Build code
+        id: build
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          args: build --config ${{ env.GORELEASER_CONFIG_OUTPUT_FILE }} --clean --snapshot
+        env:
+          # HACK make goreleaser think it's a new version and generate all artifacts
+          GORELEASER_PREVIOUS_TAG: v0.0.0-dummy
+          GORELEASER_CURRENT_TAG: v0.0.1-dummy
       - name: Set up Go
         id: setup-go
         uses: actions/setup-go@v5
