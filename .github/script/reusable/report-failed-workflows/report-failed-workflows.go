@@ -339,7 +339,7 @@ func createIssue() (int, error) {
 	if resp.StatusCode != 201 {
 		return -1, fmt.Errorf("Failed to create issue: %s", resp.Status)
 	}
-	issueNumber := issue.GetNumber()
+	issueNumber = issue.GetNumber()
 	slog.Debug("END createIssue", slog.Int("issueNumber", issueNumber))
 	return issueNumber, nil
 }
