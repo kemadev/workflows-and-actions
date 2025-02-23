@@ -110,50 +110,6 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-  release:
-    name: Release
-    needs: build-code
-    if: ${{ github.event.inputs.force-rollback == '' }}
-    permissions:
-      contents: write
-      pull-requests: write
-    runs-on: ubuntu-latest
-    environment: ${{ github.ref_name }}
-    steps:
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v4
-      - name: Checkout reusable workflow scripts and configs
-        id: checkout-reusable-scripts-and-configs
-        uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
-      - name: Download build artifacts
-        id: download-build-artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: ${{ env.GORELEASER_DIST_DIR }}
-      - name: Add prerelease attribute
-        id: add-prerelease-attribute
-        if: ${{ github.event.base_ref != 'main' }}
-        run: |
-          jq '. + {"prerelease":true}' ${{ env.RELEASE_PLEASE_CONFIG_FILE }} > ${{ env.RELEASE_PLEASE_CONFIG_FILE }}.tmp
-          mv ${{ env.RELEASE_PLEASE_CONFIG_FILE }}.tmp ${{ env.RELEASE_PLEASE_CONFIG_FILE }}}
-      - name: Release
-        id: release
-        uses: googleapis/release-please-action@v4
-        with:
-          config-file: ${{ env.RELEASE_PLEASE_CONFIG_FILE }}
-          manifest-file: config/release-please-manifest.json
-      - name: Upload release artifacts
-        id: upload-release-artifacts
-        if: ${{ steps.release.outputs.release_created }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          declare artifacts
-          artifacts=$(jq '.[] | select(.type == "Archive" or .type == "SBOM" or .type == "Checksum") | .path' ${{ env.GORELEASER_DIST_DIR }}/artifacts.json | tr -d '"' | tr '\n' ' ')
-          gh release upload "${{ steps.release.outputs.tag_name }}" ${artifacts}
-
   get-deploys-list:
     name: Get deploys list
     needs: build-code
@@ -262,6 +218,50 @@ jobs:
           git config user.email "${{ env.GHA_BOT_EMAIL }}"
           git tag -a "deploy-success-${{ github.ref_name }}-${{ github.run_id }}" -m "Deploy success"
           git push --tags
+
+  release:
+    name: Release
+    needs: tag-deploy-success
+    if: ${{ github.event.inputs.force-rollback == '' }}
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Checkout reusable workflow scripts and configs
+        id: checkout-reusable-scripts-and-configs
+        uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
+      - name: Download build artifacts
+        id: download-build-artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.GORELEASER_DIST_DIR }}
+      - name: Add prerelease attribute
+        id: add-prerelease-attribute
+        if: ${{ github.event.base_ref != 'main' }}
+        run: |
+          jq '. + {"prerelease":true}' ${{ env.RELEASE_PLEASE_CONFIG_FILE }} > ${{ env.RELEASE_PLEASE_CONFIG_FILE }}.tmp
+          mv ${{ env.RELEASE_PLEASE_CONFIG_FILE }}.tmp ${{ env.RELEASE_PLEASE_CONFIG_FILE }}}
+      - name: Release
+        id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          config-file: ${{ env.RELEASE_PLEASE_CONFIG_FILE }}
+          manifest-file: config/release-please-manifest.json
+      - name: Upload release artifacts
+        id: upload-release-artifacts
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          declare artifacts
+          artifacts=$(jq '.[] | select(.type == "Archive" or .type == "SBOM" or .type == "Checksum") | .path' ${{ env.GORELEASER_DIST_DIR }}/artifacts.json | tr -d '"' | tr '\n' ' ')
+          gh release upload "${{ steps.release.outputs.tag_name }}" ${artifacts}
 
   rollback:
     name: Rollback
