@@ -224,3 +224,4 @@ jobs:
         with:
           sbom: ${{ github.event.repository.name }}-sbom.spdx.json
           cache-db: true
+          output-format: table
