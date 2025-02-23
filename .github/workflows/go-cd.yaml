@@ -44,7 +44,7 @@ env:
   GORELEASER_CONFIG_TEMPLATE_DIR: config/reusable
   GORELEASER_CONFIG_OUTPUT_FILE: config/reusable/.goreleaser.yaml
   BUILDS_DIR: cmd
-  RELEASE_PLEASE_CONFIG_FILE: config/reusable/release-please-config.json
+  RELEASE_PLEASE_CONFIG_FILE: config/release-please-config.json
 
 concurrency:
   group: ${{ github.ref_name }}
