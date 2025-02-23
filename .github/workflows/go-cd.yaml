@@ -174,7 +174,8 @@ jobs:
         id: setup-go
         uses: actions/setup-go@v5
         with:
-          go-version: stable
+          go-version-file: ${{ env.DEPLOYS_DIR }}/${{ matrix.deploy }}/go.mod
+          cache-dependency-path: ${{ env.DEPLOYS_DIR }}/${{ matrix.deploy }}/go.sum
       # - name: Configure AWS credentials
       #   id: configure-aws-credentials
       #   uses: aws-actions/configure-aws-credentials@v4
@@ -190,13 +191,11 @@ jobs:
       #   uses: pulumi/actions@v6
       #   with:
       #     command: up
-      #     work-dir: "./${DEPLOYS_DIR}/${{ matrix.deploy }}"
+      #     work-dir: ${{ env.DEPLOYS_DIR }}/${{ matrix.deploy }}
       #     comment-on-pr: true
       #     comment-on-summary: true
       #     stack-name: ${{ github.ref_name }}
       #     github-token: ${{ github.token }}
-      #   env:
-      #     PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
   tag-deploy-success:
     name: Tag deploy success
@@ -310,7 +309,8 @@ jobs:
         id: setup-go
         uses: actions/setup-go@v5
         with:
-          go-version: stable
+          go-version-file: ${{ env.DEPLOYS_DIR }}/${{ matrix.deploy }}/go.mod
+          cache-dependency-path: ${{ env.DEPLOYS_DIR }}/${{ matrix.deploy }}/go.sum
       # - name: Configure AWS credentials
       #   id: configure-aws-credentials
       #   uses: aws-actions/configure-aws-credentials@v4
@@ -326,10 +326,8 @@ jobs:
       #   uses: pulumi/actions@v6
       #   with:
       #     command: up
-      #     work-dir: "./${DEPLOYS_DIR}/${{ matrix.deploy }}"
+      #     work-dir: ${{ env.DEPLOYS_DIR }}/${{ matrix.deploy }}
       #     comment-on-pr: true
       #     comment-on-summary: true
       #     stack-name: ${{ github.ref_name }}
       #     github-token: ${{ github.token }}
-      #   env:
-      #     PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
