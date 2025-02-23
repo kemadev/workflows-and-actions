@@ -99,6 +99,7 @@ jobs:
         with:
           args: release --config ${{ env.GORELEASER_CONFIG_OUTPUT_FILE }} --clean --snapshot --skip announce --skip publish --skip validate
         env:
+          # HACK make goreleaser think it's a new version and generate all artifacts
           GORELEASER_PREVIOUS_TAG: v0.0.0-dummy
           GORELEASER_CURRENT_TAG: v0.0.1-dummy
       - name: Upload build artifacts
