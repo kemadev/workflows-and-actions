@@ -162,9 +162,9 @@ jobs:
           declare -a go_mod_files
           mapfile -t go_mod_files < <(find . -name 'go.mod' | sed 's|./||')
           for go_mod_file in "${go_mod_files[@]}"; do
-            go_mod_dir=$(dirname "${go_mod_file}" | sed 's|\.$||' | sed 's|/$||')
+            go_mod_dir=$(dirname "${go_mod_file}" | sed 's|\.$||')
             go_mod_name=$(awk '/module/ {print $2}' "${go_mod_file}")
-            expected_go_mod_name="${github_base_domain}/${GITHUB_REPOSITORY}/${go_mod_dir}"
+            expected_go_mod_name="$(echo "${github_base_domain}/${GITHUB_REPOSITORY}/${go_mod_dir}" | sed 's|/$||')"
             if [[ "${go_mod_name}" != "${expected_go_mod_name}" ]]; then
               echo "::error file=${go_mod_file}::go mod name should be ${expected_go_mod_name}"
               go_mod_file_bad_name+=("${go_mod_file}")
