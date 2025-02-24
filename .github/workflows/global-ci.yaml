@@ -1,4 +1,5 @@
 name: Global - CI
+description: Perform Static Application Security Testing and secrets scanning
 
 on:
   schedule:

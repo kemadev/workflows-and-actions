@@ -1,4 +1,5 @@
 name: Markdown - CI
+description: Lint markdown files
 
 on:
   schedule:

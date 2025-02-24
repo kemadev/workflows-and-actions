@@ -1,4 +1,5 @@
 name: Housekeep - Report failed workflows
+description: Report workflows that failed on main branch in an issue
 
 on:
   workflow_run:

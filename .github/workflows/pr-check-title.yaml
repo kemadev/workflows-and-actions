@@ -1,4 +1,5 @@
 name: PR - Check title
+description: Check PR title is a conventional commit message
 
 on:
   workflow_call: {}

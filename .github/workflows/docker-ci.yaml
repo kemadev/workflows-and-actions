@@ -1,4 +1,5 @@
 name: Docker - CI
+description: Lint Dockerfiles
 
 on:
   schedule:
