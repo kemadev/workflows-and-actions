@@ -168,9 +168,6 @@ jobs:
         with:
           go-version-file: go.mod
           cache-dependency-path: go.sum
-      - name: Checkout reusable workflow scripts and configs
-        id: checkout-reusable-scripts-and-configs
-        uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
       - name: Lint Go
         id: lint
         uses: golangci/golangci-lint-action@v6
