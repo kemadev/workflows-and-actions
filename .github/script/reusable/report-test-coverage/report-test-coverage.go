@@ -121,7 +121,7 @@ func parseCoverageReport(profiles []*cover.Profile) (string, error) {
 		default:
 			emoji = ":heart:"
 		}
-		buffer.WriteString(fmt.Sprintf("| %s | %s %.2f%% |\n", profile.FileName, emoji, fileCoveragePercentage))
+		buffer.WriteString(fmt.Sprintf("| %s | %s %.2f%% |\n", filenameWithoutRepoPath, emoji, fileCoveragePercentage))
 	}
 	buffer.WriteString(fmt.Sprintf("\n"))
 	slog.Debug("Generated coverage report", slog.String("report", buffer.String()))
