@@ -79,7 +79,7 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     env:
-      TEST_COVERAGE_SCRIPT_DIR: ./.github/script/reusable/report-coverage
+      TEST_COVERAGE_SCRIPT_DIR: ./.github/script/reusable/report-test-coverage
     steps:
       - name: Checkout
         id: checkout
