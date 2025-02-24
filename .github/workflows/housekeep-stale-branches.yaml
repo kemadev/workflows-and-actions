@@ -1,5 +1,4 @@
 name: Housekeep - Report stale branches
-description: Report stale branches in an issue
 
 on:
   schedule:

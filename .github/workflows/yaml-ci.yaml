@@ -1,5 +1,4 @@
 name: YAML - CI
-description: Lint YAML files
 
 on:
   schedule:

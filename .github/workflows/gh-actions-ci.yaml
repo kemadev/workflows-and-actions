@@ -1,5 +1,4 @@
 name: GitHub Actions - CI
-description: Lint GitHub Actions and workflows
 
 on:
   schedule:

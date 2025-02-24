@@ -1,5 +1,4 @@
 name: Go - CI
-description: Lint and test Go code
 
 on:
   schedule:

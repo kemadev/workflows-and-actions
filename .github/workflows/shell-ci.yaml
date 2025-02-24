@@ -1,5 +1,4 @@
 name: Shell - CI
-description: Lint shell scripts
 
 on:
   schedule:

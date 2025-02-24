@@ -1,5 +1,4 @@
 name: PR - Add labels
-description: Add labels to PR
 
 on:
   workflow_call: {}

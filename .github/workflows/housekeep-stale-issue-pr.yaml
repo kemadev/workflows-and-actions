@@ -1,5 +1,4 @@
 name: Housekeep - Tidy stale Issues & PRs
-description: Tidy stale Issues & PRs
 
 on:
   schedule:

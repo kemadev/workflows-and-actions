@@ -1,5 +1,4 @@
 name: Go - CD
-description: Deploy Go applications
 
 on:
   push:
