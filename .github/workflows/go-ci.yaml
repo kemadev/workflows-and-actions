@@ -23,28 +23,8 @@ defaults:
     shell: bash
 
 jobs:
-  setup-shared-go-cache:
-    name: Setup shared Go cache
-    permissions:
-      contents: read
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v4
-      - name: Set up Go
-        id: setup-go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-          cache-dependency-path: go.sum
-      - name: Download Go modules
-        id: download-go-modules
-        run: go mod download
-
   unit-test:
     name: Unit test
-    needs: setup-shared-go-cache
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -112,7 +92,6 @@ jobs:
 
   check-clean-gomod:
     name: Clean go.mod
-    needs: setup-shared-go-cache
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -124,8 +103,7 @@ jobs:
         uses: actions/setup-go@v5
         id: setup-go
         with:
-          go-version-file: go.mod
-          cache-dependency-path: go.sum
+          cache: false
       - name: Check for unused dependencies
         id: check-unused-deps
         run: |
@@ -176,7 +154,6 @@ jobs:
 
   lint:
     name: Lint
-    needs: setup-shared-go-cache
     permissions:
       contents: read
       checks: write
