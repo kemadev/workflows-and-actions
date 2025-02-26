@@ -23,10 +23,12 @@ var (
 	prNumberInt int
 	// Path to the coverage file for which the report is to be generated
 	coverageFile = os.Getenv("COVERAGE_FILE")
+	// GitHub repository
+	repo = os.Getenv("GITHUB_REPOSITORY")
 	// GitHub repository owner
-	repoOwner = strings.Split(os.Getenv("GITHUB_REPOSITORY"), "/")[0]
+	repoOwner string
 	// GitHub repository name
-	repoName = strings.Split(os.Getenv("GITHUB_REPOSITORY"), "/")[1]
+	repoName string
 	// GitHub host
 	ghHost = os.Getenv("GITHUB_SERVER_URL")
 	// Head branch
@@ -67,9 +69,18 @@ func checkVariables() error {
 	if _, err := os.Stat(coverageFile); os.IsNotExist(err) {
 		return fmt.Errorf("Coverage file does not exist")
 	}
+	if repo == "" {
+		return fmt.Errorf("Environment variable GITHUB_REPOSITORY is not set")
+	}
+	repoParts := strings.Split(repo, "/")
+	if len(repoParts) != 2 {
+		return fmt.Errorf("Invalid GITHUB_REPOSITORY format")
+	}
+	repoOwner = repoParts[0]
 	if repoOwner == "" {
 		return fmt.Errorf("Can't infer repository owner from GITHUB_REPOSITORY environment variable")
 	}
+	repoName = repoParts[1]
 	if repoName == "" {
 		return fmt.Errorf("Can't infer repository name from GITHUB_REPOSITORY environment variable")
 	}
@@ -128,7 +139,7 @@ func parseCoverageReport(profiles []*cover.Profile) (string, error) {
 		default:
 			emoji = ":heart:"
 		}
-		buffer.WriteString(fmt.Sprintf("| [%s](%s) | %s %.2f%% |\n", filenameWithoutRepoPath, ghHost+"/"+repoName+"/tree/"+branch+"/"+filenameWithoutRepoPath, emoji, fileCoveragePercentage))
+		buffer.WriteString(fmt.Sprintf("| [%s](%s) | %s %.2f%% |\n", filenameWithoutRepoPath, ghHost+"/"+repo+"/tree/"+branch+"/"+filenameWithoutRepoPath, emoji, fileCoveragePercentage))
 	}
 	buffer.WriteString(fmt.Sprintf("\n"))
 	slog.Debug("Generated coverage report", slog.String("report", buffer.String()))
