@@ -20,7 +20,7 @@ updates:
     directories:
       - /
       - /.github/script/*
-      - /.github/script/reusable*
+      - /.github/script/reusable/*
       - /deploy/*
     commit-message:
       prefix: 'chore(deps): dependabot - go '
