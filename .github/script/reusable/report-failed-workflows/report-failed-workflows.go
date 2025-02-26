@@ -213,10 +213,9 @@ func computeIssueBody() error {
 	if !atLeastOneWorkflowFailed {
 		buffer.WriteString("## :confetti_ball: All workflows successful\n\n")
 	} else {
-		buffer.WriteString("## :rotating_light: Failed workflows\n\n")
+		buffer.WriteString("## :rotating_light: Following workflows failed\n\n")
 		buffer.WriteString("> [!NOTE]\n")
 		buffer.WriteString("> Renaming a workflow will create a new entry in the list below and previous entries will not be updated.\n\n")
-		buffer.WriteString("## :rotating_light: Failed workflows\n\n")
 		buffer.WriteString("| Workflow | Conclusion | Run | Time | Actor | Triggering Actor |\n")
 		buffer.WriteString("| -------- | ---------- | --- | ---- | ----- | ---------------- |\n")
 		for _, workflow := range allWorkflows.WorkflowsInfos {
