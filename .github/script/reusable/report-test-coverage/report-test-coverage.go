@@ -27,6 +27,10 @@ var (
 	repoOwner = strings.Split(os.Getenv("GITHUB_REPOSITORY"), "/")[0]
 	// GitHub repository name
 	repoName = strings.Split(os.Getenv("GITHUB_REPOSITORY"), "/")[1]
+	// GitHub host
+	ghHost = os.Getenv("GITHUB_SERVER_URL")
+	// Head branch
+	branch = os.Getenv("GITHUB_HEAD_REF")
 )
 
 const (
@@ -68,6 +72,9 @@ func checkVariables() error {
 	}
 	if repoName == "" {
 		return fmt.Errorf("Can't infer repository name from GITHUB_REPOSITORY environment variable")
+	}
+	if ghHost == "" {
+		return fmt.Errorf("Environment variable GITHUB_SERVER_URL is not set")
 	}
 	return nil
 }
@@ -121,7 +128,7 @@ func parseCoverageReport(profiles []*cover.Profile) (string, error) {
 		default:
 			emoji = ":heart:"
 		}
-		buffer.WriteString(fmt.Sprintf("| [%s](%s) | %s %.2f%% |\n", filenameWithoutRepoPath, "https://"+profile.FileName, emoji, fileCoveragePercentage))
+		buffer.WriteString(fmt.Sprintf("| [%s](%s) | %s %.2f%% |\n", filenameWithoutRepoPath, ghHost+"/tree/"+branch+filenameWithoutRepoPath, emoji, fileCoveragePercentage))
 	}
 	buffer.WriteString(fmt.Sprintf("\n"))
 	slog.Debug("Generated coverage report", slog.String("report", buffer.String()))
