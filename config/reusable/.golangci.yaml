@@ -26,6 +26,7 @@ linters:
     - godot
     - godox
     - gofmt
+    - gofumpt
     - goheader
     - goimports
     - gomodguard
@@ -58,6 +59,8 @@ linters-settings:
           - '!$test'
         allow:
           - $gostd
+  gofumpt:
+    extra-rules: true
   errcheck:
     check-blank: true
     check-type-assertions: true
