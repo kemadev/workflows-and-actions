@@ -1,0 +1,67 @@
+name: Build Go code
+description: Build Go code using goreleaser
+
+author: kemadev
+branding:
+  icon: box
+  color: blue
+
+inputs:
+  artifact-name:
+    description: The name of the artifact to upload
+    required: true
+    default: build-artifacts
+  goreleaser-render-config-script-dir:
+    description: The directory where the goreleaser config rendering script is located
+    required: true
+    default: .github/actions/render-goreleaser-config
+  goreleaser-dist-dir:
+    description: The directory where the goreleaser artifacts are stored
+    required: true
+    default: dist
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout reusable workflow scripts and configs
+      id: checkout-reusable-scripts-and-configs
+      uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
+    - name: Set up Go
+      id: setup-go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}/go.mod
+        cache-dependency-path: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}/go.sum
+    - name: Render goreleaser config
+      id: render-goreleaser-config
+      env:
+        GORELEASER_CONFIG_TEMPLATE_DIR: ${{ github.workspace }}/config/reusable
+        GORELEASER_CONFIG_TEMPLATE_FILENAME: .goreleaser.yaml.go.tmpl
+        GORELEASER_CONFIG_OUTPUT_FILE: ${{ github.workspace }}/config/reusable/.goreleaser.yaml
+        BUILDS_DIR_PARENT: ${{ github.workspace }}
+      working-directory: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}
+      run: |
+        mkdir -p ${{ env.GORELEASER_CONFIG_TEMPLATE_DIR }}
+        go run ./...
+    - name: Install syft
+      id: install-syft
+      # Setup Go already handles caching
+      run: |
+        go install github.com/anchore/syft/cmd/syft@latest
+    - name: Build code
+      id: build
+      uses: goreleaser/goreleaser-action@v6
+      with:
+        args: release --config ${{ env.GORELEASER_CONFIG_OUTPUT_FILE }} --clean --snapshot --skip announce --skip publish --skip validate
+      env:
+        # HACK make goreleaser think it's a new version and generate all artifacts
+        GORELEASER_PREVIOUS_TAG: v0.0.0-dummy
+        GORELEASER_CURRENT_TAG: v0.0.1-dummy
+    - name: Upload build artifacts
+      id: upload-build-artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.ARTIFACT_NAME }}
+        path: ${{ env.GORELEASER_DIST_DIR }}
+        if-no-files-found: error
+        retention-days: 1

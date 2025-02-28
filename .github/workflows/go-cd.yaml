@@ -36,7 +36,6 @@ on:
         required: false
 
 env:
-  CGO_ENABLED: 0
   TAG_VERSION_SCRIPT_NAME: output-tag-next-semver.go
   ARTIFACT_NAME: build-outputs
   DEPLOYS_DIR: ./deploy
