@@ -25,7 +25,8 @@ defaults:
     shell: bash
 
 env:
-  RELEASE_PLEASE_CONFIG_DIR: ./config/release-please
+  RELEASE_PLEASE_CONFIG_DIR: config/release-please
+  RELEASE_PLEASE_CONFIG_FILE: release-please-config.json
 
 jobs:
   update-release-packages-list:
@@ -65,9 +66,9 @@ jobs:
           fi
           jq --argjson go_mod_files "$(printf '%s\n' "${go_mod_files[@]}" | jq -R . | jq -s 'map({(.): {}}) | add')" '. + {
             packages: $go_mod_files
-          }' ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/release-please.json > ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/release-please.json.tmp
-          mv ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/release-please.json.tmp ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/release-please.json
+          }' ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/${{ env.RELEASE_PLEASE_CONFIG_FILE }} > ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/${{ env.RELEASE_PLEASE_CONFIG_FILE }}.tmp
+          mv ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/${{ env.RELEASE_PLEASE_CONFIG_FILE }}.tmp ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/${{ env.RELEASE_PLEASE_CONFIG_FILE }}
 
           ls -lRla
           pwd
-          cat ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/release-please.json
+          cat ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/${{ env.RELEASE_PLEASE_CONFIG_FILE }}
