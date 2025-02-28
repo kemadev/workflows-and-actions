@@ -64,7 +64,7 @@ jobs:
   get-deploys-list:
     name: Get deploys list
     needs: build-code
-    if: ${{ github.event.inputs.force-rollback != '' || success() }}
+    if: ${{ github.event.inputs.force-rollback == '' || success() }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
