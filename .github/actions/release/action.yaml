@@ -52,4 +52,5 @@ runs:
       run: |
         declare artifacts
         artifacts=$(jq '.[] | select(.type == "Archive" or .type == "SBOM" or .type == "Checksum") | .path' ${{ inputs.goreleaser-dist-dir }}/artifacts.json | tr -d '"' | tr '\n' ' ')
+        echo "Uploading artifacts: ${artifacts}"
         gh release upload "${{ steps.release.outputs.tag_name }}" ${artifacts}

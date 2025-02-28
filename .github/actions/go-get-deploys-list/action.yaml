@@ -28,6 +28,7 @@ runs:
       id: get-deploys-list
       shell: bash
       run: |
+        echo "Getting list of deploy configurations from: ${{ inputs.deploys-base-dir }} and reverse: ${{ inputs.reverse }}"
         mapfile -t dirs < <(find "./${{ inputs.deploys-base-dir }}" -mindepth 1 -maxdepth 1 -type d | sort)
         declare result="["
         for dir in "${dirs[@]}"; do
@@ -35,12 +36,15 @@ runs:
             result+="\"$dir_name\", "
         done
         result="${result%, }]"
+        echo "Found deploy configurations: ${result}"
         if [[ "${{ inputs.deploys-base-dir }}" == "true" ]]; then
-            declare reverse_result="["
-            for ((i=${#dirs[@]}-1; i>=0; i--)); do
-                dir_name=$(basename "${dirs[i]}")
-                reverse_result+="\"${dir_name}\", "
-            done
-            result="${reverse_result%, }]"
+          echo "Reversing the list"
+          declare reverse_result="["
+          for ((i=${#dirs[@]}-1; i>=0; i--)); do
+              dir_name=$(basename "${dirs[i]}")
+              reverse_result+="\"${dir_name}\", "
+          done
+          result="${reverse_result%, }]"
         fi
+        echo "Setting output for deployment_dirs_list: ${result}"
         echo "deployment_dirs_list=${result}" > "${GITHUB_OUTPUT}"
