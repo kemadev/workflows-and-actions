@@ -35,19 +35,6 @@ on:
         default: ''
         required: false
 
-env:
-  ARTIFACT_NAME: build-outputs
-  DEPLOYS_DIR: ./deploy
-  GORELEASER_DIST_DIR: ./dist/goreleaser
-  GHA_BOT_NAME: github-actions[bot]
-  GHA_BOT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
-  GIT_DEPLOYMENT_SUCCESS_TAG_PREFIX: deploy-success-
-  GORELEASER_RENDER_CONFIG_SCRIPT_DIR: .github/script/reusable/render-goreleaser-config
-  GORELEASER_CONFIG_TEMPLATE_DIR: config/reusable
-  GORELEASER_CONFIG_OUTPUT_FILE: config/reusable/.goreleaser.yaml
-  BUILDS_DIR: cmd
-  RELEASE_PLEASE_CONFIG_FILE: config/release-please/release-please-config.json
-
 concurrency:
   group: ${{ github.ref_name }}
 
@@ -103,7 +90,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
     strategy:
-      # Run sequentially in alphabetical order
       matrix:
         deploy: ${{ fromJSON(needs.get-deploys-list.outputs.deployment-dirs-list) }}
       max-parallel: 1
@@ -192,7 +178,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
     strategy:
-      # Run sequentially in alphabetical order
       matrix:
         deploy: ${{ fromJSON(needs.prepare-rollback.outputs.deployment-dirs-list) }}
       max-parallel: 1

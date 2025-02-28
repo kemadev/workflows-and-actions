@@ -7,6 +7,10 @@ branding:
   color: blue
 
 inputs:
+  git-deployment-success-tag-prefix:
+    description: Prefix for deployment success tags
+    required: false
+    default: deploy-success-
   force-rollback:
     description: Force rollback to a specific commit
     required: false
@@ -21,7 +25,7 @@ runs:
       run: |
         export checkout_target=""
         if [ "${{ github.event.inputs.force-rollback }}" == "latest" ]; then
-          checkout_target="$(git tag --list "${{ env.GIT_DEPLOYMENT_SUCCESS_TAG_PREFIX }}${{ github.ref_name }}-*" | sort -V | tail -n 1)"
+          checkout_target="$(git tag --list "${{ inputs.git-deployment-success-tag-prefix }}${{ github.ref_name }}-*" | sort -V | tail -n 1)"
         else
           checkout_target="${FORCE_ROLLBACK}"
         fi
