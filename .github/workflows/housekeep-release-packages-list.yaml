@@ -41,6 +41,7 @@ jobs:
       - name: Check go.mod name
         id: check-go-mod-name
         run: |
+          touch ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/release-please.json.tmp
           declare -a go_mod_files
           mapfile -t go_mod_files < <(find . -name 'go.mod' | sed 's|./||')
           declare -a go_mod_files_without_directories_to_ignore
