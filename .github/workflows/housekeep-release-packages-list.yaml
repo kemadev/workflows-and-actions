@@ -1,0 +1,72 @@
+name: Housekeep - Update release packages list
+
+on:
+  schedule:
+    # Each day at 3:00 AM
+    - cron: 0 3 * * *
+  workflow_call:
+    inputs:
+      DIRECTORIES_TO_IGNORE:
+        description: Directories that should not be considered. Should be a comma-separated list.
+        type: string
+        required: false
+        default: 'deploy'
+  workflow_dispatch:
+    inputs:
+      DIRECTORIES_TO_IGNORE:
+        description: Directories that should not be considered. Should be a comma-separated list.
+        type: string
+        required: false
+        default: 'deploy'
+
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  RELEASE_PLEASE_CONFIG_DIR: config/release-please
+
+jobs:
+  update-release-packages-list:
+    name: Update release packages list
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Check go.mod name
+        id: check-go-mod-name
+        run: |
+          declare -a go_mod_files
+          mapfile -t go_mod_files < <(find . -name 'go.mod' | sed 's|./||')
+          declare -a go_mod_files_without_directories_to_ignore
+          IFS=',' read -r -a directories_to_ignore <<< "${{ github.event.inputs.DIRECTORIES_TO_IGNORE }}"
+          for go_mod_file in "${go_mod_files[@]}"; do
+            ignore=false
+            for directory_to_ignore in "${directories_to_ignore[@]}"; do
+              if [[ $go_mod_file == $directory_to_ignore* ]]; then
+                ignore=true
+                break
+              fi
+            done
+            if [ "$ignore" = false ]; then
+              go_mod_files_without_directories_to_ignore+=("$go_mod_file")
+            fi
+          done
+          go_mod_files=("${go_mod_files_without_directories_to_ignore[@]}")
+          if [ ${#go_mod_files[@]} -eq 0 ]; then
+            echo "No go.mod files found"
+            exit 1
+          fi
+          jq --argjson go_mod_files "$(printf '%s\n' "${go_mod_files[@]}" | jq -R . | jq -s 'map({(.): {}}) | add')" '. + {
+            packages: $go_mod_files
+          }' ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/release-please.json > ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/release-please.json.tmp
+          mv ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/release-please.json.tmp ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/release-please.json
+
+          ls -lRla
+          pwd
+          cat ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/release-please.json
