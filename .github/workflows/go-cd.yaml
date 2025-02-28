@@ -36,7 +36,6 @@ on:
         required: false
 
 env:
-  TAG_VERSION_SCRIPT_NAME: output-tag-next-semver.go
   ARTIFACT_NAME: build-outputs
   DEPLOYS_DIR: ./deploy
   GORELEASER_DIST_DIR: ./dist/goreleaser
@@ -74,10 +73,6 @@ jobs:
       - name: Build code
         id: build
         uses: kemadev/workflows-and-actions/.github/actions/go-build@main
-        with:
-          artifact-name: ${{ env.ARTIFACT_NAME }}
-          goreleaser-render-config-script-dir: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}
-          goreleaser-dist-dir: ${{ env.GORELEASER_DIST_DIR }}
 
   get-deploys-list:
     name: Get deploys list
@@ -96,8 +91,6 @@ jobs:
       - name: Get deploys list
         id: get-deploys-list
         uses: kemadev/workflows-and-actions/.github/actions/go-get-deploys-list@main
-        with:
-          deploys-base-dir: ${{ env.DEPLOYS_DIR }}
 
   deploy:
     name: Deploy
@@ -121,10 +114,6 @@ jobs:
       - name: Go deploy
         id: go-deploy
         uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
-        with:
-          build-artifact-name: ${{ env.ARTIFACT_NAME }}
-          build-artifact-dir: ${{ env.GORELEASER_DIST_DIR }}
-          deploys-base-dir: ${{ env.DEPLOYS_DIR }}
 
   tag-deploy-success:
     name: Tag deploy success
@@ -159,28 +148,18 @@ jobs:
       - name: Release
         id: release
         uses: kemadev/workflows-and-actions/.github/actions/release@main
-        with:
-          artifact-name: ${{ env.ARTIFACT_NAME }}
-          goreleaser-dist-dir: ${{ env.GORELEASER_DIST_DIR }}
-          release-please-config-file: ${{ env.RELEASE_PLEASE_CONFIG_FILE }}
 
-  rollback:
+  prepare-rollback:
     name: Rollback
     needs:
-      - get-deploys-list
       - deploy
     if: ${{ github.event.inputs.force-rollback != '' || failure() }}
     permissions:
       contents: read
       packages: read
-      pull-requests: write
+    outputs:
+      deployment-dirs-list: ${{ steps.get-deploys-list.outputs.deployment-dirs-list }}
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name }}
-    strategy:
-      # Run sequentially in reverse alphabetical order
-      matrix:
-        deploy: ${{ fromJSON(needs.get-deploys-list.outputs.DEPLOYS_LIST_REVERSE) }}
-      max-parallel: 1
     steps:
       - name: Checkout
         id: checkout
@@ -188,40 +167,44 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
-      - name: Checkout reusable workflow scripts and configs
-        id: checkout-reusable-scripts-and-configs
-        uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
       - name: Checkout to latest sucessful deploy
         id: checkout-to-latest-sucessful-deploy
-        env:
-          GITHUB_REF: ${{ github.ref_name }}
-          FORCE_ROLLBACK: ${{ github.event.inputs.force-rollback }}
-        run: |
-          export checkout_target=""
-          if [ "${FORCE_ROLLBACK}" == "latest" ]; then
-            checkout_target="$(git tag --list "${{ env.GIT_DEPLOYMENT_SUCCESS_TAG_PREFIX }}${GITHUB_REF}-*" | sort -V | tail -n 1)"
-          else
-            checkout_target="${FORCE_ROLLBACK}"
-          fi
-          git checkout "${checkout_target}"
+        uses: kemadev/workflows-and-actions/.github/actions/checkout-to-latest-successful-deploy@main
+        with:
+          force-rollback: ${{ github.event.inputs.force-rollback }}
       - name: Get deploys list
         id: get-deploys-list
         uses: kemadev/workflows-and-actions/.github/actions/go-get-deploys-list@main
         with:
-          deploys-base-dir: ${{ env.DEPLOYS_DIR }}
           reverse: true
       - name: Build code
         id: build
         uses: kemadev/workflows-and-actions/.github/actions/go-build@main
+
+  rollback:
+    name: Rollback
+    needs: prepare-rollback
+    if: ${{ github.event.inputs.force-rollback == '' }}
+    permissions:
+      contents: read
+      packages: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
+    strategy:
+      # Run sequentially in alphabetical order
+      matrix:
+        deploy: ${{ fromJSON(needs.prepare-rollback.outputs.deployment-dirs-list) }}
+      max-parallel: 1
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Checkout to latest sucessful deploy
+        id: checkout-to-latest-sucessful-deploy
+        uses: kemadev/workflows-and-actions/.github/actions/checkout-to-latest-successful-deploy@main
         with:
-          artifact-name: ${{ env.ARTIFACT_NAME }}
-          goreleaser-render-config-script-dir: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}
-          goreleaser-dist-dir: ${{ env.GORELEASER_DIST_DIR }}
-          upload-artifact: false
-      - name: Deploy
-        id: deploy
+          force-rollback: ${{ github.event.inputs.force-rollback }}
+      - name: Go deploy
+        id: go-deploy
         uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
-        with:
-          build-artifact-name: ${{ env.ARTIFACT_NAME }}
-          build-artifact-dir: ${{ env.GORELEASER_DIST_DIR }}
-          deploys-base-dir: ${{ env.DEPLOYS_DIR }}

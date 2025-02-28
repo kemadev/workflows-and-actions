@@ -1,0 +1,40 @@
+name: Get list of deploy configurations
+description: Get list of deploy configurations from the deploy directory
+
+author: kemadev
+branding:
+  icon: list
+  color: blue
+
+inputs:
+  deploys-base-dir:
+    description: Directory where deploy configurations are stored
+    required: false
+    default: deploy
+  reverse:
+    description: Should the list be reversed ? (useful for rollbacks)
+    required: false
+    default: 'false'
+
+outputs:
+  deployment-dirs-list:
+    description: List of deploy configurations
+    value: ${{ steps.get-deploys-list.outputs.deployment_dirs_list }}
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout to latest sucessful deploy
+      id: checkout-to-latest-sucessful-deploy
+      shell: bash
+      env:
+        GITHUB_REF: ${{ github.ref_name }}
+        FORCE_ROLLBACK: ${{ github.event.inputs.force-rollback }}
+      run: |
+        export checkout_target=""
+        if [ "${FORCE_ROLLBACK}" == "latest" ]; then
+          checkout_target="$(git tag --list "${{ env.GIT_DEPLOYMENT_SUCCESS_TAG_PREFIX }}${GITHUB_REF}-*" | sort -V | tail -n 1)"
+        else
+          checkout_target="${FORCE_ROLLBACK}"
+        fi
+        git checkout "${checkout_target}"
