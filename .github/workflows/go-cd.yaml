@@ -6,6 +6,10 @@ on:
       - main
       - next
       # dev is deployed manually by developers on their local machines
+    paths:
+      - '**go.mod'
+      - '**go.sum'
+      - '**.go'
   workflow_call:
     inputs:
       force-patch:
