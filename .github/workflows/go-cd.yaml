@@ -12,11 +12,6 @@ on:
       - '**.go'
   workflow_call:
     inputs:
-      force-patch:
-        description: Force new patch version
-        type: boolean
-        default: false
-        required: false
       force-rollback:
         description: Force rollback to specified git reference (use `latest` for latest successful deploy)
         type: string
@@ -24,11 +19,6 @@ on:
         required: false
   workflow_dispatch:
     inputs:
-      force-patch:
-        description: Force new patch version
-        type: boolean
-        default: false
-        required: false
       force-rollback:
         description: Force rollback to specified git reference (use `latest` for latest successful deploy)
         type: string
@@ -170,7 +160,6 @@ jobs:
   rollback:
     name: Rollback
     needs: prepare-rollback
-    if: ${{ github.event.inputs.force-rollback == '' }}
     permissions:
       contents: read
       packages: read
