@@ -42,7 +42,6 @@ jobs:
       - name: Update release packages list
         id: update-release-packages-list
         run: |
-          touch ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/release-please.json.tmp
           declare -a go_mod_files
           mapfile -t go_mod_files < <(find . -name 'go.mod' | sed 's|./||')
           declare -a valid_go_mod_files_dirs
