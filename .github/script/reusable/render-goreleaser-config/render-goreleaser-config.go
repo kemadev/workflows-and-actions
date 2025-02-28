@@ -41,11 +41,11 @@ func checkVariables() error {
 	if GORELEASER_CONFIG_OUTPUT_FILE == "" {
 		return fmt.Errorf("GORELEASER_CONFIG_OUTPUT_FILE is not set")
 	}
-	if BUILDS_DIR == "" {
-		return fmt.Errorf("BUILDS_DIR is not set")
-	}
 	if BUILDS_DIR_PARENT == "" {
 		return fmt.Errorf("BUILDS_DIR_PARENT is not set")
+	}
+	if BUILDS_DIR == "" {
+		return fmt.Errorf("BUILDS_DIR is not set")
 	}
 	return nil
 }
