@@ -19,6 +19,10 @@ inputs:
     description: Directory where goreleaser artifacts are stored
     required: false
     default: dist/goreleaser
+  upload-artifact:
+    description: Whether to upload the build artifact
+    required: false
+    default: 'true'
 
 runs:
   using: composite
@@ -61,6 +65,7 @@ runs:
         GORELEASER_CURRENT_TAG: v0.0.1-dummy
     - name: Upload build artifacts
       id: upload-build-artifacts
+      if: ${{ inputs.upload-artifact == 'true' }}
       uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.artifact-name }}

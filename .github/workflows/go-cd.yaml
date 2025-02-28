@@ -204,55 +204,24 @@ jobs:
             checkout_target="${FORCE_ROLLBACK}"
           fi
           git checkout "${checkout_target}"
-      - name: Set up Go
-        id: setup-go-goreleaser
-        uses: actions/setup-go@v5
+      - name: Get deploys list
+        id: get-deploys-list
+        uses: kemadev/workflows-and-actions/.github/actions/go-get-deploys-list@main
         with:
-          go-version-file: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}/go.mod
-          cache-dependency-path: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}/go.sum
-      - name: Render goreleaser config
-        id: render-goreleaser-config
-        env:
-          GORELEASER_CONFIG_TEMPLATE_DIR: ${{ github.workspace }}/config/reusable
-          GORELEASER_CONFIG_TEMPLATE_FILENAME: .goreleaser.yaml.go.tmpl
-          GORELEASER_CONFIG_OUTPUT_FILE: ${{ github.workspace }}/config/reusable/.goreleaser.yaml
-          BUILDS_DIR_PARENT: ${{ github.workspace }}
-        working-directory: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}
-        run: |
-          mkdir -p ${{ env.GORELEASER_CONFIG_TEMPLATE_DIR }}
-          go run ./...
+          deploys-base-dir: ${{ env.DEPLOYS_DIR }}
+          reverse: true
       - name: Build code
         id: build
-        uses: goreleaser/goreleaser-action@v6
+        uses: kemadev/workflows-and-actions/.github/actions/go-build@main
         with:
-          args: build --config ${{ env.GORELEASER_CONFIG_OUTPUT_FILE }} --clean --snapshot
-        env:
-          # HACK make goreleaser think it's a new version and generate all artifacts
-          GORELEASER_PREVIOUS_TAG: v0.0.0-dummy
-          GORELEASER_CURRENT_TAG: v0.0.1-dummy
-      - name: Set up Go
-        id: setup-go
-        uses: actions/setup-go@v5
+          artifact-name: ${{ env.ARTIFACT_NAME }}
+          goreleaser-render-config-script-dir: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}
+          goreleaser-dist-dir: ${{ env.GORELEASER_DIST_DIR }}
+          upload-artifact: false
+      - name: Deploy
+        id: deploy
+        uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
         with:
-          go-version-file: ${{ env.DEPLOYS_DIR }}/${{ matrix.deploy }}/go.mod
-          cache-dependency-path: ${{ env.DEPLOYS_DIR }}/${{ matrix.deploy }}/go.sum
-      # - name: Configure AWS credentials
-      #   id: configure-aws-credentials
-      #   uses: aws-actions/configure-aws-credentials@v4
-      #   continue-on-error: false
-      #   with:
-      #     role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-      #     aws-region: ${{ secrets.AWS_REGION }}
-      #     role-session-name: gha-${{ github.repository }}-${{ github.ref_name }}-${{ github.run_id }}
-      #     mask-aws-account-id: true
-      #   timeout-minutes: 1
-      # - name: Rollback Cloud resources
-      #   id: rollback-cloud-resources
-      #   uses: pulumi/actions@v6
-      #   with:
-      #     command: up
-      #     work-dir: ${{ env.DEPLOYS_DIR }}/${{ matrix.deploy }}
-      #     comment-on-pr: true
-      #     comment-on-summary: true
-      #     stack-name: ${{ github.ref_name }}
-      #     github-token: ${{ github.token }}
+          build-artifact-name: ${{ env.ARTIFACT_NAME }}
+          build-artifact-dir: ${{ env.GORELEASER_DIST_DIR }}
+          deploys-base-dir: ${{ env.DEPLOYS_DIR }}
