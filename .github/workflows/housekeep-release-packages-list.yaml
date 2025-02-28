@@ -4,13 +4,12 @@ on:
   schedule:
     # Each day at 3:00 AM
     - cron: 0 3 * * *
-  pull_request:
-    types:
-      - opened
-      - edited
-      - synchronize
-      - reopened
-      - unlocked
+  push:
+    branches:
+      - main
+      - next
+    paths:
+      - '**go.mod'
   workflow_call:
     inputs:
       directories_to_ignore:
