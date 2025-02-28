@@ -45,26 +45,25 @@ jobs:
           touch ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/release-please.json.tmp
           declare -a go_mod_files
           mapfile -t go_mod_files < <(find . -name 'go.mod' | sed 's|./||')
-          declare -a go_mod_files_without_directories_to_ignore
+          declare -a valid_go_mod_files_dirs
           IFS=',' read -r -a directories_to_ignore <<< "${{ github.event.inputs.directories_to_ignore }}"
           for go_mod_file in "${go_mod_files[@]}"; do
             ignore=false
             for directory_to_ignore in "${directories_to_ignore[@]}"; do
-              if [[ $go_mod_file == $directory_to_ignore* ]]; then
+              if [[ "${go_mod_file}" == "${directory_to_ignore}"* ]]; then
                 ignore=true
                 break
               fi
             done
-            if [ "$ignore" = false ]; then
-              go_mod_files_without_directories_to_ignore+=("$go_mod_file")
+            if [ "${ignore}" = false ]; then
+              valid_go_mod_files_dirs+=("$(dirname "${go_mod_file}")")
             fi
           done
-          go_mod_files=("${go_mod_files_without_directories_to_ignore[@]}")
-          if [ ${#go_mod_files[@]} -eq 0 ]; then
-            echo "No go.mod files found"
+          if [ ${#valid_go_mod_files_dirs[@]} -eq 0 ]; then
+            echo "No valid go.mod files found"
             exit 1
           fi
-          jq --argjson go_mod_files "$(printf '%s\n' "${go_mod_files[@]}" | jq -R . | jq -s 'map({(.): {}}) | add')" '. + {
+          jq --argjson go_mod_files "$(printf '%s\n' "${valid_go_mod_files_dirs[@]}" | jq -R . | jq -s 'map({(.): {}}) | add')" '. + {
             packages: $go_mod_files
           }' ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/${{ env.RELEASE_PLEASE_CONFIG_FILE }} > ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/${{ env.RELEASE_PLEASE_CONFIG_FILE }}.tmp
           mv ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/${{ env.RELEASE_PLEASE_CONFIG_FILE }}.tmp ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/${{ env.RELEASE_PLEASE_CONFIG_FILE }}
