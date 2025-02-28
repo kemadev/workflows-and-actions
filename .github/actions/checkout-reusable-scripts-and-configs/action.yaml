@@ -28,6 +28,7 @@ runs:
         for dir in ${{ inputs.reusable-diretories }}; do
           cp -r "${{ github.workspace }}/dist/workflows-and-actions/${dir}" "${dir}"
         done
+        ls -Rla
     - name: Ignore git changes
       id: ignore-git-changes
       shell: bash
@@ -35,5 +36,6 @@ runs:
         for dir in ${{ inputs.reusable-diretories }}; do
           if [ -f "${dir}/PURPOSE.md" ]; then
             git update-index --assume-unchanged "${dir}/PURPOSE.md"
+            echo found "${dir}/PURPOSE.md"
           fi
         done
