@@ -71,48 +71,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Checkout reusable workflow scripts and configs
-        id: checkout-reusable-scripts-and-configs
-        uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
-      - name: Set up Go
-        id: setup-go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}/go.mod
-          cache-dependency-path: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}/go.sum
-      - name: Render goreleaser config
-        id: render-goreleaser-config
-        env:
-          GORELEASER_CONFIG_TEMPLATE_DIR: ${{ github.workspace }}/config/reusable
-          GORELEASER_CONFIG_TEMPLATE_FILENAME: .goreleaser.yaml.go.tmpl
-          GORELEASER_CONFIG_OUTPUT_FILE: ${{ github.workspace }}/config/reusable/.goreleaser.yaml
-          BUILDS_DIR_PARENT: ${{ github.workspace }}
-        working-directory: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}
-        run: |
-          mkdir -p ${{ env.GORELEASER_CONFIG_TEMPLATE_DIR }}
-          go run ./...
-      - name: Install syft
-        id: install-syft
-        # Setup Go already handles caching
-        run: |
-          go install github.com/anchore/syft/cmd/syft@latest
       - name: Build code
         id: build
-        uses: goreleaser/goreleaser-action@v6
+        uses: kemadev/workflows-and-actions/.github/actions/go-build@main
         with:
-          args: release --config ${{ env.GORELEASER_CONFIG_OUTPUT_FILE }} --clean --snapshot --skip announce --skip publish --skip validate
-        env:
-          # HACK make goreleaser think it's a new version and generate all artifacts
-          GORELEASER_PREVIOUS_TAG: v0.0.0-dummy
-          GORELEASER_CURRENT_TAG: v0.0.1-dummy
-      - name: Upload build artifacts
-        id: upload-build-artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: ${{ env.GORELEASER_DIST_DIR }}
-          if-no-files-found: error
-          retention-days: 1
+          artifact-name: ${{ env.ARTIFACT_NAME }}
+          goreleaser-render-config-script-dir: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}
+          goreleaser-dist-dir: ${{ env.GORELEASER_DIST_DIR }}
 
   get-deploys-list:
     name: Get deploys list
@@ -131,23 +96,9 @@ jobs:
         uses: actions/checkout@v4
       - name: Get deploys list
         id: get-deploys-list
-        # Output all directories in the deploy directory, sorted alphabetically, then reverse
-        run: |
-          mapfile -t dirs < <(find "./${DEPLOYS_DIR}" -mindepth 1 -maxdepth 1 -type d | sort)
-          declare result="["
-          for dir in "${dirs[@]}"; do
-              dir_name=$(basename "$dir")
-              result+="\"$dir_name\", "
-          done
-          result="${result%, }]"
-          echo "DEPLOYS_LIST=${result}" > "${GITHUB_OUTPUT}"
-          declare reverse_result="["
-          for ((i=${#dirs[@]}-1; i>=0; i--)); do
-              dir_name=$(basename "${dirs[i]}")
-              reverse_result+="\"${dir_name}\", "
-          done
-          reverse_result="${reverse_result%, }]"
-          echo "DEPLOYS_LIST_REVERSE=${reverse_result}" >> "${GITHUB_OUTPUT}"
+        uses: kemadev/workflows-and-actions/.github/actions/go-get-deploys-list@main
+        with:
+          deploys-base-dir: ${{ env.DEPLOYS_DIR }}
 
   deploy:
     name: Deploy
@@ -168,38 +119,13 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
-      - name: Download build artifacts
-        id: download-build-artifacts
-        uses: actions/download-artifact@v4
+      - name: Go deploy
+        id: go-deploy
+        uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
         with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: ${{ env.GORELEASER_DIST_DIR }}
-      - name: Set up Go
-        id: setup-go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: ${{ env.DEPLOYS_DIR }}/${{ matrix.deploy }}/go.mod
-          cache-dependency-path: ${{ env.DEPLOYS_DIR }}/${{ matrix.deploy }}/go.sum
-      # - name: Configure AWS credentials
-      #   id: configure-aws-credentials
-      #   uses: aws-actions/configure-aws-credentials@v4
-      #   continue-on-error: false
-      #   with:
-      #     role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-      #     aws-region: ${{ secrets.AWS_REGION }}
-      #     role-session-name: gha-${{ github.repository }}-${{ github.ref_name }}-${{ github.run_id }}
-      #     mask-aws-account-id: true
-      #   timeout-minutes: 1
-      # - name: Update Cloud resources
-      #   id: update-cloud-resources
-      #   uses: pulumi/actions@v6
-      #   with:
-      #     command: up
-      #     work-dir: ${{ env.DEPLOYS_DIR }}/${{ matrix.deploy }}
-      #     comment-on-pr: true
-      #     comment-on-summary: true
-      #     stack-name: ${{ github.ref_name }}
-      #     github-token: ${{ github.token }}
+          build-artifact-name: ${{ env.ARTIFACT_NAME }}
+          build-artifact-dir: ${{ env.GORELEASER_DIST_DIR }}
+          deploys-base-dir: ${{ env.DEPLOYS_DIR }}
 
   tag-deploy-success:
     name: Tag deploy success
@@ -216,11 +142,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Tag deploy success
         id: tag-deploy-success
-        run: |
-          git config user.name "${{ env.GHA_BOT_NAME }}"
-          git config user.email "${{ env.GHA_BOT_EMAIL }}"
-          git tag -a "deploy-success-${{ github.ref_name }}-${{ github.run_id }}" -m "Deploy success"
-          git push --tags
+        uses: kemadev/workflows-and-actions/.github/actions/tag-deploy-success@main
 
   release:
     name: Release
@@ -235,30 +157,13 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
-      - name: Checkout reusable workflow scripts and configs
-        id: checkout-reusable-scripts-and-configs
-        uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
-      - name: Download build artifacts
-        id: download-build-artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: ${{ env.GORELEASER_DIST_DIR }}
       - name: Release
         id: release
-        uses: googleapis/release-please-action@v4
+        uses: kemadev/workflows-and-actions/.github/actions/release@main
         with:
-          config-file: ${{ env.RELEASE_PLEASE_CONFIG_FILE }}
-          manifest-file: config/release-please/release-please-manifest.json
-      - name: Upload release artifacts
-        id: upload-release-artifacts
-        if: ${{ steps.release.outputs.release_created }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          declare artifacts
-          artifacts=$(jq '.[] | select(.type == "Archive" or .type == "SBOM" or .type == "Checksum") | .path' ${{ env.GORELEASER_DIST_DIR }}/artifacts.json | tr -d '"' | tr '\n' ' ')
-          gh release upload "${{ steps.release.outputs.tag_name }}" ${artifacts}
+          artifact-name: ${{ env.ARTIFACT_NAME }}
+          goreleaser-dist-dir: ${{ env.GORELEASER_DIST_DIR }}
+          release-please-config-file: ${{ env.RELEASE_PLEASE_CONFIG_FILE }}
 
   rollback:
     name: Rollback

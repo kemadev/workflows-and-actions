@@ -1,5 +1,5 @@
-name: Tag and release
-description: Tag a new SemVer version and release it
+name: Release
+description: Release new version
 
 author: kemadev
 branding:
@@ -28,17 +28,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Tag deploy success
-      id: tag-deploy-success
-      shell: bash
-      env:
-        GHA_BOT_NAME: github-actions[bot]
-        GHA_BOT_EMAIL: kemadev+github-actions[bot]@users.noreply.github.com
-      run: |
-        git config user.name "${{ env.GHA_BOT_NAME }}"
-        git config user.email "${{ env.GHA_BOT_EMAIL }}"
-        git tag -a "deploy-success-${{ github.ref_name }}-${{ github.run_id }}" -m "Deploy success"
-        git push --tags
     - name: Checkout reusable workflow scripts and configs
       id: checkout-reusable-scripts-and-configs
       uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
