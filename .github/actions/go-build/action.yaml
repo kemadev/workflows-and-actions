@@ -44,7 +44,7 @@ runs:
         GORELEASER_CONFIG_TEMPLATE_FILENAME: .goreleaser.yaml.go.tmpl
         GORELEASER_CONFIG_OUTPUT_FILE: ${{ github.workspace }}/config/reusable/.goreleaser.yaml
         BUILDS_DIR_PARENT: ${{ github.workspace }}
-      working-directory: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}
+      working-directory: ${{ inputs.goreleaser-render-config-script-dir }}
       run: |
         mkdir -p ${{ env.GORELEASER_CONFIG_TEMPLATE_DIR }}
         go run ./...

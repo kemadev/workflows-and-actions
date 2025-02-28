@@ -12,11 +12,8 @@ runs:
     - name: Tag deploy success
       id: tag-deploy-success
       shell: bash
-      env:
-        GHA_BOT_NAME: github-actions[bot]
-        GHA_BOT_EMAIL: kemadev+github-actions[bot]@users.noreply.github.com
       run: |
-        git config user.name "${{ env.GHA_BOT_NAME }}"
-        git config user.email "${{ env.GHA_BOT_EMAIL }}"
+        git config user.name "$github-actions[bot]"
+        git config user.email "kemadev+github-actions[bot]@users.noreply.github.com"
         git tag -a "deploy-success-${{ github.ref_name }}-${{ github.run_id }}" -m "Deploy success"
         git push --tags
