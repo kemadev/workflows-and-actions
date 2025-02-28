@@ -68,7 +68,14 @@ jobs:
             packages: $go_mod_files
           }' ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/${{ env.RELEASE_PLEASE_CONFIG_FILE }} > ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/${{ env.RELEASE_PLEASE_CONFIG_FILE }}.tmp
           mv ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/${{ env.RELEASE_PLEASE_CONFIG_FILE }}.tmp ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/${{ env.RELEASE_PLEASE_CONFIG_FILE }}
+      - name: Create Pull Request
+        id: create-pull-request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          title: ':robot: Update release packages list'
+          body: |
+            ## :pencil: New packages to be released!
 
-          ls -lRla
-          pwd
-          cat ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/${{ env.RELEASE_PLEASE_CONFIG_FILE }}
+            Check out the new packages that will be tracked for releases, and merge if everything looks good!
+          commit-message: 'feat(release): update release packages list'
+          sign-commits: true
