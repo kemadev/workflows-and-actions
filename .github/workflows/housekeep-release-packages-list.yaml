@@ -32,7 +32,7 @@ jobs:
   update-release-packages-list:
     name: Update release packages list
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
