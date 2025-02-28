@@ -5,6 +5,12 @@ on:
     # Each day at 3:00 AM
     - cron: 0 3 * * *
   pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - unlocked
+      - reopened
     paths:
       - '**/*Dockerfile'
   workflow_call: {}

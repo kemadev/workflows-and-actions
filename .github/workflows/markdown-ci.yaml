@@ -5,6 +5,12 @@ on:
     # Each day at 3:00 AM
     - cron: 0 3 * * *
   pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+      - unlocked
     paths:
       - '**/*.md'
   workflow_call: {}

@@ -2,7 +2,13 @@ name: PR - Add labels
 
 on:
   workflow_call: {}
-  pull_request_target: {}
+  pull_request_target:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+      - unlocked
 
 defaults:
   run:

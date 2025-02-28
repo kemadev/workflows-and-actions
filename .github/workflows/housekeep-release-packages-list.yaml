@@ -4,6 +4,13 @@ on:
   schedule:
     # Each day at 3:00 AM
     - cron: 0 3 * * *
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+      - unlocked
   workflow_call:
     inputs:
       directories_to_ignore:
@@ -77,3 +84,4 @@ jobs:
             Check out the new packages that will be tracked for releases, and merge if everything looks good!
           commit-message: 'feat(release): update release packages list'
           sign-commits: true
+          branch: bot/housekeep-release-packages-list
