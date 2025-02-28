@@ -8,17 +8,17 @@ branding:
 
 inputs:
   artifact-name:
-    description: The name of the artifact to upload
-    required: true
-    default: build-artifacts
+    description: Name of build artifact
+    required: false
+    default: build-outputs
   goreleaser-render-config-script-dir:
-    description: The directory where the goreleaser config rendering script is located
-    required: true
-    default: .github/actions/render-goreleaser-config
+    description: Directory where the goreleaser render config script is stored
+    required: false
+    default: .github/script/reusable/render-goreleaser-config
   goreleaser-dist-dir:
-    description: The directory where the goreleaser artifacts are stored
-    required: true
-    default: dist
+    description: Directory where goreleaser artifacts are stored
+    required: false
+    default: dist/goreleaser
 
 runs:
   using: composite
@@ -30,10 +30,11 @@ runs:
       id: setup-go
       uses: actions/setup-go@v5
       with:
-        go-version-file: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}/go.mod
-        cache-dependency-path: ${{ env.GORELEASER_RENDER_CONFIG_SCRIPT_DIR }}/go.sum
+        go-version-file: ${{ inputs.goreleaser-render-config-script-dir }}/go.mod
+        cache-dependency-path: ${{ inputs.goreleaser-render-config-script-dir }}/go.sum
     - name: Render goreleaser config
       id: render-goreleaser-config
+      shell: bash
       env:
         GORELEASER_CONFIG_TEMPLATE_DIR: ${{ github.workspace }}/config/reusable
         GORELEASER_CONFIG_TEMPLATE_FILENAME: .goreleaser.yaml.go.tmpl
@@ -45,6 +46,7 @@ runs:
         go run ./...
     - name: Install syft
       id: install-syft
+      shell: bash
       # Setup Go already handles caching
       run: |
         go install github.com/anchore/syft/cmd/syft@latest
@@ -54,14 +56,14 @@ runs:
       with:
         args: release --config ${{ env.GORELEASER_CONFIG_OUTPUT_FILE }} --clean --snapshot --skip announce --skip publish --skip validate
       env:
-        # HACK make goreleaser think it's a new version and generate all artifacts
+        # make goreleaser think it's a new version and generate all artifacts
         GORELEASER_PREVIOUS_TAG: v0.0.0-dummy
         GORELEASER_CURRENT_TAG: v0.0.1-dummy
     - name: Upload build artifacts
       id: upload-build-artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.ARTIFACT_NAME }}
-        path: ${{ env.GORELEASER_DIST_DIR }}
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.goreleaser-dist-dir }}
         if-no-files-found: error
         retention-days: 1

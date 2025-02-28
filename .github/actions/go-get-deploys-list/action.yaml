@@ -1,0 +1,46 @@
+name: Get list of deploy configurations
+description: Get list of deploy configurations from the deploy directory
+
+author: kemadev
+branding:
+  icon: list
+  color: blue
+
+inputs:
+  deploys-base-dir:
+    description: Directory where deploy configurations are stored
+    required: false
+    default: deploy
+  reverse:
+    description: Should the list be reversed ? (useful for rollbacks)
+    required: false
+    default: 'false'
+
+outputs:
+  deployment-dirs-list:
+    description: List of deploy configurations
+    value: ${{ steps.get-deploys-list.outputs.deployment_dirs_list }}
+
+runs:
+  using: composite
+  steps:
+    - name: Get deploys list
+      id: get-deploys-list
+      shell: bash
+      run: |
+        mapfile -t dirs < <(find "./${{ inputs.deploys-base-dir }}" -mindepth 1 -maxdepth 1 -type d | sort)
+        declare result="["
+        for dir in "${dirs[@]}"; do
+            dir_name=$(basename "$dir")
+            result+="\"$dir_name\", "
+        done
+        result="${result%, }]"
+        if [[ "${{ inputs.deploys-base-dir }}" == "true" ]]; then
+            declare reverse_result="["
+            for ((i=${#dirs[@]}-1; i>=0; i--)); do
+                dir_name=$(basename "${dirs[i]}")
+                reverse_result+="\"${dir_name}\", "
+            done
+            result="${reverse_result%, }]"
+        fi
+        echo "deployment_dirs_list=${result}" > "${GITHUB_OUTPUT}"

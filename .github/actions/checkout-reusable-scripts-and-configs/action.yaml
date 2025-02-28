@@ -6,6 +6,12 @@ branding:
   icon: download-cloud
   color: blue
 
+inputs:
+  reusable-diretories:
+    description: List of directories to copy from the reusable workflows repository. Should be a space separated list of directories.
+    required: false
+    default: '.github/script/reusable config/reusable'
+
 runs:
   using: composite
   steps:
@@ -19,11 +25,15 @@ runs:
       id: copy-reusable-scripts-and-configs
       shell: bash
       run: |
-        cp -r "${{ github.workspace }}/dist/workflows-and-actions/.github/script/reusable" .github/script
-        cp -r "${{ github.workspace }}/dist/workflows-and-actions/config/reusable" config
+        for dir in ${{ inputs.reusable-diretories }}; do
+          cp -r "${{ github.workspace }}/dist/workflows-and-actions/${dir}" "${dir}"
+        done
     - name: Ignore git changes
       id: ignore-git-changes
       shell: bash
       run: |
-        git update-index --assume-unchanged .github/script/reusable/PURPOSE.md
-        git update-index --assume-unchanged config/reusable/PURPOSE.md
+        for dir in ${{ inputs.reusable-diretories }}; do
+          if [ -f "${dir}/PURPOSE.md" ]; then
+            git update-index --assume-unchanged "${dir}/PURPOSE.md"
+          fi
+        done

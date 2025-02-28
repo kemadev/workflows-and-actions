@@ -1,0 +1,66 @@
+name: Tag and release
+description: Tag a new SemVer version and release it
+
+author: kemadev
+branding:
+  icon: tag
+  color: blue
+
+inputs:
+  artifact-name:
+    description: Name of build artifact
+    required: false
+    default: build-outputs
+  goreleaser-dist-dir:
+    description: Directory where goreleaser artifacts are stored
+    required: false
+    default: dist/goreleaser
+
+  release-please-config-file:
+    description: Path to the release-please configuration file
+    required: false
+    default: config/release-please/release-please-config.json
+  release-please-manifest-file:
+    description: Path to the release-please manifest file
+    required: false
+    default: config/release-please/release-please-manifest.json
+
+runs:
+  using: composite
+  steps:
+    - name: Tag deploy success
+      id: tag-deploy-success
+      shell: bash
+      env:
+        GHA_BOT_NAME: github-actions[bot]
+        GHA_BOT_EMAIL: kemadev+github-actions[bot]@users.noreply.github.com
+      run: |
+        git config user.name "${{ env.GHA_BOT_NAME }}"
+        git config user.email "${{ env.GHA_BOT_EMAIL }}"
+        git tag -a "deploy-success-${{ github.ref_name }}-${{ github.run_id }}" -m "Deploy success"
+        git push --tags
+    - name: Checkout reusable workflow scripts and configs
+      id: checkout-reusable-scripts-and-configs
+      uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
+    - name: Download build artifacts
+      id: download-build-artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.goreleaser-dist-dir }}
+    - name: Release
+      id: release
+      uses: googleapis/release-please-action@v4
+      with:
+        config-file: ${{ inputs.release-please-config-file }}
+        manifest-file: ${{ inputs.release-please-manifest-file }}
+    - name: Upload release artifacts
+      id: upload-release-artifacts
+      shell: bash
+      if: ${{ steps.release.outputs.release_created }}
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        declare artifacts
+        artifacts=$(jq '.[] | select(.type == "Archive" or .type == "SBOM" or .type == "Checksum") | .path' ${{ inputs.goreleaser-dist-dir }}/artifacts.json | tr -d '"' | tr '\n' ' ')
+        gh release upload "${{ steps.release.outputs.tag_name }}" ${artifacts}
