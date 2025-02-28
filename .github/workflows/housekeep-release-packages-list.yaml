@@ -25,7 +25,7 @@ defaults:
     shell: bash
 
 env:
-  RELEASE_PLEASE_CONFIG_DIR: config/release-please
+  RELEASE_PLEASE_CONFIG_DIR: ./config/release-please
 
 jobs:
   update-release-packages-list:
@@ -38,8 +38,8 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
-      - name: Check go.mod name
-        id: check-go-mod-name
+      - name: Update release packages list
+        id: update-release-packages-list
         run: |
           touch ${{ env.RELEASE_PLEASE_CONFIG_DIR }}/release-please.json.tmp
           declare -a go_mod_files
