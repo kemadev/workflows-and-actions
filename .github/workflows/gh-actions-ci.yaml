@@ -25,7 +25,6 @@ defaults:
   run:
     shell: bash
 
-    
 jobs:
   lint-workflow-files:
     name: Lint workflow files
