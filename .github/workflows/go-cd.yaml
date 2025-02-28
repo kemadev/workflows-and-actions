@@ -13,7 +13,7 @@ on:
   workflow_call:
     inputs:
       force-patch:
-        description: Force new patch version, creating a new tag and release
+        description: Force new patch version
         type: boolean
         default: false
         required: false
@@ -25,7 +25,7 @@ on:
   workflow_dispatch:
     inputs:
       force-patch:
-        description: Force new patch version, creating a new tag and release
+        description: Force new patch version
         type: boolean
         default: false
         required: false
