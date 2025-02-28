@@ -26,7 +26,7 @@ runs:
       shell: bash
       run: |
         for dir in ${{ inputs.reusable-diretories }}; do
-          cp -r "${{ github.workspace }}/dist/workflows-and-actions/${dir}" "${dir}"
+          cp --parents -r "${{ github.workspace }}/dist/workflows-and-actions/${dir}" "${dir}"
         done
         ls -Rla
     - name: Ignore git changes
