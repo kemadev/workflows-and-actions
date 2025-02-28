@@ -6,14 +6,14 @@ on:
     - cron: 0 3 * * *
   workflow_call:
     inputs:
-      DIRECTORIES_TO_IGNORE:
+      directories_to_ignore:
         description: Directories that should not be considered. Should be a comma-separated list.
         type: string
         required: false
         default: 'deploy'
   workflow_dispatch:
     inputs:
-      DIRECTORIES_TO_IGNORE:
+      directories_to_ignore:
         description: Directories that should not be considered. Should be a comma-separated list.
         type: string
         required: false
@@ -46,7 +46,7 @@ jobs:
           declare -a go_mod_files
           mapfile -t go_mod_files < <(find . -name 'go.mod' | sed 's|./||')
           declare -a go_mod_files_without_directories_to_ignore
-          IFS=',' read -r -a directories_to_ignore <<< "${{ github.event.inputs.DIRECTORIES_TO_IGNORE }}"
+          IFS=',' read -r -a directories_to_ignore <<< "${{ github.event.inputs.directories_to_ignore }}"
           for go_mod_file in "${go_mod_files[@]}"; do
             ignore=false
             for directory_to_ignore in "${directories_to_ignore[@]}"; do
