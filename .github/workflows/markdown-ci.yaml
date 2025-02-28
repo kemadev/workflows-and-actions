@@ -12,7 +12,7 @@ on:
       - reopened
       - unlocked
     paths:
-      - '**/*.md'
+      - '**.md'
   workflow_call: {}
   workflow_dispatch: {}
 

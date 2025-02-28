@@ -6,8 +6,8 @@ on:
     - cron: 0 3 * * *
   pull_request:
     paths:
-      - '**/*.yaml'
-      - '**/*.yml'
+      - '**.yaml'
+      - '**.yml'
   workflow_call: {}
   workflow_dispatch: {}
 

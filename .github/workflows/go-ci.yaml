@@ -12,9 +12,9 @@ on:
       - reopened
       - unlocked
     paths:
-      - go.mod
-      - go.sum
-      - '**/*.go'
+      - '**go.mod'
+      - '**go.sum'
+      - '**.go'
   workflow_call: {}
   workflow_dispatch: {}
 
