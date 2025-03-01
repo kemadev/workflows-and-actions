@@ -47,9 +47,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Build code
-        id: build
-        uses: kemadev/workflows-and-actions/.github/actions/go-build@main
+      # - name: Build code
+      #   id: build
+      #   uses: kemadev/workflows-and-actions/.github/actions/go-build@main
 
   get-deploys-list:
     name: Get deploys list
@@ -149,9 +149,9 @@ jobs:
         uses: kemadev/workflows-and-actions/.github/actions/checkout-to-latest-successful-deploy@main
         with:
           force-rollback-to: ${{ github.event.inputs.force-rollback-to }}
-      - name: Build code
-        id: build
-        uses: kemadev/workflows-and-actions/.github/actions/go-build@main
+      # - name: Build code
+      #   id: build
+      #   uses: kemadev/workflows-and-actions/.github/actions/go-build@main
       - name: Get deploys list
         id: get-deploys-list
         uses: kemadev/workflows-and-actions/.github/actions/go-get-deploys-list@main
