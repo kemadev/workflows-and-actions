@@ -13,7 +13,7 @@
 		".": {}
 	},
 	"release-type": "go",
-	"label": "release: pending,release/pending",
+	"label": "release/pending",
 	"release-label": "release/released",
 	"pull-request-header": ":gift: New release!",
 	"pull-request-footer": "Happy releasing! :tada:",
