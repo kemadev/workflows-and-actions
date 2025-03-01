@@ -87,6 +87,7 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
+      - run: exit 1
       - name: Go deploy
         id: go-deploy
         uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
