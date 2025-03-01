@@ -127,7 +127,7 @@ jobs:
         uses: kemadev/workflows-and-actions/.github/actions/release@main
 
   prepare-rollback:
-    name: Get rollback deploys list
+    name: Prepare rollback
     needs:
       - deploy
     if: ${{ github.event.inputs.force-rollback-to != '' || failure() }}
