@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - next
-      # dev is deployed manually by developers on their local machines
+      - dev
     paths:
       - '**go.mod'
       - '**go.sum'
