@@ -178,6 +178,9 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - name: Checkout to latest sucessful deploy
         id: checkout-to-latest-sucessful-deploy
         uses: kemadev/workflows-and-actions/.github/actions/checkout-to-latest-successful-deploy@main
