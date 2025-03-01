@@ -148,18 +148,20 @@ jobs:
         uses: kemadev/workflows-and-actions/.github/actions/checkout-to-latest-successful-deploy@main
         with:
           force-rollback: ${{ github.event.inputs.force-rollback }}
+      - name: Build code
+        id: build
+        uses: kemadev/workflows-and-actions/.github/actions/go-build@main
       - name: Get deploys list
         id: get-deploys-list
         uses: kemadev/workflows-and-actions/.github/actions/go-get-deploys-list@main
         with:
           reverse: true
-      - name: Build code
-        id: build
-        uses: kemadev/workflows-and-actions/.github/actions/go-build@main
 
   rollback:
     name: Rollback
-    needs: prepare-rollback
+    needs:
+      - prepare-rollback
+    if: ${{ github.event.inputs.force-rollback != '' || success() }}
     permissions:
       contents: read
       packages: read
