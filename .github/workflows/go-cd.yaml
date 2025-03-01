@@ -126,7 +126,7 @@ jobs:
         id: release
         uses: kemadev/workflows-and-actions/.github/actions/release@main
 
-  get-rollback-deploys-list:
+  prepare-rollback:
     name: Get rollback deploys list
     needs:
       - deploy
@@ -161,8 +161,8 @@ jobs:
   rollback:
     name: Rollback
     needs:
-      - get-rollback-deploys-list
-    if: ${{ needs.get-rollback-deploys-list.result == success() }}
+      - prepare-rollback
+    if: ${{ needs.prepare-rollback.result != success() }}
     permissions:
       contents: read
       packages: read
@@ -171,7 +171,7 @@ jobs:
     environment: ${{ github.ref_name }}
     strategy:
       matrix:
-        deploy: ${{ fromJSON(needs.get-rollback-deploys-list.outputs.deployment-dirs-list) }}
+        deploy: ${{ fromJSON(needs.prepare-rollback.outputs.deployment-dirs-list) }}
       max-parallel: 1
     steps:
       - name: Checkout
