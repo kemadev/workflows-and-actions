@@ -87,6 +87,7 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
+      - run: exit 1
       - name: Go deploy
         id: go-deploy
         uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
@@ -151,6 +152,8 @@ jobs:
       - name: Build code
         id: build
         uses: kemadev/workflows-and-actions/.github/actions/go-build@main
+        with:
+          artifact-name: rollback-build-outputs
       - name: Get deploys list
         id: get-deploys-list
         uses: kemadev/workflows-and-actions/.github/actions/go-get-deploys-list@main
@@ -188,3 +191,5 @@ jobs:
       - name: Go deploy
         id: go-deploy
         uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
+        with:
+          build-artifact-name: rollback-build-outputs
