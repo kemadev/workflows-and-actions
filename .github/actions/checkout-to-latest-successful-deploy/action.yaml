@@ -12,7 +12,7 @@ inputs:
     required: false
     default: deploy-success-
   force-rollback-to:
-    description: Force rollback to a specific checkout target (use `latest` for latest successful deploy, default = `latest`)
+    description: Force rollback to a specific checkout target (use `latest` for latest successful deploy)
     required: false
     default: 'latest'
 
