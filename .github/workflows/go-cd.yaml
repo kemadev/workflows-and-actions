@@ -162,7 +162,7 @@ jobs:
     name: Rollback
     needs:
       - prepare-rollback
-    if: ${{ needs.prepare-rollback.result != success() }}
+    if: ${{ github.event.inputs.force-rollback-to != '' || failure() }}
     permissions:
       contents: read
       packages: read
