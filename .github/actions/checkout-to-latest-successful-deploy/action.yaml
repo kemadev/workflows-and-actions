@@ -25,7 +25,7 @@ runs:
       run: |
         echo "Checking out to latest successful deploy with tag prefix: ${{ inputs.git-deployment-success-tag-prefix }} and force-rollback-to: ${{ github.event.inputs.force-rollback-to }}"
         declare checkout_target=""
-        if [ "${{ github.event.inputs.force-rollback-to }}" == "latest" || -z "${{ github.event.inputs.force-rollback-to }}" ]; then
+        if [[ "${{ github.event.inputs.force-rollback-to }}" == "latest" || -z "${{ github.event.inputs.force-rollback-to }}" ]]; then
           checkout_target="$(git tag --list "${{ inputs.git-deployment-success-tag-prefix }}${{ github.ref_name }}-*" | sort -V | tail -n 1)"
         else
           checkout_target="${{ github.event.inputs.force-rollback-to }}"
