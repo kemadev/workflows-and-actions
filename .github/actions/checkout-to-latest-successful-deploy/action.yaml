@@ -24,6 +24,7 @@ runs:
       shell: bash
       run: |
         echo "Checking out to latest successful deploy with tag prefix: ${{ inputs.git-deployment-success-tag-prefix }} and force-rollback-to: ${{ github.event.inputs.force-rollback-to }}"
+        # Avoid noisy warning message
         git config --global advice.detachedHead false
         declare checkout_target=""
         if [[ "${{ github.event.inputs.force-rollback-to }}" == "latest" || -z "${{ github.event.inputs.force-rollback-to }}" ]]; then
