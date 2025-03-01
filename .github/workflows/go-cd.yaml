@@ -162,7 +162,6 @@ jobs:
     name: Rollback
     needs:
       - get-rollback-deploys-list
-    if: ${{ github.event.inputs.force-rollback-to != '' || success() }}
     permissions:
       contents: read
       packages: read
