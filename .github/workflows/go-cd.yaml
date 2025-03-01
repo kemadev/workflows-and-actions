@@ -12,14 +12,14 @@ on:
       - '**.go'
   workflow_call:
     inputs:
-      force-rollback:
+      force-rollback-to:
         description: Force rollback to specified git reference (use `latest` for latest successful deploy)
         type: string
         default: ''
         required: false
   workflow_dispatch:
     inputs:
-      force-rollback:
+      force-rollback-to:
         description: Force rollback to specified git reference (use `latest` for latest successful deploy)
         type: string
         default: ''
@@ -35,7 +35,7 @@ defaults:
 jobs:
   build-code:
     name: Build code
-    if: ${{ github.event.inputs.force-rollback == '' }}
+    if: ${{ github.event.inputs.force-rollback-to == '' }}
     permissions:
       contents: write
       packages: write
@@ -54,7 +54,7 @@ jobs:
   get-deploys-list:
     name: Get deploys list
     needs: build-code
-    if: ${{ github.event.inputs.force-rollback == '' || success() }}
+    if: ${{ github.event.inputs.force-rollback-to == '' || success() }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -72,7 +72,7 @@ jobs:
   deploy:
     name: Deploy
     needs: get-deploys-list
-    if: ${{ github.event.inputs.force-rollback == '' }}
+    if: ${{ github.event.inputs.force-rollback-to == '' }}
     permissions:
       contents: read
       packages: read
@@ -112,7 +112,7 @@ jobs:
   release:
     name: Release
     needs: tag-deploy-success
-    if: ${{ github.event.inputs.force-rollback == '' }}
+    if: ${{ github.event.inputs.force-rollback-to == '' }}
     permissions:
       contents: write
       pull-requests: write
@@ -130,7 +130,7 @@ jobs:
     name: Prepare rollback
     needs:
       - deploy
-    if: ${{ github.event.inputs.force-rollback != '' || failure() }}
+    if: ${{ github.event.inputs.force-rollback-to != '' || failure() }}
     permissions:
       contents: read
       packages: read
@@ -148,7 +148,7 @@ jobs:
         id: checkout-to-latest-sucessful-deploy
         uses: kemadev/workflows-and-actions/.github/actions/checkout-to-latest-successful-deploy@main
         with:
-          force-rollback: ${{ github.event.inputs.force-rollback }}
+          force-rollback-to: ${{ github.event.inputs.force-rollback-to }}
       - name: Build code
         id: build
         uses: kemadev/workflows-and-actions/.github/actions/go-build@main
@@ -162,7 +162,7 @@ jobs:
     name: Rollback
     needs:
       - prepare-rollback
-    if: ${{ github.event.inputs.force-rollback != '' || success() }}
+    if: ${{ github.event.inputs.force-rollback-to != '' || success() }}
     permissions:
       contents: read
       packages: read
@@ -181,7 +181,7 @@ jobs:
         id: checkout-to-latest-sucessful-deploy
         uses: kemadev/workflows-and-actions/.github/actions/checkout-to-latest-successful-deploy@main
         with:
-          force-rollback: ${{ github.event.inputs.force-rollback }}
+          force-rollback-to: ${{ github.event.inputs.force-rollback-to }}
       - name: Go deploy
         id: go-deploy
         uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
