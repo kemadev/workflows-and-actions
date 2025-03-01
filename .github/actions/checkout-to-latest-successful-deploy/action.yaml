@@ -27,7 +27,7 @@ runs:
         # Avoid noisy warning message
         git config --global advice.detachedHead false
         declare checkout_target=""
-        if [[ "${{ github.event.inputs.force-rollback-to }}" == "latest" || -z "${{ github.event.inputs.force-rollback-to }}" ]]; then
+        if [[ "${{ github.event.inputs.force-rollback-to }}" == "latest" || "${{ github.event.inputs.force-rollback-to }}" == "" ]]; then
           checkout_target="$(git tag --list "${{ inputs.git-deployment-success-tag-prefix }}${{ github.ref_name }}-*" | sort -V | tail -n 1)"
         else
           checkout_target="${{ github.event.inputs.force-rollback-to }}"
