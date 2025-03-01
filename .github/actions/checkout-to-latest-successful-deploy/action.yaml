@@ -28,8 +28,6 @@ runs:
         git config --global advice.detachedHead false
         declare checkout_target=""
         if [[ "${{ github.event.inputs.force-rollback-to }}" == "latest" || "${{ github.event.inputs.force-rollback-to }}" == "" ]]; then
-          git tag --list "deploy-success-main-*" | sort -V | tail -n 1
-          git log --oneline --decorate --graph --all
           checkout_target="$(git tag --list "${{ inputs.git-deployment-success-tag-prefix }}${{ github.ref_name }}-*" | sort -V | tail -n 1)"
         else
           checkout_target="${{ github.event.inputs.force-rollback-to }}"
