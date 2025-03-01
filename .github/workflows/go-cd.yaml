@@ -162,7 +162,7 @@ jobs:
     name: Rollback
     needs:
       - get-rollback-deploys-list
-    if: ${{ needs.get-rollback-deploys-list.result == 'success' }}
+    if: ${{ needs.get-rollback-deploys-list.result == success() }}
     permissions:
       contents: read
       packages: read
