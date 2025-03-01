@@ -26,9 +26,11 @@ runs:
         echo "Checking out to latest successful deploy with tag prefix: ${{ inputs.git-deployment-success-tag-prefix }} and force-rollback: ${{ github.event.inputs.force-rollback }}"
         export checkout_target=""
         if [ "${{ github.event.inputs.force-rollback }}" == "latest" ]; then
+          git status
+          git tag --list "${{ inputs.git-deployment-success-tag-prefix }}${{ github.ref_name }}-*" | sort -V | tail -n 1
           checkout_target="$(git tag --list "${{ inputs.git-deployment-success-tag-prefix }}${{ github.ref_name }}-*" | sort -V | tail -n 1)"
         else
-          checkout_target="${FORCE_ROLLBACK}"
+          checkout_target="${{ github.event.inputs.force-rollback }}"
         fi
         echo "Checking out to ${checkout_target}"
         git checkout "${checkout_target}"
