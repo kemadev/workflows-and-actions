@@ -39,6 +39,8 @@ runs:
     - name: Get syft go.mod for cache key
       id: get-syft-go-mod-for-cache-key
       shell: bash
+      env:
+        GH_TOKEN: dummy
       run: |
         declare syft_go_mod_path="${{ runner.temp }}/syft-go.mod"
         gh api repos/anchore/syft/contents/go.mod | jq -r '.content' | base64 -d > "${syft_go_mod_path}"
