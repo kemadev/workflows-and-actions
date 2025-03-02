@@ -51,7 +51,7 @@ runs:
       with:
         path: |
           ~/go/bin
-        key: ${{ runner.os }}-go-install-${{ hashFiles('${{ runner.temp }}/syft-go.mod') }}
+        key: go-install-${{ runner.os }}-${{ hashFiles('${{ runner.temp }}/syft-go.mod') }}
     - name: Render goreleaser config
       id: render-goreleaser-config
       shell: bash
