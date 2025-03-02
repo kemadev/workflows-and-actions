@@ -12,7 +12,7 @@ defaults:
     shell: bash
 
 env:
-  HOUSEKEEP_STALE_BRANCHES_SCRIPT_DIR: .github/script/reusable/housekeep-stale-branches
+  HOUSEKEEP_STALE_BRANCHES_SCRIPT_DIR: .github/script/reusable/report-stale-branches
 
 jobs:
   report-stale-branches:
