@@ -41,7 +41,9 @@ runs:
       shell: bash
       run: |
         declare syft_go_mod_path="${{ runner.temp }}/syft-go.mod"
+        echo "Fetching syft go.mod for cache key, storing at ${syft_go_mod_path}"
         curl --silent https://raw.githubusercontent.com/anchore/syft/refs/heads/main/go.mod > "${syft_go_mod_path}"
+        echo "Syft go.mod successfully fetched, stored at ${syft_go_mod_path}"
       working-directory: ${{ inputs.goreleaser-render-config-script-dir }}
     - name: Cache Go install
       id: cache-go-install
