@@ -44,7 +44,6 @@ runs:
         echo "Fetching syft go.mod for cache key, storing at ${syft_go_mod_path}"
         curl --silent https://raw.githubusercontent.com/anchore/syft/refs/heads/main/go.mod > "${syft_go_mod_path}"
         echo "Syft go.mod successfully fetched, stored at ${syft_go_mod_path}"
-      working-directory: ${{ inputs.goreleaser-render-config-script-dir }}
     - name: Cache Go install
       id: cache-go-install
       uses: actions/cache@v4
@@ -79,12 +78,3 @@ runs:
         # make goreleaser think it's a new version and generate all artifacts
         GORELEASER_PREVIOUS_TAG: v0.0.0-dummy
         GORELEASER_CURRENT_TAG: v0.0.1-dummy
-    - name: Upload build artifacts
-      id: upload-build-artifacts
-      if: ${{ inputs.upload-artifact == 'true' }}
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ inputs.artifact-name }}
-        path: ${{ inputs.goreleaser-dist-dir }}
-        if-no-files-found: error
-        retention-days: 1
