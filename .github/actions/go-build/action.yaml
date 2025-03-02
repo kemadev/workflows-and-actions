@@ -36,6 +36,21 @@ runs:
       with:
         go-version-file: ${{ inputs.goreleaser-render-config-script-dir }}/go.mod
         cache-dependency-path: ${{ inputs.goreleaser-render-config-script-dir }}/go.sum
+    - name: Get syft go.mod for cache key
+      id: get-syft-go-mod-for-cache-key
+      shell: bash
+      run: |
+        declare syft_go_mod_path="${{ runner.temp }}/syft-go.mod"
+        gh api repos/anchore/syft/contents/go.mod | jq -r '.content' | base64 -d > "${syft_go_mod_path}"
+        echo "syft-go-mod-path=${syft_go_mod_path}" > "${GITHUB_OUTPUT}"
+      working-directory: ${{ inputs.goreleaser-render-config-script-dir }}
+    - name: Cache Go install
+      id: cache-go-install
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/go/bin
+        key: ${{ runner.os }}-go-install-${{ hashFiles('${{ steps.get-syft-go-mod-for-cache-key.outputs.syft-go-mod-path }}') }}
     - name: Render goreleaser config
       id: render-goreleaser-config
       shell: bash
@@ -52,7 +67,6 @@ runs:
     - name: Install syft
       id: install-syft
       shell: bash
-      # Setup Go already handles caching
       run: |
         go install github.com/anchore/syft/cmd/syft@latest
     - name: Build code
