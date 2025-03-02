@@ -39,11 +39,9 @@ runs:
     - name: Get syft go.mod for cache key
       id: get-syft-go-mod-for-cache-key
       shell: bash
-      env:
-        GH_TOKEN: ${{ github.token }}
       run: |
         declare syft_go_mod_path="${{ runner.temp }}/syft-go.mod"
-        gh api repos/anchore/syft/contents/go.mod | jq -r '.content' | base64 -d > "${syft_go_mod_path}"
+        curl --silent https://raw.githubusercontent.com/anchore/syft/refs/heads/main/go.mod > "${syft_go_mod_path}"
         echo "syft-go-mod-path=${syft_go_mod_path}" > "${GITHUB_OUTPUT}"
       working-directory: ${{ inputs.goreleaser-render-config-script-dir }}
     - name: Cache Go install
