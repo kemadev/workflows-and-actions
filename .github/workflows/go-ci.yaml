@@ -60,6 +60,8 @@ jobs:
   report-test-coverage:
     name: Report test coverage
     needs: unit-test
+    # Dependabot is most likely not going to add or remove tests to the codebase
+    if: github.actor != 'dependabot[bot]'
     permissions:
       contents: read
       pull-requests: write
