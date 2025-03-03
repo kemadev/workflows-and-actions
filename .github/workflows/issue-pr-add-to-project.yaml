@@ -1,0 +1,37 @@
+name: Issue / PR - Add to project
+
+on:
+  issues:
+    types:
+      - labeled
+      - unlabeled
+      - milestoned
+      - demilestoned
+  workflow_call: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  report-stale-branches:
+    name: Report stale branches
+    permissions:
+      repository-projects: write
+      discussions: write
+      issues: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add to project
+        id: add-to-project
+        run: |
+          echo "Add to project"
+          echo "Issue / PR: ${{ github.event.issue.number }}"
+          echo "Action: ${{ github.event.action }}"
+          echo "Label: ${{ github.event.label.name }}"
+          echo "Milestone: ${{ github.event.issue.milestone.title }}"
+          echo "Project: ${{ github.event.project.name }}"
+          echo "Column: ${{ github.event.project_column.name }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Repository owner: ${{ github.repository_owner }}"
