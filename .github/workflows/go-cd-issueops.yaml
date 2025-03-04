@@ -23,7 +23,7 @@ jobs:
       noop: ${{ steps.receive-issueops-commands.outputs.noop }}
     permissions:
       pull-requests: write
-      deployments: write
+      # deployments: write
       contents: write
       checks: read
       statuses: read
