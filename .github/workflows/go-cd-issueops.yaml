@@ -32,12 +32,12 @@ jobs:
         id: receive-issueops-commands
         uses: github/branch-deploy@v10
         with:
+          environment: next
+          skip_reviews: next
           allow_non_default_target_branch_deployments: true
           permissions: write,admin
           update_branch: disabled
-          checks: required
-          environment: next
-          skip_reviews: next
+          skip_ci: next
 
   build-code:
     name: Build code
