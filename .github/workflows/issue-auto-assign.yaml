@@ -47,10 +47,11 @@ jobs:
           echo "Assigning to ${repo_code_owner_no_at}"
           declare assignee
           if $(echo "${repo_code_owner_no_at}" | grep -vq "/"); then
-            echo "CODEOWNER is a user, assigning to them"
+            echo "${repo_code_owner_no_at} is a user, assigning to them"
           else
-            echo "CODEOWNER is a team, assigning to random member"
+            echo "${repo_code_owner_no_at} is a team, assigning to random member"
             declare org="${repo_code_owner_no_at%%/*}"
+            echo "Organization inferred as ${org}"
             # assignee="$(gh api orgs/${org}/teams/${repo_code_owner_no_at}/members | jq -r '.[] | .login' | shuf -n 1)"
             echo gh api orgs/${org}/teams/${repo_code_owner_no_at}/members | jq -r '.[] | .login' | shuf -n 1
           fi
