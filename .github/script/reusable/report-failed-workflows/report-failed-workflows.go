@@ -162,6 +162,22 @@ func parseWorkflowsInfos() (allWorkflowsInfos, error) {
 	return workflowsInfos, nil
 }
 
+func trimOldWorkflows(allWorkflows allWorkflowsInfos) (allWorkflowsInfos, error) {
+	slog.Debug("START trimOldWorkflows")
+	for _, w := range allWorkflows.WorkflowsInfos {
+		workflowTime, err := time.Parse(time.RFC3339, w.CreatedAt)
+		if err != nil {
+			return allWorkflowsInfos{}, err
+		}
+		// keep only the last day, minus one hour to prevent from inconsistencies in scheduling times
+		if workflowTime.Before(time.Now().Add(-time.Hour * (24 - 24))) {
+			delete(allWorkflows.WorkflowsInfos, w.WorkflowName)
+		}
+	}
+	slog.Debug("END trimOldWorkflows", slog.Any("allWorkflows", allWorkflows))
+	return allWorkflows, nil
+}
+
 func computeIssueBody() error {
 	slog.Debug("START computeIssueBody")
 	currentIssue, resp, err := gh.Issues.Get(context.TODO(), repoOwner, repoName, issueNumber)
@@ -191,6 +207,10 @@ func computeIssueBody() error {
 	}
 	if allWorkflows.WorkflowsInfos == nil {
 		allWorkflows.WorkflowsInfos = make(map[string]workflowInfos)
+	}
+	allWorkflows, err = trimOldWorkflows(allWorkflows)
+	if err != nil {
+		return fmt.Errorf("Failed to trim old workflows: %s", err)
 	}
 	allWorkflows.WorkflowsInfos[workflowName] = newWorkflow
 
