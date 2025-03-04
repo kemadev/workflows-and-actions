@@ -34,6 +34,7 @@ runs:
         name: ${{ inputs.build-artifact-name }}
         path: ${{ inputs.build-artifact-dir }}
     - name: Debug command noop
+      shell: bash
       run: |
         echo "noop: ${{ inputs.noop }}"
     # - name: Set up Go
