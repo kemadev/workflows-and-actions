@@ -53,7 +53,7 @@ jobs:
             declare org="${repo_code_owner_no_at%%/*}"
             echo "Organization inferred as ${org}"
             # assignee="$(gh api orgs/${org}/teams/${repo_code_owner_no_at}/members | jq -r '.[] | .login' | shuf -n 1)"
-            echo gh api orgs/${org}/teams/${repo_code_owner_no_at}/members | jq -r '.[] | .login' | shuf -n 1
+            echo 'gh api orgs/${org}/teams/${repo_code_owner_no_at}/members | jq -r '.[] | .login' | shuf -n 1'
           fi
           echo "Assigning issue to ${assignee}"
           gh issue edit "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --add-assignee "${assignee}"
