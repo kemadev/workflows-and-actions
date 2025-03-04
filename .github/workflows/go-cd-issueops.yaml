@@ -112,6 +112,7 @@ jobs:
           noop: ${{ needs.dispatch.outputs.noop }}
 
 
+  # Handle post deployment, see https://github.com/github/branch-deploy/blob/eb9366890f2ba137867043eae5842ce9c0806bfd/README.md#manual-deployment-control
   result:
     needs: [dispatch, deploy]
     runs-on: ubuntu-latest
@@ -121,9 +122,9 @@ jobs:
       # if a previous step failed, set a variable to use as the deployment status
       - name: set deployment status
         id: deploy-status
-        if: ${{ needs.dispatch.result == 'failure' || needs.deploy.result == 'failure' }}
+        if: ${{ needs.dispatch.result != 'success' || needs.deploy.result != 'success' }}
         run: |
-          echo "DEPLOY_STATUS=failure" >> $GITHUB_OUTPUT
+          echo "DEPLOY_STATUS=failure" >> ${GITHUB_OUTPUT}
 
       # use the GitHub CLI to update the deployment status that was initiated by the branch-deploy action
       - name: Create a deployment status
@@ -182,7 +183,7 @@ jobs:
 
       # if the deployment was successful, add a 'rocket' reaction to the comment that triggered the deployment
       - name: rocket reaction
-        if: ${{ steps.deploy-status.outputs.DEPLOY_STATUS != 'failure' }}
+        if: ${{ steps.deploy-status.outputs.DEPLOY_STATUS == 'success' }}
         uses: GrantBirki/comment@e6bf4bc177996c9572b4ddb98b25eb1a80f9abc9 # pin@v2.0.7
         with:
           comment-id: ${{ needs.dispatch.outputs.comment_id }}
@@ -190,7 +191,7 @@ jobs:
 
       # if the deployment failed, add a '-1' (thumbs down) reaction to the comment that triggered the deployment
       - name: failure reaction
-        if: ${{ steps.deploy-status.outputs.DEPLOY_STATUS == 'failure' }}
+        if: ${{ steps.deploy-status.outputs.DEPLOY_STATUS != 'success' }}
         uses: GrantBirki/comment@e6bf4bc177996c9572b4ddb98b25eb1a80f9abc9 # pin@v2.0.7
         with:
           comment-id: ${{ needs.dispatch.outputs.comment_id }}
@@ -198,7 +199,7 @@ jobs:
 
       # if the deployment was successful, add a 'success' comment
       - name: success comment
-        if: ${{ steps.deploy-status.outputs.DEPLOY_STATUS != 'failure' }}
+        if: ${{ steps.deploy-status.outputs.DEPLOY_STATUS == 'success' }}
         uses: peter-evans/create-or-update-comment@67dcc547d311b736a8e6c5c236542148a47adc3d # pin@v2.1.1
         with:
           issue-number: ${{ github.event.issue.number }}
@@ -209,7 +210,7 @@ jobs:
 
       # if the deployment was not successful, add a 'failure' comment
       - name: failure comment
-        if: ${{ steps.deploy-status.outputs.DEPLOY_STATUS == 'failure' }}
+        if: ${{ steps.deploy-status.outputs.DEPLOY_STATUS != 'success' }}
         uses: peter-evans/create-or-update-comment@67dcc547d311b736a8e6c5c236542148a47adc3d # pin@v2.1.1
         with:
           issue-number: ${{ github.event.issue.number }}
