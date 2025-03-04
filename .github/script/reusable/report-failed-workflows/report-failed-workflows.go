@@ -170,7 +170,7 @@ func trimOldWorkflows(allWorkflows allWorkflowsInfos) (allWorkflowsInfos, error)
 			return allWorkflowsInfos{}, err
 		}
 		// keep only the last day, minus one hour to prevent from inconsistencies in scheduling times
-		if workflowTime.Before(time.Now().Add(-time.Hour * (24 - 24))) {
+		if workflowTime.Before(time.Now().Add(-time.Hour * (24 - 1))) {
 			delete(allWorkflows.WorkflowsInfos, w.WorkflowName)
 		}
 	}
