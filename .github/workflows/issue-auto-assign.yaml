@@ -28,7 +28,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           declare repo_code_owner
-          repo_code_owner="$(cat .github/CODEOWNERS | grep -oP '^\*\s+\K[a-zA-Z@/]+$')"
+          repo_code_owner="$(cat .github/CODEOWNERS | grep -oP '^\*\s+\K[@a-zA-Z/]+$')"
           if [ -n "${repo_code_owner}" ]; then
             echo "Assigning issue to ${repo_code_owner}"
             gh issue edit --assignee "${repo_code_owner}"
