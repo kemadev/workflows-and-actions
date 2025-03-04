@@ -38,7 +38,7 @@ jobs:
     needs: dispatch
     if: ${{ needs.dispatch.outputs.continue == 'true' }}
     permissions:
-      contents: write
+      contents: read
       packages: write
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
