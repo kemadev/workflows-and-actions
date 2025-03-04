@@ -54,8 +54,11 @@ jobs:
             echo "Organization inferred as ${org}"
             declare team="${repo_code_owner_no_at##*/}"
             echo "Team inferred as ${team}"
-            # assignee="$(gh api orgs/${org}/teams/${team}/members | jq -r '.[] | .login' | shuf -n 1)"
-            echo "gh api orgs/${org}/teams/${team}/members | jq -r '.[] | .login' | shuf -n 1"
+            assignee="$(gh api orgs/${org}/teams/${team}/members | jq -r '.[] | .login' | shuf -n 1)"
+            if [ -z "${assignee}" ]; then
+              echo "No team members found"
+              exit 1
+            fi
           fi
           echo "Assigning issue to ${assignee}"
           gh issue edit "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --add-assignee "${assignee}"
