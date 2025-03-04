@@ -7,7 +7,7 @@ on:
   workflow_call: {}
 
 concurrency:
-  group: ${{ github.event.repository.full_name }}
+  group: ${{ github.ref_name }}
 
 defaults:
   run:
@@ -17,7 +17,6 @@ jobs:
   dispatch:
     name: Dispatch IssueOps commands
     if: ${{ github.event.issue.pull_request }}
-    environment: ${{ github.ref_name }}-secrets
     runs-on: ubuntu-latest
     outputs:
       continue: ${{ steps.receive-issueops-commands.outputs.continue }}
