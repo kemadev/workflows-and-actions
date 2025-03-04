@@ -35,9 +35,9 @@ jobs:
           allow_non_default_target_branch_deployments: true
           permissions: write,admin
           update_branch: disabled
-          checks: ''
-          environment: ${{ github.event.issue.pull_request }}
-          skip_reviews: prod
+          checks: required
+          environment: next
+          skip_reviews: next
 
   build-code:
     name: Build code
