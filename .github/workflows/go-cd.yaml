@@ -65,7 +65,7 @@ jobs:
     name: Build code
     if: ${{ github.event.inputs.force-rollback-to == '' }}
     permissions:
-      contents: write
+      contents: read
       packages: write
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
