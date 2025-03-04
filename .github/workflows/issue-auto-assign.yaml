@@ -50,7 +50,7 @@ jobs:
             echo "CODEOWNER is a user, assigning to them"
           else
             echo "CODEOWNER is a team, assigning to random member"
-            decalre org="${repo_code_owner_no_at%%/*}"
+            declare org="${repo_code_owner_no_at%%/*}"
             # assignee="$(gh api orgs/${org}/teams/${repo_code_owner_no_at}/members | jq -r '.[] | .login' | shuf -n 1)"
             echo gh api orgs/${org}/teams/${repo_code_owner_no_at}/members | jq -r '.[] | .login' | shuf -n 1
           fi
