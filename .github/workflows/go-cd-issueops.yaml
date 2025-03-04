@@ -36,6 +36,8 @@ jobs:
           permissions: write,admin
           update_branch: disabled
           checks: ''
+          environment: ${{ github.event.issue.pull_request }}
+          skip_reviews: prod
 
   build-code:
     name: Build code
