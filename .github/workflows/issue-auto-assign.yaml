@@ -44,13 +44,14 @@ jobs:
             exit 1
           fi
           repo_code_owner_no_at="${repo_code_owner//@/}"
-          echo "CODEOWNER: ${repo_code_owner_no_at}"
+          echo "Assigning to ${repo_code_owner_no_at}"
           declare assignee
           if $(echo "${repo_code_owner_no_at}" | grep -vq "/"); then
             echo "CODEOWNER is a user, assigning to them"
           else
             echo "CODEOWNER is a team, assigning to random member"
-            org="${repo_code_owner_no_at%%/*}"
+            export org="${repo_code_owner_no_at%%/*}"
+            export repo_code_owner_no_at
             assignee="$(gh api orgs/${org}/teams/${repo_code_owner_no_at}/members | jq -r '.[] | .login' | shuf -n 1)"
           fi
           echo "Assigning issue to ${assignee}"
