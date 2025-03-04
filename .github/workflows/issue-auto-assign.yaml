@@ -37,7 +37,7 @@ jobs:
           repo_code_owner="$(cat .github/CODEOWNERS | grep -oP '^\*\s+\K[@a-zA-Z/]+$')"
           if [ -n "${repo_code_owner}" ]; then
             echo "Assigning issue to ${repo_code_owner}"
-            gh issue edit --repo "${{ github.repository }}" --issue "${{ github.event.issue.number }}" --assignee "${repo_code_owner}"
+            gh issue edit "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --assignee "${repo_code_owner}"
           else
             echo "No default CODEOWNER found"
             exit 1
