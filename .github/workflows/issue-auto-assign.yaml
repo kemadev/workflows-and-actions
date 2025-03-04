@@ -54,7 +54,7 @@ jobs:
             echo "Organization inferred as ${org}"
             declare team="${repo_code_owner_no_at##*/}"
             echo "Team inferred as ${team}"
-            echo "gh api orgs/${org}/teams/${team}/members | jq -r '.[] | .login' | shuf -n 1"
+            gh api orgs/${org}/teams/${team}/members | jq
             assignee="$(gh api orgs/${org}/teams/${team}/members | jq -r '.[] | .login' | shuf -n 1)"
             if [ -z "${assignee}" ]; then
               echo "No team members found"
