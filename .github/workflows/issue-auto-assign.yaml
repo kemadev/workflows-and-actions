@@ -22,7 +22,7 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
-      - name: Auto-assign to issue
+      - name: Auto-assign issue
         id: auto-assign
         env:
           GH_TOKEN: ${{ github.token }}
@@ -33,7 +33,7 @@ jobs:
             echo "CODEOWNERS file not found"
             exit 1
           fi
-          if [ -n "${{ github.event.issue.assignees }}" ]; then
+          if [ -n "${{ github.event.issue.assignees[0].login }}" ]; then
             echo "Issue already assigned"
             exit 0
           else
