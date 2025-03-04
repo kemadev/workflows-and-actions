@@ -35,7 +35,7 @@ jobs:
           allow_non_default_target_branch_deployments: true
           permissions: write,admin
           update_branch: disabled
-          required_contexts: ''
+          checks: ''
 
   build-code:
     name: Build code
