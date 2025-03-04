@@ -37,6 +37,7 @@ runs:
       shell: bash
       run: |
         echo "noop: ${{ inputs.noop }}"
+        echo "github.ref_name: ${{ github.ref_name }}"
     # - name: Set up Go
     #   id: setup-go
     #   uses: actions/setup-go@v5
