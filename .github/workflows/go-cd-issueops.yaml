@@ -1,0 +1,100 @@
+name: Go - CD IssueOps
+
+on:
+  issue_comment:
+    types:
+      - created
+  workflow_call: {}
+
+concurrency:
+  group: ${{ github.event.repository.full_name }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  dispatch:
+    name: Dispatch IssueOps commands
+    if: ${{ github.event.issue.pull_request }}
+    environment: ${{ github.ref_name }}-secrets
+    runs-on: ubuntu-latest
+    outputs:
+      continue: ${{ steps.receive-issueops-commands.outputs.continue }}
+      noop: ${{ steps.receive-issueops-commands.outputs.noop }}
+    permissions:
+      pull-requests: write
+      deployments: write
+      contents: read
+      checks: read
+      statuses: read
+    steps:
+      - name: Receive IssueOps commands
+        id: receive-issueops-commands
+        uses: github/branch-deploy@v10
+
+  build-code:
+    name: Build code
+    needs: dispatch
+    if: ${{ needs.dispatch.outputs.continue == 'true' }}
+    permissions:
+      contents: write
+      packages: write
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build code
+        id: build
+        uses: kemadev/workflows-and-actions/.github/actions/go-build@main
+
+  get-deploys-list:
+    name: Get deploys list
+    needs:
+      - dispatch
+      - build-code
+    if: ${{ needs.dispatch.outputs.continue == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    outputs:
+      deployment-dirs-list: ${{ steps.get-deploys-list.outputs.deployment-dirs-list }}
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Get deploys list
+        id: get-deploys-list
+        uses: kemadev/workflows-and-actions/.github/actions/go-get-deploys-list@main
+
+  deploy:
+    name: Deploy
+    needs:
+      - dispatch
+      - get-deploys-list
+    if: ${{ needs.dispatch.outputs.continue == 'true' }}
+    permissions:
+      contents: read
+      packages: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
+    strategy:
+      matrix:
+        deploy: ${{ fromJSON(needs.get-deploys-list.outputs.deployment-dirs-list) }}
+      max-parallel: 1
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Go deploy
+        id: go-deploy
+        uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
+        if: ${{ needs.dispatch.outputs.continue == 'true' }}
+        with:
+          noop: ${{ needs.dispatch.outputs.noop }}

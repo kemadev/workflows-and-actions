@@ -1,5 +1,5 @@
 name: Deploy Go code
-description: Deploy Go code using pulumi
+description: Deploy Go code
 
 author: kemadev
 branding:
@@ -19,6 +19,10 @@ inputs:
     description: Directory where deploy configurations are stored
     required: false
     default: deploy
+  noop:
+    description: Whether to perform a dry run
+    required: false
+    default: 'false'
 
 runs:
   using: composite
@@ -29,6 +33,9 @@ runs:
       with:
         name: ${{ inputs.build-artifact-name }}
         path: ${{ inputs.build-artifact-dir }}
+    - name: Debug command noop
+      run: |
+        echo "noop: ${{ inputs.noop }}"
     # - name: Set up Go
     #   id: setup-go
     #   uses: actions/setup-go@v5
