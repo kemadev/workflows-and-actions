@@ -41,6 +41,7 @@ var (
 	atLeastOneWorkflowFailed bool = false
 
 	ghToken                string = os.Getenv("GH_TOKEN")
+	headBranch             string = os.Getenv("HEAD_BRANCH")
 	workflowName           string = os.Getenv("WORKFLOW_NAME")
 	workflowRunTitle       string = os.Getenv("WORKFLOW_RUN_TITLE")
 	conclusion             string = os.Getenv("CONCLUSION")
@@ -54,6 +55,7 @@ var (
 )
 
 type workflowInfos struct {
+	HeadBranch             string `json:"headBranch"`
 	WorkflowName           string `json:"workflowName"`
 	WorkflowRunTitle       string `json:"workflowRunTitle"`
 	Conclusion             string `json:"conclusion"`
@@ -87,6 +89,9 @@ func checkAndSetVariables() error {
 	}
 	repoOwner = strings.Split(githubRepository, "/")[0]
 	repoName = strings.Split(githubRepository, "/")[1]
+	if headBranch == "" {
+		return fmt.Errorf("HEAD_BRANCH is not set")
+	}
 	if workflowName == "" {
 		return fmt.Errorf("WORKFLOW_NAME is not set")
 	}
@@ -120,7 +125,7 @@ func checkAndSetVariables() error {
 	if ghToken == "" {
 		return fmt.Errorf("GH_TOKEN is not set")
 	}
-	slog.Debug("END checkAndSetVariables", slog.Group("variables", slog.Any("githubRepository", githubRepository), slog.Any("repoOwner", repoOwner), slog.Any("repoName", repoName), slog.Any("workflowName", workflowName), slog.Any("workflowRunTitle", workflowRunTitle), slog.Any("conclusion", conclusion), slog.Any("htmlUrl", htmlUrl), slog.Any("createdAt", createdAt), slog.Any("updatedAt", updatedAt), slog.Any("actorType", actorType), slog.Any("actorHtmlUrl", actorHtmlUrl), slog.Any("triggeringActorType", triggeringActorType), slog.Any("triggeringActorHtmlUrl", triggeringActorHtmlUrl)))
+	slog.Debug("END checkAndSetVariables", slog.Group("variables", slog.Any("githubRepository", githubRepository), slog.Any("repoOwner", repoOwner), slog.Any("repoName", repoName), slog.Any("headBranch", headBranch), slog.Any("workflowName", workflowName), slog.Any("workflowRunTitle", workflowRunTitle), slog.Any("conclusion", conclusion), slog.Any("htmlUrl", htmlUrl), slog.Any("createdAt", createdAt), slog.Any("updatedAt", updatedAt), slog.Any("actorType", actorType), slog.Any("actorHtmlUrl", actorHtmlUrl), slog.Any("triggeringActorType", triggeringActorType), slog.Any("triggeringActorHtmlUrl", triggeringActorHtmlUrl)))
 	return nil
 }
 
@@ -184,6 +189,7 @@ func computeIssueBody() error {
 	}
 	issueBody = currentIssue.GetBody()
 	newWorkflow := workflowInfos{
+		HeadBranch:             headBranch,
 		WorkflowName:           workflowName,
 		WorkflowRunTitle:       workflowRunTitle,
 		Conclusion:             conclusion,
