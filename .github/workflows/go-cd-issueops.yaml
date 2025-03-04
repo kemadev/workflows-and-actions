@@ -24,7 +24,7 @@ jobs:
     permissions:
       pull-requests: write
       deployments: write
-      contents: read
+      contents: write
       checks: read
       statuses: read
     steps:
