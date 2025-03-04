@@ -38,7 +38,7 @@ jobs:
             exit 0
           fi
           declare repo_code_owner
-          repo_code_owner="$(cat .github/CODEOWNERS | grep -oP '^\*\s+\K[@a-zA-Z/]+$')"
+          repo_code_owner="$(cat .github/CODEOWNERS | grep -oP '^\*\s+\K.+$')"
           if [ -z "${repo_code_owner}" ]; then
             echo "No default CODEOWNER found"
             exit 1
