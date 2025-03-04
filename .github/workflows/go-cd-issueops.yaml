@@ -6,8 +6,8 @@ on:
       - created
   workflow_call: {}
 
-# concurrency:
-#   group: ${{ github.ref_name }}
+concurrency:
+  group: go-cd-issueops-${{ github.ref_name }}
 
 defaults:
   run:
