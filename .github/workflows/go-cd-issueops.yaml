@@ -117,6 +117,7 @@ jobs:
         if: ${{ needs.dispatch.outputs.continue == 'true' }}
         with:
           noop: ${{ needs.dispatch.outputs.noop }}
+          environment: ${{ needs.dispatch.outputs.environment }}
 
 
   # Handle post deployment, see https://github.com/github/branch-deploy/blob/eb9366890f2ba137867043eae5842ce9c0806bfd/README.md#manual-deployment-control

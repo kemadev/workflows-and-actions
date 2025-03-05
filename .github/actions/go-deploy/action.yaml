@@ -23,6 +23,10 @@ inputs:
     description: Whether to perform a dry run
     required: false
     default: 'false'
+  environment:
+    description: Environment to deploy to
+    required: true
+    default: dev
 
 runs:
   using: composite
@@ -37,7 +41,7 @@ runs:
       shell: bash
       run: |
         echo "noop: ${{ inputs.noop }}"
-        echo "github.ref_name: ${{ github.ref_name }}"
+        echo "environment: ${{ inputs.environment }}"
     # - name: Set up Go
     #   id: setup-go
     #   uses: actions/setup-go@v5
