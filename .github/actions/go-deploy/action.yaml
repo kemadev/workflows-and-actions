@@ -38,6 +38,7 @@ runs:
         name: ${{ inputs.build-artifact-name }}
         path: ${{ inputs.build-artifact-dir }}
     - name: Debug
+      shell: bash
       env:
         FOO: ${{ inputs.noop == 'true' && 'preview' || 'up' }}
       run: |
