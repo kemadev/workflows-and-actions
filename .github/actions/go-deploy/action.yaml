@@ -37,28 +37,34 @@ runs:
       with:
         name: ${{ inputs.build-artifact-name }}
         path: ${{ inputs.build-artifact-dir }}
-    # - name: Set up Go
-    #   id: setup-go
-    #   uses: actions/setup-go@v5
-    #   with:
-    #     go-version-file: ${{ inputs.deploys-base-dir }}/${{ matrix.deploy }}/go.mod
-    #     cache-dependency-path: ${{ inputs.deploys-base-dir }}/${{ matrix.deploy }}/go.sum
-    # - name: Configure AWS credentials
-    #   id: configure-aws-credentials
-    #   uses: aws-actions/configure-aws-credentials@v4
-    #   continue-on-error: false
-    #   with:
-    #     role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-    #     aws-region: ${{ secrets.AWS_REGION }}
-    #     role-session-name: gha-${{ github.repository }}-${{ inputs.environment }}-${{ github.run_id }}
-    #     mask-aws-account-id: true
-    # - name: Update Cloud resources
-    #   id: update-cloud-resources
-    #   uses: pulumi/actions@v6
-    #   with:
-    #     command: up
-    #     work-dir: ${{ inputs.deploys-base-dir }}/${{ matrix.deploy }}
-    #     comment-on-pr: true
-    #     comment-on-summary: true
-    #     stack-name: ${{ inputs.environment }}
-    #     github-token: ${{ github.token }}
+    - name: Debug
+      env:
+        FOO: ${{ inputs.noop == 'true' && 'preview' || 'up' }}
+      run: |
+        echo "noop: ${{ inputs.noop }}"
+        echo "FOO: $FOO"
+    - name: Set up Go
+      id: setup-go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: ${{ inputs.deploys-base-dir }}/${{ matrix.deploy }}/go.mod
+        cache-dependency-path: ${{ inputs.deploys-base-dir }}/${{ matrix.deploy }}/go.sum
+    - name: Configure AWS credentials
+      id: configure-aws-credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      continue-on-error: false
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+        aws-region: ${{ secrets.AWS_REGION }}
+        role-session-name: gha-${{ github.repository }}-${{ inputs.environment }}-${{ github.run_id }}
+        mask-aws-account-id: true
+    - name: Update Cloud resources
+      id: update-cloud-resources
+      uses: pulumi/actions@v6
+      with:
+        command: ${{ inputs.noop == 'true' && 'preview' || 'up' }}
+        work-dir: ${{ inputs.deploys-base-dir }}/${{ matrix.deploy }}
+        comment-on-pr: true
+        comment-on-summary: true
+        stack-name: ${{ inputs.environment }}
+        github-token: ${{ github.token }}
