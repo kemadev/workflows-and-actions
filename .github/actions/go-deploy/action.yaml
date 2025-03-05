@@ -37,11 +37,6 @@ runs:
       with:
         name: ${{ inputs.build-artifact-name }}
         path: ${{ inputs.build-artifact-dir }}
-    - name: Debug command noop
-      shell: bash
-      run: |
-        echo "noop: ${{ inputs.noop }}"
-        echo "environment: ${{ inputs.environment }}"
     # - name: Set up Go
     #   id: setup-go
     #   uses: actions/setup-go@v5
@@ -55,7 +50,7 @@ runs:
     #   with:
     #     role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
     #     aws-region: ${{ secrets.AWS_REGION }}
-    #     role-session-name: gha-${{ github.repository }}-${{ github.ref_name }}-${{ github.run_id }}
+    #     role-session-name: gha-${{ github.repository }}-${{ inputs.environment }}-${{ github.run_id }}
     #     mask-aws-account-id: true
     # - name: Update Cloud resources
     #   id: update-cloud-resources
@@ -65,5 +60,5 @@ runs:
     #     work-dir: ${{ inputs.deploys-base-dir }}/${{ matrix.deploy }}
     #     comment-on-pr: true
     #     comment-on-summary: true
-    #     stack-name: ${{ github.ref_name }}
+    #     stack-name: ${{ inputs.environment }}
     #     github-token: ${{ github.token }}
