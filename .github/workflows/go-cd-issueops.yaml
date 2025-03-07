@@ -50,8 +50,10 @@ jobs:
           edit-mode: append
           append-separator: newline
           body: |
-            Deploying to *${{ github.base_ref == 'main' && 'next' || 'dev' }}*!
-            [Workflow Run](${{ github.event.workflow_run.url }})
+
+            Deploying to **${{ github.base_ref == 'main' && 'next' || 'dev' }}**!
+
+            [Workflow Run](../actions/runs/${{ github.run_id }})
 
   build-code:
     name: Build code
@@ -124,3 +126,24 @@ jobs:
           command: ${{ needs.dispatch.outputs.params }}
           # Deploy to next if target branch is main, otherwise deploy to dev
           environment: ${{ github.base_ref == 'main' && 'next' || 'dev' }}
+
+  comment-deploy-end:
+    name: Comment deploy end
+    needs:
+      - dispatch
+      - deploy
+    if: ${{ always() && needs.dispatch.outputs.continue == 'true' }}
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment deploy end
+        id: comment-deploy-end
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          edit-mode: append
+          append-separator: newline
+          body: |
+
+            Outcome **${{ job.status == 'success' && 'Success' || 'Failure' }}**
