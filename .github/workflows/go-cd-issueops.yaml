@@ -48,7 +48,14 @@ jobs:
       - name: Output params
         id: output-params
         run: |
-          echo "target_env=${{ github.base_ref == 'main' && 'next' || 'dev' }}" >> "${GITHUB_OUTPUT}"
+          declare target_env
+          target_env=${{ github.base_ref == 'main' && 'next' || 'dev' }}" >> "${GITHUB_OUTPUT}"
+          if [ -z "${target_env}" ]; then
+            echo "Failed to determine target environment"
+            exit 1
+          fi
+          echo Target environment is "${target_env}"
+          echo "target_env=${target_env}" >> "${GITHUB_OUTPUT}"
       - name: Comment deploy start
         id: comment-deploy-start
         uses: peter-evans/create-or-update-comment@v4
@@ -61,7 +68,7 @@ jobs:
 
             ## Deployment details :rocket:
 
-            Deploying to **[${{ steps.output-params.outputs.target_env }}](../deployments/${{ steps.output-params.outputs.target_env }})**!
+            Deploying to **[${{ steps.output-params.outputs.target_env }}](../deployments/${{ steps.output-params.outputs.target_env }})**
 
             [Workflow run](../actions/runs/${{ github.run_id }})
       - name: Start deployment
@@ -69,19 +76,43 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          declare sha
+          sha="${{ github.event.issue.pull_request.head.sha }}"
+          if [ -z "${sha}" ]; then
+            echo "Failed to determine SHA"
+            exit 1
+          fi
+          echo "SHA is ${sha}"
+          declare target_env
+          target_env="${{ steps.output-params.outputs.target_env }}"
+          if [ -z "${target_env}" ]; then
+            echo "Failed to determine target environment"
+            exit 1
+          fi
+          echo "Target environment is ${target_env}"
+          declare github_actor
+          github_actor="${{ github.actor }}"
+          if [ -z "${github_actor}" ]; then
+            echo "Failed to determine GitHub actor"
+            exit 1
+          fi
+          echo "GitHub actor is ${github_actor}"
+          declare pull_request_url
+          pull_request_url="${{ github.event.issue.pull_request.html_url }}"
           declare deployment_id
           deployment_id="$(gh api \
             --method POST \
             repos/{owner}/{repo}/deployments \
-            -f ref='${{ steps.dispatch-issueops-commands.outputs.sha }}' \
+            -f ref='${sha}' \
             -f task='deploy' \
             -f required_contexts\[\] \
-            -f environment='${{ steps.output-params.outputs.target_env }}' \
-            -f description='Deploy request from IssueOps, initiated by ${{ github.actor }} on ${{ github.repositoryUrl }}#${{ github.event.issue.number }}')"
+            -f environment='${target_env}' \
+            -f description='Deploy request from IssueOps, initiated by ${github_actor} on ${pull_request_url}')"
           if [ -z "${deployment_id}" ]; then
             echo "Failed to start deployment"
             exit 1
           fi
+          echo "Deployment started with ID ${deployment_id}"
           echo "deployment_id=${deployment_id}" >> "${GITHUB_OUTPUT}"
 
   build-code:
@@ -185,7 +216,16 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          declare state
+          state="${{ needs.deploy.result == 'success' && 'success' || 'failure' }}"
+          declare deployment_id
+          deployment_id="${{ needs.dispatch.outputs.deployment_id }}"
+          if [ -z "${deployment_id}" ]; then
+            echo "Failed to determine deployment ID"
+            exit 1
+          fi
+          echo "Setting deployment status to ${state} for deployment ID ${deployment_id}"
           gh api \
             --method POST \
             repos/{owner}/{repo}/deployments/${{ needs.dispatch.outputs.deployment_id }}/statuses \
-            -f state='${{ needs.deploy.result == 'success' && 'success' || 'failure' }}'
+            -f state="${state}"
