@@ -24,6 +24,7 @@ jobs:
       base_ref: ${{ steps.dispatch-issueops-commands.outputs.base_ref }}
       params: ${{ steps.dispatch-issueops-commands.outputs.params }}
       target_env: ${{ steps.output-params.outputs.target_env }}
+      deployment_id: ${{ steps.start-deployment.outputs.id }}
     permissions:
       pull-requests: write
       deployments: write
@@ -67,14 +68,20 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh api \
+          declare deployment_id
+          deployment_id="$(gh api \
             --method POST \
             repos/{owner}/{repo}/deployments \
             -f ref='${{ steps.dispatch-issueops-commands.outputs.sha }}' \
             -f task='deploy' \
             -f required_contexts\[\] \
             -f environment='${{ steps.output-params.outputs.target_env }}' \
-            -f description='Deploy request from IssueOps, initiated by ${{ github.actor }} on ${{ github.repositoryUrl }}#${{ github.event.issue.number }}'
+            -f description='Deploy request from IssueOps, initiated by ${{ github.actor }} on ${{ github.repositoryUrl }}#${{ github.event.issue.number }}')"
+          if [ -z "${deployment_id}" ]; then
+            echo "Failed to start deployment"
+            exit 1
+          fi
+          echo "deployment_id=${deployment_id}" >> "${GITHUB_OUTPUT}"
 
   build-code:
     name: Build code
@@ -168,3 +175,12 @@ jobs:
             <!-- comment-deploy-end -->
 
             Outcome is **${{ needs.deploy.result == 'success' && 'success :white_check_mark:' || 'failure :boom:' }}**
+      - name: Finish deployment
+        id: finish-deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api \
+            --method POST \
+            repos/{owner}/{repo}/deployments/${{ needs.dispatch.outputs.deployment_id }}/statuses \
+            -f state='${{ needs.deploy.result == 'success' && 'success' || 'failure' }}'
