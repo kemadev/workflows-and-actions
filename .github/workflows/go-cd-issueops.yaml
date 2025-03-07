@@ -23,12 +23,10 @@ jobs:
       sha: ${{ steps.dispatch-issueops-commands.outputs.sha }}
       base_ref: ${{ steps.dispatch-issueops-commands.outputs.base_ref }}
       params: ${{ steps.dispatch-issueops-commands.outputs.params }}
+      target_env: ${{ steps.output-params.outputs.target_env }}
     permissions:
       pull-requests: write
       deployments: write
-      contents: write
-      checks: read
-      statuses: read
     steps:
       - name: Receive IssueOps commands
         id: dispatch-issueops-commands
@@ -42,6 +40,10 @@ jobs:
           reaction: eyes
           failure_reaction: boom
           success_reaction: rocket
+      - name: Output params
+        id: output-params
+        run: |
+          echo "target_env=${{ github.base_ref == 'main' && 'next' || 'dev' }}" >> "${GITHUB_OUTPUT}
       - name: Comment deploy start
         id: comment-deploy-start
         uses: peter-evans/create-or-update-comment@v4
@@ -50,10 +52,11 @@ jobs:
           edit-mode: append
           append-separator: newline
           body: |
+            <!-- comment-deploy-start -->
 
-            Deploying **${{ github.ref_name }}** to **${{ github.base_ref == 'main' && 'next' || 'dev' }}**
+            Deploying `${{ github.event.pull_request.head }}` to `${{ steps.output-params.outputs.target_env }}`!
 
-            [Workflow Run](../actions/runs/${{ github.run_id }})
+            [Workflow run](../actions/runs/${{ github.run_id }})
 
   build-code:
     name: Build code
@@ -124,8 +127,7 @@ jobs:
         uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
         with:
           command: ${{ needs.dispatch.outputs.params }}
-          # Deploy to next if target branch is main, otherwise deploy to dev
-          environment: ${{ github.base_ref == 'main' && 'next' || 'dev' }}
+          environment: ${{ needs.dispatch.outputs.target_env }}
 
   comment-deploy-end:
     name: Comment deploy end
@@ -145,5 +147,6 @@ jobs:
           edit-mode: append
           append-separator: newline
           body: |
+            <!-- comment-deploy-end -->
 
-            Outcome **${{ job.status == 'success' && 'Success' || 'Failure' }}**
+            Outcome is **${{ job.status == 'success' && 'Success :white_check_mark:' || 'Failure :boom:' }}**
