@@ -29,6 +29,8 @@ jobs:
         env:
           FINDINGS_JSON_OUTPUT: ./dist/shellcheck.json
         run: |
+          git remote get-url origin
+          ls -Rla
           declare scan_returned_findings=false
           shellcheck ./**/*.sh --format=json > "${FINDINGS_JSON_OUTPUT}" || scan_returned_findings=true
           if [ "${scan_returned_findings}" = true ]; then
