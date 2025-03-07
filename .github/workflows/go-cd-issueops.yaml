@@ -22,7 +22,9 @@ jobs:
       continue: ${{ steps.dispatch-issueops-commands.outputs.continue }}
       sha: ${{ steps.dispatch-issueops-commands.outputs.sha }}
       base_ref: ${{ steps.dispatch-issueops-commands.outputs.base_ref }}
+      actor: ${{ steps.dispatch-issueops-commands.outputs.actor }}
       params: ${{ steps.dispatch-issueops-commands.outputs.params }}
+      issue_number: ${{ steps.dispatch-issueops-commands.outputs.issue_number }}
       target_env: ${{ steps.output-params.outputs.target_env }}
       deployment_id: ${{ steps.start-deployment.outputs.id }}
     permissions:
@@ -77,7 +79,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           declare sha
-          sha="${{ github.event.issue.pull_request.head.sha }}"
+          sha="${{ steps.dispatch-issueops-commands.outputs.sha }}"
           if [ -z "${sha}" ]; then
             echo "Failed to determine SHA"
             exit 1
@@ -91,14 +93,26 @@ jobs:
           fi
           echo "Target environment is ${target_env}"
           declare github_actor
-          github_actor="${{ github.actor }}"
+          github_actor="${{ steps.dispatch-issueops-commands.outputs.actor }}"
           if [ -z "${github_actor}" ]; then
             echo "Failed to determine GitHub actor"
             exit 1
           fi
           echo "GitHub actor is ${github_actor}"
-          declare pull_request_url
-          pull_request_url="${{ github.event.issue.pull_request.html_url }}"
+          declare repo
+          repo="${{ github.repository }}"
+          if [ -z "${repo}" ]; then
+            echo "Failed to determine repository"
+            exit 1
+          fi
+          echo "Repository is ${repo}"
+          declare pull_request_number
+          pull_request_number="${{ steps.dispatch-issueops-commands.outputs.issue_number }}"
+          if [ -z "${pull_request_number}" ]; then
+            echo "Failed to determine pull request number"
+            exit 1
+          fi
+          echo "Pull request number is ${pull_request_number}"
           declare deployment_id
           deployment_id="$(gh api \
             --method POST \
@@ -107,7 +121,7 @@ jobs:
             -f task='deploy' \
             -f required_contexts\[\] \
             -f environment='${target_env}' \
-            -f description='Deploy request from IssueOps, initiated by ${github_actor} on ${pull_request_url}')"
+            -f description='Deploy request from IssueOps, initiated by ${github_actor} on ${repo}#${pull_request_number}')"
           if [ -z "${deployment_id}" ]; then
             echo "Failed to start deployment"
             exit 1
