@@ -209,6 +209,7 @@ jobs:
     if: ${{ always() && needs.dispatch.outputs.continue == 'true' }}
     permissions:
       pull-requests:  write
+      deployments: write
     runs-on: ubuntu-latest
     steps:
       # Checkout is useful for {owner} and {repo} placeholders in gh api command
