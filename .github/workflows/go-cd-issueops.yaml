@@ -62,7 +62,7 @@ jobs:
         if: ${{ steps.dispatch-issueops-preview-command.outputs.continue == 'true' || steps.dispatch-issueops-up-command.outputs.continue == 'true' }}
         run: |
           declare target_env
-          target_env="${{ steps.dispatch-issueops-preview-command.outputs.base_ref || steps.dispatch-issueops-up-command.outputs.base_ref == 'main' && 'next' || 'dev' }}"
+          target_env="${{ (steps.dispatch-issueops-preview-command.outputs.base_ref == 'main' && 'next' || 'dev') || (steps.dispatch-issueops-up-command.outputs.base_ref == 'main' && 'next' || 'dev') }}"
           if [ -z "${target_env}" ]; then
             echo "Failed to determine target environment, got ${target_env}"
             exit 1
