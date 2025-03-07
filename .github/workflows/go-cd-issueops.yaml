@@ -29,7 +29,6 @@ jobs:
       target_env: ${{ steps.output-target-env.outputs.target_env }}
       deployment_id: ${{ steps.start-deployment.outputs.id }}
     permissions:
-      contents: write
       pull-requests: write
       deployments: write
     steps:
@@ -209,7 +208,6 @@ jobs:
       - deploy
     if: ${{ always() && needs.dispatch.outputs.continue == 'true' }}
     permissions:
-      contents: write
       pull-requests:  write
     runs-on: ubuntu-latest
     steps:
@@ -241,7 +239,7 @@ jobs:
           fi
           echo "Deployment status is ${state}"
           declare deployment_id
-          deployment_id="${{ needs.dispatch.outputs.deployment_id }}"
+          deployment_id="${{ needs.dispatch.outputs.target_env }}"
           if [ -z "${deployment_id}" ]; then
             echo "Failed to determine deployment ID, got ${deployment_id}"
             exit 1
