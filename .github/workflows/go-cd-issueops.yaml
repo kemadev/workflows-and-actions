@@ -94,14 +94,14 @@ jobs:
         id: output-target-env
         if: ${{ needs.dispatch.outputs.continue == 'true' }}
         run: |
-          declare ref
-          ref="${{ needs.dispatch.outputs.ref }}"
-          if [ -z "${ref}" ]; then
-            echo "Failed to determine ref, got ${ref}"
+          declare base_ref
+          base_ref="${{ needs.dispatch.outputs.base_ref }}"
+          if [ -z "${base_ref}" ]; then
+            echo "Failed to determine base ref, got ${base_ref}"
             exit 1
           fi
           declare target_env
-          if [[ "${ref}" == "main" ]]; then
+          if [[ "${base_ref}" == "main" ]]; then
             target_env="next"
           else
             target_env="dev"
