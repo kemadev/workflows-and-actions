@@ -52,9 +52,9 @@ jobs:
         id: output-target-env
         run: |
           declare target_env
-          target_env="${{ steps.dispatch-issueops-commands.outputs.base_ref == 'main' && 'next' || 'dev' }}" >> "${GITHUB_OUTPUT}"
+          target_env="${{ steps.dispatch-issueops-commands.outputs.base_ref == 'main' && 'next' || 'dev' }}"
           if [ -z "${target_env}" ]; then
-            echo "Failed to determine target environment"
+            echo "Failed to determine target environment, got ${target_env}"
             exit 1
           fi
           echo "target_env=${target_env}" >> "${GITHUB_OUTPUT}"
@@ -81,35 +81,35 @@ jobs:
           declare ref
           ref="${{ steps.dispatch-issueops-commands.outputs.ref }}"
           if [ -z "${ref}" ]; then
-            echo "Failed to determine ref"
+            echo "Failed to determine ref, got ${ref}"
             exit 1
           fi
           echo "ref is ${ref}"
           declare target_env
           target_env="${{ steps.output-target-env.outputs.target_env }}"
           if [ -z "${target_env}" ]; then
-            echo "Failed to determine target environment"
+            echo "Failed to determine target environment, got ${target_env}"
             exit 1
           fi
           echo "Target environment is ${target_env}"
           declare github_actor
           github_actor="${{ steps.dispatch-issueops-commands.outputs.actor }}"
           if [ -z "${github_actor}" ]; then
-            echo "Failed to determine GitHub actor"
+            echo "Failed to determine GitHub actor, got ${github_actor}"
             exit 1
           fi
           echo "GitHub actor is ${github_actor}"
           declare repo
           repo="${{ github.repository }}"
           if [ -z "${repo}" ]; then
-            echo "Failed to determine repository"
+            echo "Failed to determine repository, got ${repo}"
             exit 1
           fi
           echo "Repository is ${repo}"
           declare pull_request_number
           pull_request_number="${{ steps.dispatch-issueops-commands.outputs.issue_number }}"
           if [ -z "${pull_request_number}" ]; then
-            echo "Failed to determine pull request number"
+            echo "Failed to determine pull request number, got ${pull_request_number}"
             exit 1
           fi
           echo "Pull request number is ${pull_request_number}"
@@ -234,18 +234,18 @@ jobs:
           declare state
           state="${{ needs.deploy.result == 'success' && 'success' || 'failure' }}"
           if [ -z "${state}" ]; then
-            echo "Failed to determine deployment status"
+            echo "Failed to determine deployment status, got ${state}"
             exit 1
           fi
           echo "Deployment status is ${state}"
           declare deployment_id
           deployment_id="${{ needs.dispatch.outputs.deployment_id }}"
           if [ -z "${deployment_id}" ]; then
-            echo "Failed to determine deployment ID"
+            echo "Failed to determine deployment ID, got ${deployment_id}"
             exit 1
           fi
           gh api \
           --method POST \
-          repos/{owner}/{repo}/deployments/${{ needs.dispatch.outputs.deployment_id }}/statuses \
+          repos/{owner}/{repo}/deployments/${deployment_id}/statuses \
           -f state="${state}"
           echo "Deployment status set to ${state} for deployment ID ${deployment_id}"
