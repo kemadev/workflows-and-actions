@@ -234,14 +234,19 @@ jobs:
         run: |
           declare state
           state="${{ needs.deploy.result == 'success' && 'success' || 'failure' }}"
+          if [ -z "${state}" ]; then
+            echo "Failed to determine deployment status"
+            exit 1
+          fi
+          echo "Deployment status is ${state}"
           declare deployment_id
           deployment_id="${{ needs.dispatch.outputs.deployment_id }}"
           if [ -z "${deployment_id}" ]; then
             echo "Failed to determine deployment ID"
             exit 1
           fi
-          echo "Setting deployment status to ${state} for deployment ID ${deployment_id}"
           gh api \
-            --method POST \
-            repos/{owner}/{repo}/deployments/${{ needs.dispatch.outputs.deployment_id }}/statuses \
-            -f state="${state}"
+          --method POST \
+          repos/{owner}/{repo}/deployments/${{ needs.dispatch.outputs.deployment_id }}/statuses \
+          -f state="${state}"
+          echo "Deployment status set to ${state} for deployment ID ${deployment_id}"
