@@ -72,7 +72,7 @@ jobs:
             repos/{owner}/{repo}/deployments \
             -f ref='${{ steps.dispatch-issueops-commands.outputs.sha }}' \
             -f task='deploy' \
-            -f required_contexts='[]' \
+            -f required_contexts\[\] \
             -f environment='${{ steps.output-params.outputs.target_env }}' \
             -f description='Deploy request from IssueOps, initiated by ${{ github.actor }} on ${{ github.repositoryUrl }}#${{ github.event.issue.number }}'
 
