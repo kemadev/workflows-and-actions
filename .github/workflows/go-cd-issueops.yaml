@@ -29,6 +29,7 @@ jobs:
       pull-requests: write
       deployments: write
     steps:
+      # Checkout is useful for {owner} and {repo} placeholders in gh api command
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
@@ -60,7 +61,7 @@ jobs:
 
             ## Deployment details :rocket:
 
-            Deploying to `${{ steps.output-params.outputs.target_env }}`!
+            Deploying to **[${{ steps.output-params.outputs.target_env }}](../deployments/${{ steps.output-params.outputs.target_env }})**!
 
             [Workflow run](../actions/runs/${{ github.run_id }})
       - name: Start deployment
@@ -154,7 +155,7 @@ jobs:
           command: ${{ needs.dispatch.outputs.params }}
           environment: ${{ needs.dispatch.outputs.target_env }}
 
-  comment-deploy-end:
+  finish-deployment:
     name: Comment deploy end
     needs:
       - dispatch
@@ -164,19 +165,23 @@ jobs:
       pull-requests:  write
     runs-on: ubuntu-latest
     steps:
+      # Checkout is useful for {owner} and {repo} placeholders in gh api command
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
       - name: Comment deploy end
-        id: comment-deploy-end
+        id: finish-deployment
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ github.event.comment.id }}
           edit-mode: append
           append-separator: newline
           body: |
-            <!-- comment-deploy-end -->
+            <!-- finish-deployment -->
 
             Outcome is **${{ needs.deploy.result == 'success' && 'success :white_check_mark:' || 'failure :boom:' }}**
-      - name: Finish deployment
-        id: finish-deployment
+      - name: Set deployment status
+        id: set-deployment-status
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
