@@ -19,24 +19,44 @@ jobs:
     if: ${{ github.event.issue.pull_request }}
     runs-on: ubuntu-latest
     outputs:
-      continue: ${{ steps.dispatch-issueops-commands.outputs.continue }}
-      sha: ${{ steps.dispatch-issueops-commands.outputs.sha }}
-      ref: ${{ steps.dispatch-issueops-commands.outputs.ref }}
-      base_ref: ${{ steps.dispatch-issueops-commands.outputs.base_ref }}
-      actor: ${{ steps.dispatch-issueops-commands.outputs.actor }}
-      params: ${{ steps.dispatch-issueops-commands.outputs.params }}
-      issue_number: ${{ steps.dispatch-issueops-commands.outputs.issue_number }}
+      continue: ${{ steps.dispatch-issueops-preview-command.outputs.continue || steps.dispatch-issueops-up-command.outputs.continue }}
+      sha: ${{ steps.get-generic-issueops-params.outputs.sha }}
+      ref: ${{ steps.get-generic-issueops-params.outputs.ref }}
+      base_ref: ${{ steps.get-generic-issueops-params.outputs.base_ref }}
+      actor: ${{ steps.get-generic-issueops-params.outputs.actor }}
+      params: ${{ steps.get-generic-issueops-params.outputs.params }}
+      issue_number: ${{ steps.get-generic-issueops-params.outputs.issue_number }}
       target_env: ${{ steps.output-target-env.outputs.target_env }}
       deployment_id: ${{ steps.start-deployment.outputs.deployment_id }}
     permissions:
       pull-requests: write
       deployments: write
     steps:
-      - name: Receive IssueOps commands
-        id: dispatch-issueops-commands
+      - name: Receive IssueOps preview command
+        id: get-generic-issueops-params
         uses: github/command@v2
         with:
-          command: .deploy
+          command: .dummy
+          param_separator: ' '
+          skip_completing: true
+      - name: Receive IssueOps preview command
+        id: dispatch-issueops-preview-command
+        uses: github/command@v2
+        with:
+          command: .preview
+          param_separator: ' '
+          skip_reviews: true
+          skip_ci: true
+          permissions: write,admin
+          reaction: eyes
+          failure_reaction: boom
+          success_reaction: rocket
+      - name: Receive IssueOps up command
+        id: dispatch-issueops-up-command
+        if: ${{ steps.dispatch-issueops-preview-command.outputs.continue == 'false' }}
+        uses: github/command@v2
+        with:
+          command: .up
           param_separator: ' '
           skip_reviews: true
           skip_ci: true
@@ -48,7 +68,7 @@ jobs:
         id: output-target-env
         run: |
           declare target_env
-          target_env="${{ steps.dispatch-issueops-commands.outputs.base_ref == 'main' && 'next' || 'dev' }}"
+          target_env="${{ steps.get-generic-issueops-params.outputs.base_ref == 'main' && 'next' || 'dev' }}"
           if [ -z "${target_env}" ]; then
             echo "Failed to determine target environment, got ${target_env}"
             exit 1
@@ -79,7 +99,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           declare ref
-          ref="${{ steps.dispatch-issueops-commands.outputs.ref }}"
+          ref="${{ steps.get-generic-issueops-params.outputs.ref }}"
           if [ -z "${ref}" ]; then
             echo "Failed to determine ref, got ${ref}"
             exit 1
@@ -93,7 +113,7 @@ jobs:
           fi
           echo "Target environment is ${target_env}"
           declare github_actor
-          github_actor="${{ steps.dispatch-issueops-commands.outputs.actor }}"
+          github_actor="${{ steps.get-generic-issueops-params.outputs.actor }}"
           if [ -z "${github_actor}" ]; then
             echo "Failed to determine GitHub actor, got ${github_actor}"
             exit 1
@@ -107,7 +127,7 @@ jobs:
           fi
           echo "Repository is ${repo}"
           declare pull_request_number
-          pull_request_number="${{ steps.dispatch-issueops-commands.outputs.issue_number }}"
+          pull_request_number="${{ steps.get-generic-issueops-params.outputs.issue_number }}"
           if [ -z "${pull_request_number}" ]; then
             echo "Failed to determine pull request number, got ${pull_request_number}"
             exit 1
