@@ -31,17 +31,12 @@ inputs:
 runs:
   using: composite
   steps:
-    # - name: Download build artifacts
-    #   id: download-build-artifacts
-    #   uses: actions/download-artifact@v4
-    #   with:
-    #     name: ${{ inputs.build-artifact-name }}
-    #     path: ${{ inputs.build-artifact-dir }}
-    - name: Debug
-      shell: bash
-      run: |
-        echo "command: ${{ inputs.command }}"
-        echo "environment: ${{ inputs.environment }}"
+    - name: Download build artifacts
+      id: download-build-artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.build-artifact-name }}
+        path: ${{ inputs.build-artifact-dir }}
     # - name: Set up Go
     #   id: setup-go
     #   uses: actions/setup-go@v5
@@ -61,7 +56,7 @@ runs:
     #   id: update-cloud-resources
     #   uses: pulumi/actions@v6
     #   with:
-    #     command: ${{ inputs.noop == 'true' && 'preview' || 'up' }}
+    #     command: ${{ inputs.command }}
     #     work-dir: ${{ inputs.deploys-base-dir }}/${{ matrix.deploy }}
     #     comment-on-pr: true
     #     comment-on-summary: true
