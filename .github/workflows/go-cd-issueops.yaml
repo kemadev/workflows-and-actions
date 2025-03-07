@@ -19,18 +19,15 @@ jobs:
     if: ${{ github.event.issue.pull_request }}
     runs-on: ubuntu-latest
     outputs:
-      continue: ${{ steps.dispatch-issueops-preview-command.outputs.continue || steps.dispatch-issueops-up-command.outputs.continue }}
-      sha: ${{ steps.dispatch-issueops-preview-command.outputs.sha || steps.dispatch-issueops-up-command.outputs.sha }}
-      ref: ${{ steps.dispatch-issueops-preview-command.outputs.ref || steps.dispatch-issueops-up-command.outputs.ref }}
-      base_ref: ${{ steps.dispatch-issueops-preview-command.outputs.base_ref || steps.dispatch-issueops-up-command.outputs.base_ref }}
-      actor: ${{ steps.dispatch-issueops-preview-command.outputs.actor || steps.dispatch-issueops-up-command.outputs.actor }}
-      params: ${{ steps.dispatch-issueops-preview-command.outputs.params || steps.dispatch-issueops-up-command.outputs.params }}
-      issue_number: ${{ steps.dispatch-issueops-preview-command.outputs.issue_number || steps.dispatch-issueops-up-command.outputs.issue_number }}
-      target_env: ${{ steps.output-target-env.outputs.target_env }}
-      deployment_id: ${{ steps.start-deployment.outputs.deployment_id }}
+      continue: ${{ steps.override-outputs.outputs.continue }}
+      sha: ${{ steps.override-outputs.outputs.sha }}
+      ref: ${{ steps.override-outputs.outputs.ref }}
+      base_ref: ${{ steps.override-outputs.outputs.base_ref }}
+      actor: ${{ steps.override-outputs.outputs.actor }}
+      params: ${{ steps.override-outputs.outputs.params }}
+      issue_number: ${{ steps.override-outputs.outputs.issue_number }}
     permissions:
-      pull-requests: write
-      deployments: write
+      contents: none
     steps:
       - name: Receive IssueOps preview command
         id: dispatch-issueops-preview-command
@@ -57,12 +54,48 @@ jobs:
           reaction: eyes
           failure_reaction: x
           success_reaction: rocket
+      - name: Override outputs
+        id: override-outputs
+        run: |
+          if ${{ steps.dispatch-issueops-preview-command.outputs.continue == 'true' }} ; then
+            echo "continue=true" >> "${GITHUB_OUTPUT}"
+            echo "sha=${{ steps.dispatch-issueops-preview-command.outputs.sha }}" >> "${GITHUB_OUTPUT}"
+            echo "ref=${{ steps.dispatch-issueops-preview-command.outputs.ref }}" >> "${GITHUB_OUTPUT}"
+            echo "base_ref=${{ steps.dispatch-issueops-preview-command.outputs.base_ref }}" >> "${GITHUB_OUTPUT}"
+            echo "actor=${{ steps.dispatch-issueops-preview-command.outputs.actor }}" >> "${GITHUB_OUTPUT}"
+            echo "params=${{ steps.dispatch-issueops-preview-command.outputs.params }}" >> "${GITHUB_OUTPUT}"
+            echo "issue_number=${{ steps.dispatch-issueops-preview-command.outputs.issue_number }}" >> "${GITHUB_OUTPUT}"
+          elif ${{ steps.dispatch-issueops-up-command.outputs.continue == 'true' }} ; then
+            echo "continue=true" >> "${GITHUB_OUTPUT}"
+            echo "sha=${{ steps.dispatch-issueops-up-command.outputs.sha }}" >> "${GITHUB_OUTPUT}"
+            echo "ref=${{ steps.dispatch-issueops-up-command.outputs.ref }}" >> "${GITHUB_OUTPUT}"
+            echo "base_ref=${{ steps.dispatch-issueops-up-command.outputs.base_ref }}" >> "${GITHUB_OUTPUT}"
+            echo "actor=${{ steps.dispatch-issueops-up-command.outputs.actor }}" >> "${GITHUB_OUTPUT}"
+            echo "params=${{ steps.dispatch-issueops-up-command.outputs.params }}" >> "${GITHUB_OUTPUT}"
+            echo "issue_number=${{ steps.dispatch-issueops-up-command.outputs.issue_number }}" >> "${GITHUB_OUTPUT}"
+          else
+            echo "continue=false" >> "${GITHUB_OUTPUT}"
+          fi
+
+  start-deployment:
+    name: Start deployment
+    if: ${{ github.event.issue.pull_request }}
+    needs:
+      - dispatch
+    runs-on: ubuntu-latest
+    outputs:
+      target_env: ${{ steps.output-target-env.outputs.target_env }}
+      deployment_id: ${{ steps.start-deployment.outputs.deployment_id }}
+    permissions:
+      pull-requests: write
+      deployments: write
+    steps:
       - name: Output target environment
         id: output-target-env
-        if: ${{ steps.dispatch-issueops-preview-command.outputs.continue == 'true' || steps.dispatch-issueops-up-command.outputs.continue == 'true' }}
+        if: ${{ needs.dispatch.outputs.continue == 'true' }}
         run: |
           declare target_env
-          target_env="${{ (steps.dispatch-issueops-preview-command.outputs.base_ref == 'main' && 'next' || 'dev') || (steps.dispatch-issueops-up-command.outputs.base_ref == 'main' && 'next' || 'dev') }}"
+          target_env="${{ needs.dispatch.outputs.ref == 'main' && 'next' || 'dev' }}"
           if [ -z "${target_env}" ]; then
             echo "Failed to determine target environment, got ${target_env}"
             exit 1
@@ -70,7 +103,7 @@ jobs:
           echo "target_env=${target_env}" >> "${GITHUB_OUTPUT}"
       - name: Comment deploy start
         id: comment-deploy-start
-        if: ${{ steps.dispatch-issueops-preview-command.outputs.continue == 'true' || steps.dispatch-issueops-up-command.outputs.continue == 'true' }}
+        if: ${{ needs.dispatch.outputs.continue == 'true' }}
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ github.event.comment.id }}
@@ -87,16 +120,16 @@ jobs:
       # Checkout is useful for {owner} and {repo} placeholders in gh api command
       - name: Checkout
         id: checkout
-        if: ${{ steps.dispatch-issueops-preview-command.outputs.continue == 'true' || steps.dispatch-issueops-up-command.outputs.continue == 'true' }}
+        if: ${{ needs.dispatch.outputs.continue == 'true' }}
         uses: actions/checkout@v4
       - name: Start deployment
         id: start-deployment
-        if: ${{ steps.dispatch-issueops-preview-command.outputs.continue == 'true' || steps.dispatch-issueops-up-command.outputs.continue == 'true' }}
+        if: ${{ needs.dispatch.outputs.continue == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           declare ref
-          ref="${{ steps.dispatch-issueops-preview-command.outputs.ref || steps.dispatch-issueops-up-command.outputs.ref }}"
+          ref="${{ needs.dispatch.outputs.ref }}"
           if [ -z "${ref}" ]; then
             echo "Failed to determine ref, got ${ref}"
             exit 1
@@ -110,7 +143,7 @@ jobs:
           fi
           echo "Target environment is ${target_env}"
           declare github_actor
-          github_actor="${{ steps.dispatch-issueops-preview-command.outputs.actor || steps.dispatch-issueops-up-command.outputs.actor }}"
+          github_actor="${{ needs.dispatch.outputs.actor }}"
           if [ -z "${github_actor}" ]; then
             echo "Failed to determine GitHub actor, got ${github_actor}"
             exit 1
@@ -124,7 +157,7 @@ jobs:
           fi
           echo "Repository is ${repo}"
           declare pull_request_number
-          pull_request_number="${{ steps.dispatch-issueops-preview-command.outputs.issue_number || steps.dispatch-issueops-up-command.outputs.issue_number }}"
+          pull_request_number="${{ needs.dispatch.outputs.issue_number }}"
           if [ -z "${pull_request_number}" ]; then
             echo "Failed to determine pull request number, got ${pull_request_number}"
             exit 1
@@ -149,7 +182,9 @@ jobs:
 
   build-code:
     name: Build code
-    needs: dispatch
+    needs:
+      - dispatch
+      - start-deployment
     if: ${{ needs.dispatch.outputs.continue == 'true' }}
     permissions:
       contents: read
@@ -170,6 +205,7 @@ jobs:
     name: Get deploys list
     needs:
       - dispatch
+      - start-deployment
       - build-code
     if: ${{ needs.dispatch.outputs.continue == 'true' }}
     runs-on: ubuntu-latest
@@ -193,6 +229,7 @@ jobs:
     name: Deploy
     needs:
       - dispatch
+      - start-deployment
       - get-deploys-list
     if: ${{ needs.dispatch.outputs.continue == 'true' }}
     permissions:
@@ -216,12 +253,13 @@ jobs:
         uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
         with:
           command: ${{ needs.dispatch.outputs.params }}
-          environment: ${{ needs.dispatch.outputs.target_env }}
+          environment: ${{ needs.start-deployment.outputs.target_env }}
 
   finish-deployment:
     name: Comment deploy end
     needs:
       - dispatch
+      - start-deployment
       - deploy
     if: ${{ always() && needs.dispatch.outputs.continue == 'true' }}
     permissions:
@@ -257,7 +295,7 @@ jobs:
           fi
           echo "Deployment status is ${state}"
           declare deployment_id
-          deployment_id="${{ needs.dispatch.outputs.deployment_id }}"
+          deployment_id="${{ needs.start-deployment.outputs.deployment_id }}"
           if [ -z "${deployment_id}" ]; then
             echo "Failed to determine deployment ID, got ${deployment_id}"
             exit 1
