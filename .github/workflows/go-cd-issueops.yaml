@@ -59,6 +59,7 @@ jobs:
           success_reaction: rocket
       - name: Output target environment
         id: output-target-env
+        if: ${{ steps.dispatch-issueops-preview-command.outputs.continue == 'true' || steps.dispatch-issueops-up-command.outputs.continue == 'true' }}
         run: |
           declare target_env
           target_env="${{ steps.dispatch-issueops-preview-command.outputs.base_ref || steps.dispatch-issueops-up-command.outputs.base_ref == 'main' && 'next' || 'dev' }}"
@@ -69,6 +70,7 @@ jobs:
           echo "target_env=${target_env}" >> "${GITHUB_OUTPUT}"
       - name: Comment deploy start
         id: comment-deploy-start
+        if: ${{ steps.dispatch-issueops-preview-command.outputs.continue == 'true' || steps.dispatch-issueops-up-command.outputs.continue == 'true' }}
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ github.event.comment.id }}
@@ -85,9 +87,11 @@ jobs:
       # Checkout is useful for {owner} and {repo} placeholders in gh api command
       - name: Checkout
         id: checkout
+        if: ${{ steps.dispatch-issueops-preview-command.outputs.continue == 'true' || steps.dispatch-issueops-up-command.outputs.continue == 'true' }}
         uses: actions/checkout@v4
       - name: Start deployment
         id: start-deployment
+        if: ${{ steps.dispatch-issueops-preview-command.outputs.continue == 'true' || steps.dispatch-issueops-up-command.outputs.continue == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
