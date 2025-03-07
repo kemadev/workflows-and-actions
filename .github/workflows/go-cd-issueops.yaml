@@ -42,7 +42,7 @@ jobs:
           skip_ci: true
           permissions: write,admin
           reaction: eyes
-          failure_reaction: boom
+          failure_reaction: x
           success_reaction: rocket
       - name: Receive IssueOps up command
         id: dispatch-issueops-up-command
@@ -55,8 +55,20 @@ jobs:
           skip_ci: true
           permissions: write,admin
           reaction: eyes
-          failure_reaction: boom
+          failure_reaction: x
           success_reaction: rocket
+      - name: Handle invalid command
+        if: ${{ steps.dispatch-issueops-preview-command.outputs.continue == 'false' && steps.dispatch-issueops-up-command.outputs.continue == 'false' }}
+        id: handle-invalid-command
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          edit-mode: append
+          append-separator: newline
+          body: |
+            <!-- handle-invalid-command -->
+
+            ## Command not recognized :x:
       - name: Output target environment
         id: output-target-env
         if: ${{ steps.dispatch-issueops-preview-command.outputs.continue == 'true' || steps.dispatch-issueops-up-command.outputs.continue == 'true' }}
@@ -239,7 +251,7 @@ jobs:
           body: |
             <!-- finish-deployment -->
 
-            Outcome is **${{ needs.deploy.result == 'success' && 'success :white_check_mark:' || 'failure :boom:' }}**
+            Outcome is **${{ needs.deploy.result == 'success' && 'success :white_check_mark:' || 'failure :x:' }}**
       # Checkout is useful for {owner} and {repo} placeholders in gh api command
       - name: Checkout
         id: checkout
