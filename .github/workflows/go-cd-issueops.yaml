@@ -32,10 +32,6 @@ jobs:
       pull-requests: write
       deployments: write
     steps:
-      # Checkout is useful for {owner} and {repo} placeholders in gh api command
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v4
       - name: Receive IssueOps commands
         id: dispatch-issueops-commands
         uses: github/command@v2
@@ -73,6 +69,10 @@ jobs:
             Deploying to **[${{ steps.output-target-env.outputs.target_env }}](../deployments/${{ steps.output-target-env.outputs.target_env }})**
 
             [Workflow run](../actions/runs/${{ github.run_id }})
+            # Checkout is useful for {owner} and {repo} placeholders in gh api command
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
       - name: Start deployment
         id: start-deployment
         env:
@@ -212,10 +212,6 @@ jobs:
       deployments: write
     runs-on: ubuntu-latest
     steps:
-      # Checkout is useful for {owner} and {repo} placeholders in gh api command
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v4
       - name: Comment deploy end
         id: finish-deployment
         uses: peter-evans/create-or-update-comment@v4
@@ -227,6 +223,10 @@ jobs:
             <!-- finish-deployment -->
 
             Outcome is **${{ needs.deploy.result == 'success' && 'success :white_check_mark:' || 'failure :boom:' }}**
+      # Checkout is useful for {owner} and {repo} placeholders in gh api command
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
       - name: Set deployment status
         id: set-deployment-status
         env:
