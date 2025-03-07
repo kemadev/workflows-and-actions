@@ -109,4 +109,5 @@ jobs:
         uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
         with:
           command: ${{ needs.dispatch.outputs.params }}
+          # Deploy to next if target branch is main, otherwise deploy to dev
           environment: ${{ github.base_ref == 'main' && 'next' || 'dev' }}
