@@ -41,7 +41,7 @@ runs:
       shell: bash
       run: |
         echo "command: ${{ inputs.command }}"
-        echo "enviroment: ${{ inputs.environment }}"
+        echo "environment: ${{ inputs.environment }}"
     # - name: Set up Go
     #   id: setup-go
     #   uses: actions/setup-go@v5

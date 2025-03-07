@@ -79,7 +79,7 @@ jobs:
 
   start-deployment:
     name: Start deployment
-    if: ${{ github.event.issue.pull_request }}
+    if: ${{ needs.dispatch.outputs.continue == 'true' }}
     needs:
       - dispatch
     runs-on: ubuntu-latest
@@ -101,6 +101,7 @@ jobs:
             exit 1
           fi
           echo "target_env=${target_env}" >> "${GITHUB_OUTPUT}"
+          echo "Set target environment to ${target_env}"
       - name: Comment deploy start
         id: comment-deploy-start
         if: ${{ needs.dispatch.outputs.continue == 'true' }}
@@ -179,6 +180,7 @@ jobs:
           fi
           echo "Deployment started with ID ${deployment_id}"
           echo "deployment_id=${deployment_id}" >> "${GITHUB_OUTPUT}"
+          echo "Set deployment ID to ${deployment_id}"
 
   build-code:
     name: Build code
