@@ -49,7 +49,7 @@ jobs:
         id: output-params
         run: |
           declare target_env
-          target_env=${{ github.base_ref == 'main' && 'next' || 'dev' }}" >> "${GITHUB_OUTPUT}"
+          target_env="${{ github.base_ref == 'main' && 'next' || 'dev' }}" >> "${GITHUB_OUTPUT}"
           if [ -z "${target_env}" ]; then
             echo "Failed to determine target environment"
             exit 1
