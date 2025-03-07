@@ -27,7 +27,7 @@ jobs:
       params: ${{ steps.override-outputs.outputs.params }}
       issue_number: ${{ steps.override-outputs.outputs.issue_number }}
     permissions:
-      contents: none
+      pull-requests: write
     steps:
       - name: Receive IssueOps preview command
         id: dispatch-issueops-preview-command
