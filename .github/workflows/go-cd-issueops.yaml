@@ -52,12 +52,11 @@ jobs:
         id: output-target-env
         run: |
           declare target_env
-          target_env="${{ github.base_ref == 'main' && 'next' || 'dev' }}" >> "${GITHUB_OUTPUT}"
+          target_env="${{ steps.dispatch-issueops-commands.outputs.base_ref == 'main' && 'next' || 'dev' }}" >> "${GITHUB_OUTPUT}"
           if [ -z "${target_env}" ]; then
             echo "Failed to determine target environment"
             exit 1
           fi
-          echo Target environment is "${target_env}"
           echo "target_env=${target_env}" >> "${GITHUB_OUTPUT}"
       - name: Comment deploy start
         id: comment-deploy-start
