@@ -109,3 +109,4 @@ jobs:
         uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
         with:
           command: ${{ needs.dispatch.outputs.params }}
+          environment: ${{ github.base_ref == 'main' && 'next' || 'dev' }}
