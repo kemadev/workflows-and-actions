@@ -27,7 +27,7 @@ jobs:
       params: ${{ steps.dispatch-issueops-commands.outputs.params }}
       issue_number: ${{ steps.dispatch-issueops-commands.outputs.issue_number }}
       target_env: ${{ steps.output-target-env.outputs.target_env }}
-      deployment_id: ${{ steps.start-deployment.outputs.id }}
+      deployment_id: ${{ steps.start-deployment.outputs.deployment_id }}
     permissions:
       pull-requests: write
       deployments: write
@@ -239,7 +239,7 @@ jobs:
           fi
           echo "Deployment status is ${state}"
           declare deployment_id
-          deployment_id="${{ needs.dispatch.outputs.target_env }}"
+          deployment_id="${{ needs.dispatch.outputs.deployment_id }}"
           if [ -z "${deployment_id}" ]; then
             echo "Failed to determine deployment ID, got ${deployment_id}"
             exit 1
