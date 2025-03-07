@@ -57,18 +57,6 @@ jobs:
           reaction: eyes
           failure_reaction: x
           success_reaction: rocket
-      - name: Handle invalid command
-        if: ${{ steps.dispatch-issueops-preview-command.outputs.continue == 'false' && steps.dispatch-issueops-up-command.outputs.continue == 'false' }}
-        id: handle-invalid-command
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          comment-id: ${{ github.event.comment.id }}
-          edit-mode: append
-          append-separator: newline
-          body: |
-            <!-- handle-invalid-command -->
-
-            ## Command not recognized :x:
       - name: Output target environment
         id: output-target-env
         if: ${{ steps.dispatch-issueops-preview-command.outputs.continue == 'true' || steps.dispatch-issueops-up-command.outputs.continue == 'true' }}
