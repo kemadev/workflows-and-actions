@@ -43,7 +43,7 @@ jobs:
       - name: Output params
         id: output-params
         run: |
-          echo "target_env=${{ github.base_ref == 'main' && 'next' || 'dev' }}" >> "${GITHUB_OUTPUT}
+          echo "target_env=${{ github.base_ref == 'main' && 'next' || 'dev' }}" >> "${GITHUB_OUTPUT}"
       - name: Comment deploy start
         id: comment-deploy-start
         uses: peter-evans/create-or-update-comment@v4
