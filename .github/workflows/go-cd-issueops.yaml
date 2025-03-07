@@ -21,6 +21,7 @@ jobs:
     outputs:
       continue: ${{ steps.dispatch-issueops-commands.outputs.continue }}
       sha: ${{ steps.dispatch-issueops-commands.outputs.sha }}
+      ref: ${{ steps.dispatch-issueops-commands.outputs.ref }}
       base_ref: ${{ steps.dispatch-issueops-commands.outputs.base_ref }}
       actor: ${{ steps.dispatch-issueops-commands.outputs.actor }}
       params: ${{ steps.dispatch-issueops-commands.outputs.params }}
@@ -78,13 +79,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          declare sha
-          sha="${{ steps.dispatch-issueops-commands.outputs.sha }}"
-          if [ -z "${sha}" ]; then
-            echo "Failed to determine SHA"
+          declare ref
+          ref="${{ steps.dispatch-issueops-commands.outputs.ref }}"
+          if [ -z "${ref}" ]; then
+            echo "Failed to determine ref"
             exit 1
           fi
-          echo "SHA is ${sha}"
+          echo "ref is ${ref}"
           declare target_env
           target_env="${{ steps.output-params.outputs.target_env }}"
           if [ -z "${target_env}" ]; then
@@ -117,7 +118,7 @@ jobs:
           deployment_id="$(gh api \
             --method POST \
             repos/{owner}/{repo}/deployments \
-            -f ref="${sha}" \
+            -f ref="${ref}" \
             -f task='deploy' \
             -f required_contexts\[\] \
             -f environment="${target_env}" \
