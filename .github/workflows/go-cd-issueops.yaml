@@ -51,7 +51,7 @@ jobs:
           append-separator: newline
           body: |
 
-            Deploying to **${{ github.base_ref == 'main' && 'next' || 'dev' }}**!
+            Deploying **${{ github.ref_name }}** to **${{ github.base_ref == 'main' && 'next' || 'dev' }}**
 
             [Workflow Run](../actions/runs/${{ github.run_id }})
 
@@ -134,7 +134,7 @@ jobs:
       - deploy
     if: ${{ always() && needs.dispatch.outputs.continue == 'true' }}
     permissions:
-      contents: write
+      pull-requests:  write
     runs-on: ubuntu-latest
     steps:
       - name: Comment deploy end
