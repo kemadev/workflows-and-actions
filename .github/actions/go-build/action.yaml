@@ -30,54 +30,54 @@ runs:
     - name: Checkout reusable workflow scripts and configs
       id: checkout-reusable-scripts-and-configs
       uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
-    - name: Set up Go
-      id: setup-go
-      uses: actions/setup-go@v5
-      with:
-        go-version-file: ${{ inputs.goreleaser-render-config-script-dir }}/go.mod
-        cache-dependency-path: ${{ inputs.goreleaser-render-config-script-dir }}/go.sum
-    - name: Get syft go.mod for cache key
-      id: get-syft-go-mod-for-cache-key
-      shell: bash
-      run: |
-        declare syft_go_mod_path="${{ runner.temp }}/syft-go.mod"
-        echo "Fetching syft go.mod for cache key, storing at ${syft_go_mod_path}"
-        curl --silent https://raw.githubusercontent.com/anchore/syft/refs/heads/main/go.mod > "${syft_go_mod_path}"
-        echo "Syft go.mod successfully fetched, stored at ${syft_go_mod_path}"
-    - name: Cache Go install
-      id: cache-go-install
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/go/bin
-        key: go-install-${{ runner.os }}-${{ hashFiles('${{ runner.temp }}/syft-go.mod') }}
-    - name: Render goreleaser config
-      id: render-goreleaser-config
-      shell: bash
-      env:
-        GORELEASER_CONFIG_TEMPLATE_DIR: ${{ github.workspace }}/config/reusable
-        GORELEASER_CONFIG_TEMPLATE_FILENAME: .goreleaser.yaml.go.tmpl
-        GORELEASER_CONFIG_OUTPUT_FILE: ${{ github.workspace }}/config/reusable/.goreleaser.yaml
-        BUILDS_DIR_PARENT: ${{ github.workspace }}
-        BUILDS_DIR: cmd
-      working-directory: ${{ inputs.goreleaser-render-config-script-dir }}
-      run: |
-        mkdir -p ${{ env.GORELEASER_CONFIG_TEMPLATE_DIR }}
-        go run ./...
-    - name: Install syft
-      id: install-syft
-      shell: bash
-      run: |
-        go install github.com/anchore/syft/cmd/syft@latest
-    - name: Build code
-      id: build
-      uses: goreleaser/goreleaser-action@v6
-      with:
-        args: release --config ${{ github.workspace }}/config/reusable/.goreleaser.yaml --clean --snapshot --skip announce --skip publish --skip validate
-      env:
-        # make goreleaser think it's a new version and generate all artifacts
-        GORELEASER_PREVIOUS_TAG: v0.0.0-dummy
-        GORELEASER_CURRENT_TAG: v0.0.1-dummy
+    # - name: Set up Go
+    #   id: setup-go
+    #   uses: actions/setup-go@v5
+    #   with:
+    #     go-version-file: ${{ inputs.goreleaser-render-config-script-dir }}/go.mod
+    #     cache-dependency-path: ${{ inputs.goreleaser-render-config-script-dir }}/go.sum
+    # - name: Get syft go.mod for cache key
+    #   id: get-syft-go-mod-for-cache-key
+    #   shell: bash
+    #   run: |
+    #     declare syft_go_mod_path="${{ runner.temp }}/syft-go.mod"
+    #     echo "Fetching syft go.mod for cache key, storing at ${syft_go_mod_path}"
+    #     curl --silent https://raw.githubusercontent.com/anchore/syft/refs/heads/main/go.mod > "${syft_go_mod_path}"
+    #     echo "Syft go.mod successfully fetched, stored at ${syft_go_mod_path}"
+    # - name: Cache Go install
+    #   id: cache-go-install
+    #   uses: actions/cache@v4
+    #   with:
+    #     path: |
+    #       ~/go/bin
+    #     key: go-install-${{ runner.os }}-${{ hashFiles('${{ runner.temp }}/syft-go.mod') }}
+    # - name: Render goreleaser config
+    #   id: render-goreleaser-config
+    #   shell: bash
+    #   env:
+    #     GORELEASER_CONFIG_TEMPLATE_DIR: ${{ github.workspace }}/config/reusable
+    #     GORELEASER_CONFIG_TEMPLATE_FILENAME: .goreleaser.yaml.go.tmpl
+    #     GORELEASER_CONFIG_OUTPUT_FILE: ${{ github.workspace }}/config/reusable/.goreleaser.yaml
+    #     BUILDS_DIR_PARENT: ${{ github.workspace }}
+    #     BUILDS_DIR: cmd
+    #   working-directory: ${{ inputs.goreleaser-render-config-script-dir }}
+    #   run: |
+    #     mkdir -p ${{ env.GORELEASER_CONFIG_TEMPLATE_DIR }}
+    #     go run ./...
+    # - name: Install syft
+    #   id: install-syft
+    #   shell: bash
+    #   run: |
+    #     go install github.com/anchore/syft/cmd/syft@latest
+    # - name: Build code
+    #   id: build
+    #   uses: goreleaser/goreleaser-action@v6
+    #   with:
+    #     args: release --config ${{ github.workspace }}/config/reusable/.goreleaser.yaml --clean --snapshot --skip announce --skip publish --skip validate
+    #   env:
+    #     # make goreleaser think it's a new version and generate all artifacts
+    #     GORELEASER_PREVIOUS_TAG: v0.0.0-dummy
+    #     GORELEASER_CURRENT_TAG: v0.0.1-dummy
     - name: Upload build artifact
       if: ${{ inputs.upload-artifact == 'true' }}
       id: upload-build-artifact
