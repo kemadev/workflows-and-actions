@@ -54,9 +54,24 @@ jobs:
           body: |
             <!-- comment-deploy-start -->
 
-            Deploying `${{ github.event.pull_request.head }}` to `${{ steps.output-params.outputs.target_env }}`!
+            ## Deployment details :rocket:
+
+            Deploying to `${{ steps.output-params.outputs.target_env }}`!
 
             [Workflow run](../actions/runs/${{ github.run_id }})
+      - name: Start deployment
+        id: start-deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api \
+            --method POST \
+            repos/{owner}/{repo}/deployments \
+            -f ref='${{ steps.dispatch-issueops-commands.outputs.sha }}' \
+            -f task='deploy' \
+            -f environment='${{ steps.output-params.outputs.target_env }}' \
+            -f description='Deploy request from IssueOps, initiated by ${{ github.actor }} on ${{ github.repository }}#${{ github.event.issue.number }}' \
+            -f production_environment=${{ steps.output-params.outputs.target_env == 'prod' && 'true' || 'false' }}
 
   build-code:
     name: Build code
@@ -149,4 +164,4 @@ jobs:
           body: |
             <!-- comment-deploy-end -->
 
-            Outcome is **${{ job.status == 'success' && 'Success :white_check_mark:' || 'Failure :boom:' }}**
+            Outcome is **${{ job.status == 'success' && 'success :white_check_mark:' || 'failure :boom:' }}**
