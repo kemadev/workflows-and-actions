@@ -84,7 +84,7 @@ jobs:
             echo "Failed to determine ref, got ${ref}"
             exit 1
           fi
-          echo "ref is ${ref}"
+          echo "Ref is ${ref}"
           declare target_env
           target_env="${{ steps.output-target-env.outputs.target_env }}"
           if [ -z "${target_env}" ]; then
@@ -128,7 +128,7 @@ jobs:
             exit 1
           fi
           echo "Deployment started with ID ${deployment_id}"
-          echo "deployment_id=${deployment_id}" >> "${GITHUB_OUTPUT}"
+          echo "deployment_id=mgc" >> "${GITHUB_OUTPUT}"
 
   build-code:
     name: Build code
@@ -245,7 +245,7 @@ jobs:
             exit 1
           fi
           gh api \
-          --method POST \
-          repos/{owner}/{repo}/deployments/${deployment_id}/statuses \
-          -f state="${state}"
+            --method POST \
+            repos/{owner}/{repo}/deployments/${deployment_id}/statuses \
+            -f state="${state}"
           echo "Deployment status set to ${state} for deployment ID ${deployment_id}"
