@@ -60,8 +60,8 @@ jobs:
   report-test-coverage:
     name: Report test coverage
     needs: unit-test
-    # Dependabot is most likely not going to add or remove tests to the codebase
-    if: github.event.pull_request.user.login != 'dependabot[bot]'
+    # Report only on PRs, don't run on forks or dependabot as they don't have write access to the repository
+    if: github.event_name == 'pull_request' && ! github.event.pull_request.head.repo.fork
     permissions:
       contents: read
       pull-requests: write
@@ -88,8 +88,6 @@ jobs:
           path: ${{ env.TEST_COVERAGE_SCRIPT_DIR }}
       - name: Report test coverage
         id: report-test-coverage
-        # Don't run on forks or dependabot as they don't have write access to the repository
-        if: github.event_name == 'pull_request' && ! github.event.pull_request.head.repo.fork
         working-directory: ${{ env.TEST_COVERAGE_SCRIPT_DIR }}
         env:
           COVERAGE_FILE: ./${{ env.COVERAGE_FILE_NAME }}
