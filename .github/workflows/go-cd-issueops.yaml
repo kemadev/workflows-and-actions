@@ -20,13 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       continue: ${{ steps.dispatch-issueops-commands.outputs.continue }}
-      noop: ${{ steps.dispatch-issueops-commands.outputs.noop }}
-      deployment_id: ${{ steps.dispatch-issueops-commands.outputs.deployment_id }}
-      environment: ${{ steps.dispatch-issueops-commands.outputs.environment }}
       sha: ${{ steps.dispatch-issueops-commands.outputs.sha }}
-      comment_id: ${{ steps.dispatch-issueops-commands.outputs.comment_id }}
-      initial_reaction_id: ${{ steps.dispatch-issueops-commands.outputs.initial_reaction_id }}
-      actor_handle: ${{ steps.dispatch-issueops-commands.outputs.actor_handle }}
     permissions:
       pull-requests: write
       deployments: write
@@ -114,5 +108,5 @@ jobs:
         uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
         if: ${{ needs.dispatch.outputs.continue == 'true' }}
         with:
-          noop: ${{ needs.dispatch.outputs.noop }}
-          environment: ${{ needs.dispatch.outputs.environment }}
+          noop: true
+          environment: dev
