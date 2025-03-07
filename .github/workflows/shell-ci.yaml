@@ -29,7 +29,7 @@ jobs:
         env:
           FINDINGS_JSON_OUTPUT: ./dist/shellcheck.json
         run: |
-          decalre sh_files
+          declare sh_files
           sh_files=$(find . -type f -name '*.sh')
           if [ -z "${sh_files}" ]; then
             echo "No shell scripts found"
