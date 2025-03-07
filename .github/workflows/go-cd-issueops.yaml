@@ -167,4 +167,4 @@ jobs:
           body: |
             <!-- comment-deploy-end -->
 
-            Outcome is **${{ job.status == 'success' && 'success :white_check_mark:' || 'failure :boom:' }}**
+            Outcome is **${{ needs.deploy.result == 'success' && 'success :white_check_mark:' || 'failure :boom:' }}**
