@@ -29,6 +29,7 @@ jobs:
       target_env: ${{ steps.output-target-env.outputs.target_env }}
       deployment_id: ${{ steps.start-deployment.outputs.id }}
     permissions:
+      contents: write
       pull-requests: write
       deployments: write
     steps:
@@ -208,7 +209,7 @@ jobs:
       - deploy
     if: ${{ always() && needs.dispatch.outputs.continue == 'true' }}
     permissions:
-      contents: read
+      contents: write
       pull-requests:  write
     runs-on: ubuntu-latest
     steps:
