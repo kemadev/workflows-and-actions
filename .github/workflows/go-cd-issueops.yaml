@@ -22,7 +22,7 @@ jobs:
       continue: ${{ steps.dispatch-issueops-commands.outputs.continue }}
       sha: ${{ steps.dispatch-issueops-commands.outputs.sha }}
       base_ref: ${{ steps.dispatch-issueops-commands.outputs.base_ref }}
-      comment_body: ${{ steps.dispatch-issueops-commands.outputs.comment_body }}
+      params: ${{ steps.dispatch-issueops-commands.outputs.params }}
     permissions:
       pull-requests: write
       deployments: write
@@ -108,5 +108,5 @@ jobs:
         id: go-deploy
         uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
         with:
-          command: ${{ needs.dispatch.outputs.comment_body }}
+          command: ${{ needs.dispatch.outputs.params }}
           environment: ${{ needs.dispatch.outputs.base_ref }}
