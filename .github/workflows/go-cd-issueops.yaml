@@ -117,11 +117,11 @@ jobs:
           deployment_id="$(gh api \
             --method POST \
             repos/{owner}/{repo}/deployments \
-            -f ref='${sha}' \
+            -f ref="${sha}" \
             -f task='deploy' \
             -f required_contexts\[\] \
-            -f environment='${target_env}' \
-            -f description='Deploy request from IssueOps, initiated by ${github_actor} on ${repo}#${pull_request_number}')"
+            -f environment="${target_env}" \
+            -f description="Deploy request from IssueOps, initiated by ${github_actor} on ${repo}#${pull_request_number}")"
           if [ -z "${deployment_id}" ]; then
             echo "Failed to start deployment"
             exit 1
