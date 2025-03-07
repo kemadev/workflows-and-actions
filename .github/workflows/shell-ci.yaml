@@ -29,10 +29,14 @@ jobs:
         env:
           FINDINGS_JSON_OUTPUT: ./dist/shellcheck.json
         run: |
-          git remote get-url origin
-          ls -Rla
+          decalre sh_files
+          sh_files=$(find . -type f -name '*.sh')
+          if [ -z "${sh_files}" ]; then
+            echo "No shell scripts found"
+            exit 0
+          fi
           declare scan_returned_findings=false
-          shellcheck ./**/*.sh --format=json > "${FINDINGS_JSON_OUTPUT}" || scan_returned_findings=true
+          shellcheck ${sh_files} --format=json > "${FINDINGS_JSON_OUTPUT}" || scan_returned_findings=true
           if [ "${scan_returned_findings}" = true ]; then
             if [ -f "${FINDINGS_JSON_OUTPUT}" ]; then
               jq -r '.[] | "::error file=\(.file),line=\(.line),endLine=\(.endLine),col=\(.column),endCol=\(.endColumn)::\(.message) - SC\(.code)"' "${FINDINGS_JSON_OUTPUT}"
