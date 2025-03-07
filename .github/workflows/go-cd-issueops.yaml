@@ -43,7 +43,7 @@ jobs:
           success_reaction: rocket
       - name: Receive IssueOps up command
         id: dispatch-issueops-up-command
-        if: ${{ steps.dispatch-issueops-preview-command.outputs.continue == 'false' }}
+        if: ${{ steps.dispatch-issueops-preview-command.outputs.continue != 'true' }}
         uses: github/command@v2
         with:
           command: .up
