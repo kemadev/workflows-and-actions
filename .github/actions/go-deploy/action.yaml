@@ -31,12 +31,12 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Download build artifacts
-      id: download-build-artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: ${{ inputs.build-artifact-name }}
-        path: ${{ inputs.build-artifact-dir }}
+    # - name: Download build artifacts
+    #   id: download-build-artifacts
+    #   uses: actions/download-artifact@v4
+    #   with:
+    #     name: ${{ inputs.build-artifact-name }}
+    #     path: ${{ inputs.build-artifact-dir }}
     - name: Debug
       shell: bash
       run: |
