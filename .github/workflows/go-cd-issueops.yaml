@@ -39,6 +39,19 @@ jobs:
           skip_reviews: true
           skip_ci: true
           permissions: write,admin
+          reaction: eyes
+          failure_reaction: boom
+          success_reaction: rocket
+      - name: Comment deploy start
+        id: comment-deploy-start
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          edit-mode: append
+          append-separator: newline
+          body: |
+            Deploying to *${{ github.base_ref == 'main' && 'next' || 'dev' }}*!
+            [Workflow Run](${{ github.event.workflow_run.url }})
 
   build-code:
     name: Build code
