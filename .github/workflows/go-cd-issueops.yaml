@@ -28,6 +28,9 @@ jobs:
       pull-requests: write
       deployments: write
     steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
       - name: Receive IssueOps commands
         id: dispatch-issueops-commands
         uses: github/command@v2
@@ -70,7 +73,7 @@ jobs:
             -f ref='${{ steps.dispatch-issueops-commands.outputs.sha }}' \
             -f task='deploy' \
             -f environment='${{ steps.output-params.outputs.target_env }}' \
-            -f description='Deploy request from IssueOps, initiated by ${{ github.actor }} on ${{ github.repository }}#${{ github.event.issue.number }}' \
+            -f description='Deploy request from IssueOps, initiated by ${{ github.actor }} on ${{ github.repositoryUrl }}#${{ github.event.issue.number }}' \
             -f production_environment=${{ steps.output-params.outputs.target_env == 'prod' && 'true' || 'false' }}
 
   build-code:
