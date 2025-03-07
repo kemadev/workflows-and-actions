@@ -20,25 +20,18 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       continue: ${{ steps.dispatch-issueops-preview-command.outputs.continue || steps.dispatch-issueops-up-command.outputs.continue }}
-      sha: ${{ steps.get-generic-issueops-params.outputs.sha }}
-      ref: ${{ steps.get-generic-issueops-params.outputs.ref }}
-      base_ref: ${{ steps.get-generic-issueops-params.outputs.base_ref }}
-      actor: ${{ steps.get-generic-issueops-params.outputs.actor }}
-      params: ${{ steps.get-generic-issueops-params.outputs.params }}
-      issue_number: ${{ steps.get-generic-issueops-params.outputs.issue_number }}
+      sha: ${{ steps.dispatch-issueops-preview-command.outputs.sha || steps.dispatch-issueops-up-command.outputs.sha }}
+      ref: ${{ steps.dispatch-issueops-preview-command.outputs.ref || steps.dispatch-issueops-up-command.outputs.ref }}
+      base_ref: ${{ steps.dispatch-issueops-preview-command.outputs.base_ref || steps.dispatch-issueops-up-command.outputs.base_ref }}
+      actor: ${{ steps.dispatch-issueops-preview-command.outputs.actor || steps.dispatch-issueops-up-command.outputs.actor }}
+      params: ${{ steps.dispatch-issueops-preview-command.outputs.params || steps.dispatch-issueops-up-command.outputs.params }}
+      issue_number: ${{ steps.dispatch-issueops-preview-command.outputs.issue_number || steps.dispatch-issueops-up-command.outputs.issue_number }}
       target_env: ${{ steps.output-target-env.outputs.target_env }}
       deployment_id: ${{ steps.start-deployment.outputs.deployment_id }}
     permissions:
       pull-requests: write
       deployments: write
     steps:
-      - name: Receive IssueOps preview command
-        id: get-generic-issueops-params
-        uses: github/command@v2
-        with:
-          command: .dummy
-          param_separator: ' '
-          skip_completing: true
       - name: Receive IssueOps preview command
         id: dispatch-issueops-preview-command
         uses: github/command@v2
@@ -68,7 +61,7 @@ jobs:
         id: output-target-env
         run: |
           declare target_env
-          target_env="${{ steps.get-generic-issueops-params.outputs.base_ref == 'main' && 'next' || 'dev' }}"
+          target_env="${{ steps.dispatch-issueops-preview-command.outputs.base_ref || steps.dispatch-issueops-up-command.outputs.base_ref == 'main' && 'next' || 'dev' }}"
           if [ -z "${target_env}" ]; then
             echo "Failed to determine target environment, got ${target_env}"
             exit 1
@@ -89,7 +82,7 @@ jobs:
             Deploying to **[${{ steps.output-target-env.outputs.target_env }}](../deployments/${{ steps.output-target-env.outputs.target_env }})**
 
             [Workflow run](../actions/runs/${{ github.run_id }})
-            # Checkout is useful for {owner} and {repo} placeholders in gh api command
+      # Checkout is useful for {owner} and {repo} placeholders in gh api command
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
@@ -99,7 +92,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           declare ref
-          ref="${{ steps.get-generic-issueops-params.outputs.ref }}"
+          ref="${{ steps.dispatch-issueops-preview-command.outputs.ref || steps.dispatch-issueops-up-command.outputs.ref }}"
           if [ -z "${ref}" ]; then
             echo "Failed to determine ref, got ${ref}"
             exit 1
@@ -113,7 +106,7 @@ jobs:
           fi
           echo "Target environment is ${target_env}"
           declare github_actor
-          github_actor="${{ steps.get-generic-issueops-params.outputs.actor }}"
+          github_actor="${{ steps.dispatch-issueops-preview-command.outputs.actor || steps.dispatch-issueops-up-command.outputs.actor }}"
           if [ -z "${github_actor}" ]; then
             echo "Failed to determine GitHub actor, got ${github_actor}"
             exit 1
@@ -127,7 +120,7 @@ jobs:
           fi
           echo "Repository is ${repo}"
           declare pull_request_number
-          pull_request_number="${{ steps.get-generic-issueops-params.outputs.issue_number }}"
+          pull_request_number="${{ steps.dispatch-issueops-preview-command.outputs.issue_number || steps.dispatch-issueops-up-command.outputs.issue_number }}"
           if [ -z "${pull_request_number}" ]; then
             echo "Failed to determine pull request number, got ${pull_request_number}"
             exit 1
