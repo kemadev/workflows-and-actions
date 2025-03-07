@@ -26,7 +26,7 @@ jobs:
       actor: ${{ steps.dispatch-issueops-commands.outputs.actor }}
       params: ${{ steps.dispatch-issueops-commands.outputs.params }}
       issue_number: ${{ steps.dispatch-issueops-commands.outputs.issue_number }}
-      target_env: ${{ steps.output-params.outputs.target_env }}
+      target_env: ${{ steps.output-target-env.outputs.target_env }}
       deployment_id: ${{ steps.start-deployment.outputs.id }}
     permissions:
       pull-requests: write
@@ -48,8 +48,8 @@ jobs:
           reaction: eyes
           failure_reaction: boom
           success_reaction: rocket
-      - name: Output params
-        id: output-params
+      - name: Output target environment
+        id: output-target-env
         run: |
           declare target_env
           target_env="${{ github.base_ref == 'main' && 'next' || 'dev' }}" >> "${GITHUB_OUTPUT}"
@@ -71,7 +71,7 @@ jobs:
 
             ## Deployment details :rocket:
 
-            Deploying to **[${{ steps.output-params.outputs.target_env }}](../deployments/${{ steps.output-params.outputs.target_env }})**
+            Deploying to **[${{ steps.output-target-env.outputs.target_env }}](../deployments/${{ steps.output-target-env.outputs.target_env }})**
 
             [Workflow run](../actions/runs/${{ github.run_id }})
       - name: Start deployment
@@ -87,7 +87,7 @@ jobs:
           fi
           echo "ref is ${ref}"
           declare target_env
-          target_env="${{ steps.output-params.outputs.target_env }}"
+          target_env="${{ steps.output-target-env.outputs.target_env }}"
           if [ -z "${target_env}" ]; then
             echo "Failed to determine target environment"
             exit 1
@@ -116,6 +116,7 @@ jobs:
           echo "Pull request number is ${pull_request_number}"
           declare deployment_id
           deployment_id="$(gh api \
+            --jq '.id' \
             --method POST \
             repos/{owner}/{repo}/deployments \
             -f ref="${ref}" \
