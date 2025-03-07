@@ -74,7 +74,7 @@ jobs:
             -f task='deploy' \
             -f environment='${{ steps.output-params.outputs.target_env }}' \
             -f description='Deploy request from IssueOps, initiated by ${{ github.actor }} on ${{ github.repositoryUrl }}#${{ github.event.issue.number }}' \
-            -f production_environment=${{ steps.output-params.outputs.target_env == 'prod' && 'true' || 'false' }}
+            -f production_environment=${{ steps.output-params.outputs.target_env == 'prod' && '0' || '1' }}
 
   build-code:
     name: Build code
