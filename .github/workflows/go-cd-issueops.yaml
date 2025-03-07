@@ -94,12 +94,17 @@ jobs:
         id: output-target-env
         if: ${{ needs.dispatch.outputs.continue == 'true' }}
         run: |
-          echo ref=${{ needs.dispatch.outputs.ref }}
-          declare target_env
-          target_env="${{ needs.dispatch.outputs.ref == 'main' && 'next' || 'dev' }}"
-          if [ -z "${target_env}" ]; then
-            echo "Failed to determine target environment, got ${target_env}"
+          declare ref
+          ref="${{ needs.dispatch.outputs.ref }}"
+          if [ -z "${ref}" ]; then
+            echo "Failed to determine ref, got ${ref}"
             exit 1
+          fi
+          declare target_env
+          if [[ "${ref}" == "main" ]]; then
+            target_env="next"
+          else
+            target_env="dev"
           fi
           echo "target_env=${target_env}" >> "${GITHUB_OUTPUT}"
           echo "Set target environment to ${target_env}"
