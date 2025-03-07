@@ -38,7 +38,7 @@ jobs:
         id: dispatch-issueops-commands
         uses: github/command@v2
         with:
-          command: .deploy
+          command: /deploy
           param_separator: ' '
           skip_reviews: true
           skip_ci: true
