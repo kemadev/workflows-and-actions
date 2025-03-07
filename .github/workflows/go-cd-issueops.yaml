@@ -21,6 +21,8 @@ jobs:
     outputs:
       continue: ${{ steps.dispatch-issueops-commands.outputs.continue }}
       sha: ${{ steps.dispatch-issueops-commands.outputs.sha }}
+      base_ref: ${{ steps.dispatch-issueops-commands.outputs.base_ref }}
+      comment_body: ${{ steps.dispatch-issueops-commands.outputs.comment_body }}
     permissions:
       pull-requests: write
       deployments: write
@@ -32,12 +34,11 @@ jobs:
         id: dispatch-issueops-commands
         uses: github/command@v2
         with:
-          command: /deploy
+          command: .deploy
           param_separator: ' '
           skip_reviews: true
           skip_ci: true
           permissions: write,admin
-          skip_completing: true
 
   build-code:
     name: Build code
@@ -106,7 +107,6 @@ jobs:
       - name: Go deploy
         id: go-deploy
         uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
-        if: ${{ needs.dispatch.outputs.continue == 'true' }}
         with:
-          noop: true
-          environment: dev
+          command: ${{ needs.dispatch.outputs.comment_body }}
+          environment: ${{ needs.dispatch.outputs.base_ref }}

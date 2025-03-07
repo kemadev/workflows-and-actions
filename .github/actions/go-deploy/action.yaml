@@ -19,14 +19,10 @@ inputs:
     description: Directory where deploy configurations are stored
     required: false
     default: deploy
-  noop:
-    description: Whether to perform a dry run
-    required: false
-    default: 'false'
-  environment:
-    description: Environment to deploy to
+  command:
+    description: Which command to run
     required: true
-    default: dev
+    default: preview
 
 runs:
   using: composite
@@ -39,11 +35,10 @@ runs:
         path: ${{ inputs.build-artifact-dir }}
     - name: Debug
       shell: bash
-      env:
-        FOO: ${{ inputs.noop == 'true' && 'preview' || 'up' }}
       run: |
-        echo "noop: ${{ inputs.noop }}"
-        echo "FOO: $FOO"
+        echo "command: ${{ inputs.command }}"
+        echo "enviroment: ${{ environment }}"
+        echo "enviroment url: ${{ environment.url }}"
     # - name: Set up Go
     #   id: setup-go
     #   uses: actions/setup-go@v5
