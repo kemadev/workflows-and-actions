@@ -26,6 +26,7 @@ on:
         required: false
 
 concurrency:
+  # Same group as go-cd-issueops
   group: go-cd-${{ github.ref_name }}
 
 defaults:

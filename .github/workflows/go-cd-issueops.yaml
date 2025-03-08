@@ -6,9 +6,6 @@ on:
       - created
   workflow_call: {}
 
-concurrency:
-  group: go-cd-issueops
-
 defaults:
   run:
     shell: bash
@@ -243,12 +240,15 @@ jobs:
       - start-deployment
       - get-deploys-list
     if: ${{ needs.dispatch.outputs.continue == 'true' }}
+    concurrency:
+      # Same group as go-cd, target_env matches branch name
+      group: go-cd-${{ needs.start-deployment.outputs.target_env }}
     permissions:
       contents: read
       packages: read
       pull-requests: write
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name }}
+    environment: ${{ needs.start-deployment.outputs.target_env }}
     strategy:
       matrix:
         deploy: ${{ fromJSON(needs.get-deploys-list.outputs.deployment-dirs-list) }}
