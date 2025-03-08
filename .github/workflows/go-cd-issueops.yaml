@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       continue: ${{ steps.override-outputs.outputs.continue }}
+      command: ${{ steps.override-outputs.outputs.command }}
       sha: ${{ steps.override-outputs.outputs.sha }}
       ref: ${{ steps.override-outputs.outputs.ref }}
       base_ref: ${{ steps.override-outputs.outputs.base_ref }}
@@ -59,6 +60,7 @@ jobs:
         run: |
           if ${{ steps.dispatch-issueops-preview-command.outputs.continue == 'true' }} ; then
             echo "continue=true" >> "${GITHUB_OUTPUT}"
+            echo "command=preview" >> "${GITHUB_OUTPUT}"
             echo "sha=${{ steps.dispatch-issueops-preview-command.outputs.sha }}" >> "${GITHUB_OUTPUT}"
             echo "ref=${{ steps.dispatch-issueops-preview-command.outputs.ref }}" >> "${GITHUB_OUTPUT}"
             echo "base_ref=${{ steps.dispatch-issueops-preview-command.outputs.base_ref }}" >> "${GITHUB_OUTPUT}"
@@ -67,6 +69,7 @@ jobs:
             echo "issue_number=${{ steps.dispatch-issueops-preview-command.outputs.issue_number }}" >> "${GITHUB_OUTPUT}"
           elif ${{ steps.dispatch-issueops-up-command.outputs.continue == 'true' }} ; then
             echo "continue=true" >> "${GITHUB_OUTPUT}"
+            echo "command=up" >> "${GITHUB_OUTPUT}"
             echo "sha=${{ steps.dispatch-issueops-up-command.outputs.sha }}" >> "${GITHUB_OUTPUT}"
             echo "ref=${{ steps.dispatch-issueops-up-command.outputs.ref }}" >> "${GITHUB_OUTPUT}"
             echo "base_ref=${{ steps.dispatch-issueops-up-command.outputs.base_ref }}" >> "${GITHUB_OUTPUT}"
@@ -131,7 +134,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Start deployment
         id: start-deployment
-        if: ${{ needs.dispatch.outputs.continue == 'true' }}
+        if: ${{ needs.dispatch.outputs.continue == 'true' && needs.dispatch.outputs.command == 'up' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -292,6 +295,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Set deployment status
         id: set-deployment-status
+        if: ${{ needs.dispatch.outputs.command == 'up' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
