@@ -16,12 +16,12 @@ jobs:
     if: ${{ github.event.issue.pull_request }}
     runs-on: ubuntu-latest
     outputs:
-      sha: ${{ steps.override-outputs.outputs.sha }}
-      ref: ${{ steps.override-outputs.outputs.ref }}
-      base_ref: ${{ steps.override-outputs.outputs.base_ref }}
-      params: ${{ steps.override-outputs.outputs.params }}
-      continue: ${{ steps.override-outputs.outputs.continue }}
-      command: ${{ steps.override-outputs.outputs.command }}
+      sha: ${{ steps.get-pr-infos.outputs.sha }}
+      ref: ${{ steps.get-pr-infos.outputs.ref }}
+      base_ref: ${{ steps.get-pr-infos.outputs.base_ref }}
+      params: ${{ steps.parse-command.outputs.params }}
+      command: ${{ steps.parse-command.outputs.command }}
+      continue: ${{ steps.parse-command.outputs.continue }}
     permissions:
       contents: read
       pull-requests: write
