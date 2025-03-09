@@ -439,7 +439,7 @@ jobs:
     needs:
       - dispatch
       - deploy
-    if: ${{ always() && needs.dispatch.outputs.command == 'up' && needs.deploy.result != 'success' || needs.dispatch.outputs.command == 'rollback' }}
+    if: ${{ always() && needs.dispatch.outputs.command == 'up' && needs.deploy.result == 'failure' || needs.dispatch.outputs.command == 'rollback' }}
     permissions:
       contents: read
       packages: read
