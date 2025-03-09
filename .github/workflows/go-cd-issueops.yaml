@@ -107,11 +107,15 @@ jobs:
             echo "Parsed command is unknown, got ${command[0]}"
           fi
           echo "command=${command}" >> "${GITHUB_OUTPUT}"
+          echo "Set output command to ${command}"
           for param in "${params[@]}"; do
             echo "${param}=${param}" >> "${GITHUB_OUTPUT}"
+            echo "Set output param ${param} to ${param}"
           done
           echo "params=${params}" >> "${GITHUB_OUTPUT}"
+          echo "Set output params to ${params}"
           echo "valid=${valid}" >> "${GITHUB_OUTPUT}"
+          echo "Set output valid to ${valid}"
       - name: Check requirements
         id: check-requirements
         if: ${{ steps.parse-command.outputs.valid == 'true' }}
