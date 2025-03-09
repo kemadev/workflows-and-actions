@@ -88,18 +88,19 @@ jobs:
           declare command
           declare params
           command=(${{ github.event.comment.body }})
+          echo "Command is ${command[@]}"
           if [ "${command[0]}" == ".preview" ]; then
             command=preview
             params=${command[@]:1}
             valid=true
             echo "Parsed command is preview"
-            echo "params=${params}"
+            echo "Params are ${params}"
           elif [ "${command[0]}" == ".up" ]; then
             command=up
             params=${command[@]:1}
             valid=true
             echo "Parsed command is up"
-            echo "params=${params}"
+            echo "Params are ${params}"
           else
             command=unknown
             valid=false
