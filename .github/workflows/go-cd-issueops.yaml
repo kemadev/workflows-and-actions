@@ -316,7 +316,7 @@ jobs:
         with:
           comment-id: ${{ github.event.comment.id }}
           reactions-edit-mode: replace
-          reactions: white_check_mark
+          reactions: '+1'
 
   finish-deployment:
     name: Comment deploy end
@@ -474,7 +474,7 @@ jobs:
         with:
           comment-id: ${{ github.event.comment.id }}
           reactions-edit-mode: replace
-          reactions: stopwatch
+          reactions: '+1'
           edit-mode: append
           append-separator: newline
           body: |
