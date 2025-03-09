@@ -1,15 +1,6 @@
 name: Go - CD
 
 on:
-  push:
-    branches:
-      - main
-      - next
-      - dev
-    paths:
-      - '**go.mod'
-      - '**go.sum'
-      - '**.go'
   workflow_call:
     inputs:
       force-rollback-to:
@@ -26,7 +17,6 @@ on:
         required: false
 
 concurrency:
-  # Same group as go-cd-issueops
   group: go-cd-${{ github.ref_name }}
 
 defaults:
@@ -34,34 +24,6 @@ defaults:
     shell: bash
 
 jobs:
-  backlink-pr:
-    name: Backlink PR
-    if: ${{ github.event.inputs.force-rollback-to == '' }}
-    permissions:
-      pull-requests: write
-    runs-on: ubuntu-latest
-    # Do not fail the workflow if a QoL step fails
-    continue-on-error: true
-    steps:
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Backlink PR
-        id: backlink-pr
-        env:
-          GH_TOKEN: ${{ github.token }}
-        # Assuming we use format `<PR title> (#<PR number>)`, which is the organization's convention
-        run: |
-          declare pr_number
-          pr_number="$(git log -1 --pretty=format:"%s" ${{ github.sha }} | grep -oP '(?<=\(#)\d+(?=\)$)')"
-          if [[ -z "${pr_number}" ]]; then
-            echo "No PR number found in commit message"
-            exit 0
-          fi
-          gh pr comment "${pr_number}" --repo "${{ github.repository }}" --body "This PR has been deployed from **${{ github.ref_name }}**. [View deployment details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-
   build-code:
     name: Build code
     if: ${{ github.event.inputs.force-rollback-to == '' }}
@@ -69,7 +31,6 @@ jobs:
       contents: read
       packages: write
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name }}
     steps:
       - name: Checkout
         id: checkout
@@ -107,7 +68,6 @@ jobs:
       packages: read
       pull-requests: write
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name }}
     strategy:
       matrix:
         deploy: ${{ fromJSON(needs.get-deploys-list.outputs.deployment-dirs-list) }}
@@ -128,7 +88,6 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name }}
     steps:
       - name: Checkout
         id: checkout
@@ -136,23 +95,8 @@ jobs:
       - name: Tag deploy success
         id: tag-deploy-success
         uses: kemadev/workflows-and-actions/.github/actions/tag-deploy-success@main
-
-  release:
-    name: Release
-    needs: tag-deploy-success
-    if: ${{ github.event.inputs.force-rollback-to == '' }}
-    permissions:
-      contents: write
-      pull-requests: write
-    runs-on: ubuntu-latest
-    environment: ${{ github.ref_name }}
-    steps:
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v4
-      - name: Release
-        id: release
-        uses: kemadev/workflows-and-actions/.github/actions/release@main
+        with:
+          deployed-ref: ${{ github.ref_name }}
 
   prepare-rollback:
     name: Prepare rollback
@@ -199,7 +143,6 @@ jobs:
       packages: read
       pull-requests: write
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name }}
     strategy:
       matrix:
         deploy: ${{ fromJSON(needs.prepare-rollback.outputs.deployment-dirs-list) }}
@@ -221,3 +164,4 @@ jobs:
         uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
         with:
           build-artifact-name: rollback-build-outputs
+          environment: ${{ github.base_ref }}

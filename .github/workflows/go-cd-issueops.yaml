@@ -228,7 +228,6 @@ jobs:
       packages: read
       pull-requests: write
     runs-on: ubuntu-latest
-    environment: ${{ needs.dispatch.outputs.base_ref }}
     strategy:
       matrix:
         deploy: ${{ fromJSON(needs.get-deploys-list.outputs.deployment-dirs-list) }}
@@ -318,26 +317,6 @@ jobs:
         with:
           deployed-ref: ${{ needs.dispatch.outputs.base_ref }}
 
-  release:
-    name: Release
-    needs:
-      - dispatch
-      - deploy
-      - tag-deploy-success
-    if: ${{ needs.dispatch.outputs.base_ref == 'main' }}
-    permissions:
-      contents: write
-      pull-requests: write
-    runs-on: ubuntu-latest
-    environment: ${{ github.ref_name }}
-    steps:
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v4
-      - name: Release
-        id: release
-        uses: kemadev/workflows-and-actions/.github/actions/release@main
-
   prepare-rollback:
     name: Prepare rollback
     needs:
@@ -376,6 +355,7 @@ jobs:
   rollback:
     name: Rollback
     needs:
+      - dispatch
       - prepare-rollback
     if: ${{ always() && needs.prepare-rollback.result == 'success' }}
     permissions:
@@ -383,7 +363,6 @@ jobs:
       packages: read
       pull-requests: write
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name }}
     strategy:
       matrix:
         deploy: ${{ fromJSON(needs.prepare-rollback.outputs.deployment-dirs-list) }}
@@ -405,3 +384,4 @@ jobs:
         uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
         with:
           build-artifact-name: rollback-build-outputs
+          environment: ${{ needs.dispatch.outputs.base_ref }}

@@ -1,0 +1,30 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_call:
+  workflow_dispatch:
+
+concurrency:
+  group: release
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  release:
+    name: Release
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Release
+        id: release
+        uses: kemadev/workflows-and-actions/.github/actions/release@main
