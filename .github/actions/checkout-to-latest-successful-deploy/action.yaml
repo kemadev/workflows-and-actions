@@ -32,10 +32,10 @@ runs:
         # Avoid noisy warning message
         git config --global advice.detachedHead false
         declare checkout_target=""
-        if [[ "${{ github.event.inputs.force-rollback-to }}" == "latest" || "${{ github.event.inputs.force-rollback-to }}" == "" ]]; then
+        if [[ "${{ inputs.force-rollback-to }}" == "latest" || "${{ inputs.force-rollback-to }}" == "" ]]; then
           checkout_target="$(git tag --list "${{ inputs.git-deployment-success-tag-prefix }}${{ github.ref_name }}-*" | sort -V | tail -n 1)"
         else
-          checkout_target="${{ github.event.inputs.force-rollback-to }}"
+          checkout_target="${{ inputs.force-rollback-to }}"
         fi
         echo "Checking out to ${checkout_target}"
         git checkout "${checkout_target}"
