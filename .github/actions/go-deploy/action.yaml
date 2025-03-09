@@ -62,6 +62,7 @@ runs:
     #   with:
     #     command: ${{ inputs.command }}
     #     work-dir: ${{ inputs.deploys-base-dir }}/${{ matrix.deploy }}
+    #     refresh: true
     #     comment-on-summary: true
     #     comment-on-pr: true
     #     edit-pr-comment: false
