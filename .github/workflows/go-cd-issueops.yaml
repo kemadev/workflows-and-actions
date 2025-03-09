@@ -27,6 +27,11 @@ jobs:
     permissions:
       pull-requests: write
     steps:
+      - run: |
+          echo ${{ github.event.issue.body }}
+          echo ${{ github.event.issue.pull_request }}
+          echo ${{ github.event.issue.pull_request.base.ref }}
+      - run: exit 1
       - name: Receive IssueOps preview command
         id: dispatch-issueops-preview-command
         uses: github/command@v2
