@@ -163,7 +163,7 @@ jobs:
         id: check-requirements
         if: ${{ steps.parse-command.outputs.valid == 'true' }}
         run: |
-          if [ "${{ steps.parse-command.outputs.command }}" == 'rollback' ]; then
+          if [ "${{ steps.parse-command.outputs.command }}" == 'rollback' || "${{ steps.parse-command.outputs.command }}" == 'preview' ]; then
             echo "Rollback command, skipping checks and fast forwarding to rollback"
             echo "continue=false" >> "${GITHUB_OUTPUT}"
             exit 0
