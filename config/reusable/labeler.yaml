@@ -9,16 +9,16 @@ area/dependencies:
       - any-glob-to-any-file: [go.mod, go.sum]
 
 type/bug:
-  - head-branch: [^bugfix/, ^hotfix/]
+  - head-branch: [^fix/, ^hotfix/]
 
 type/feature:
-  - head-branch: [^feature/]
+  - head-branch: [^feat/]
 
 env/dev:
-  - head-branch: [^dev]
+  - base-branch: [^dev]
 
 env/next:
-  - head-branch: [^next]
+  - base-branch: [^next]
 
 env/prod:
-  - head-branch: [^main]
+  - base-branch: [^main]
