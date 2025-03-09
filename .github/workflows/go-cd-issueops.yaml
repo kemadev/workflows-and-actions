@@ -480,6 +480,8 @@ jobs:
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ github.event.comment.id }}
+          reactions-edit-mode: replace
+          reactions: stopwatch
           edit-mode: append
           append-separator: newline
           body: |
