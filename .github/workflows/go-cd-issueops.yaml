@@ -374,6 +374,7 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
+          ref: ${{ needs.dispatch.outputs.base_ref }}
       - name: Checkout to latest sucessful deploy
         id: checkout-to-latest-sucessful-deploy
         uses: kemadev/workflows-and-actions/.github/actions/checkout-to-latest-successful-deploy@main
