@@ -30,6 +30,8 @@ jobs:
     steps:
       - name: Get base ref
         id: get-base-ref
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           declare base_ref
           base_ref="$(gh api \
