@@ -210,13 +210,6 @@ jobs:
             exit 1
           fi
           echo "Target environment is ${target_env}"
-          declare github_actor
-          github_actor="${{ needs.dispatch.outputs.actor }}"
-          if [ -z "${github_actor}" ]; then
-            echo "Failed to determine GitHub actor, got ${github_actor}"
-            exit 1
-          fi
-          echo "GitHub actor is ${github_actor}"
           declare repo
           repo="${{ github.repository }}"
           if [ -z "${repo}" ]; then
