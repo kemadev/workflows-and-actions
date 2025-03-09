@@ -200,9 +200,9 @@ jobs:
           body: |
             <!-- comment-deploy-start -->
 
-            ## Deployment details :rocket:
+            ## Action details :rocket:
 
-            Deploying to **[${{ needs.dispatch.outputs.base_ref }}](../deployments/${{ needs.dispatch.outputs.base_ref }})**
+            Running **${{ needs.dispatch.outputs.command }}** on **[${{ needs.dispatch.outputs.base_ref }}](../deployments/${{ needs.dispatch.outputs.base_ref }})**
 
             [Workflow run](../actions/runs/${{ github.run_id }})
       # Checkout is useful for {owner} and {repo} placeholders in gh api command
