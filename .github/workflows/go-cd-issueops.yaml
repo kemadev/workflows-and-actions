@@ -31,6 +31,7 @@ jobs:
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ github.event.comment.id }}
+          reactions-edit-mode: replace
           reactions: eyes
       # Checkout is useful for {owner} and {repo} placeholders in gh api command
       - name: Checkout
@@ -139,6 +140,7 @@ jobs:
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ github.event.comment.id }}
+          reactions-edit-mode: replace
           reactions: confused
           edit-mode: append
           append-separator: newline
@@ -152,6 +154,7 @@ jobs:
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ github.event.comment.id }}
+          reactions-edit-mode: replace
           reactions: rocket
 
   start-deployment:
@@ -321,7 +324,13 @@ jobs:
         with:
           command: ${{ needs.dispatch.outputs.params }}
           environment: ${{ needs.dispatch.outputs.base_ref }}
-      - run: exit 1
+      - name: React to comment - deploy success
+        id: react-to-comment-deploy-success
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          reactions-edit-mode: replace
+          reactions: white_check_mark
 
   finish-deployment:
     name: Comment deploy end
