@@ -474,6 +474,7 @@ jobs:
         uses: kemadev/workflows-and-actions/.github/actions/checkout-to-latest-successful-deploy@main
         with:
           force-rollback-to: ${{ needs.dispatch.outputs.rollback_sha }}
+          branch: ${{ needs.dispatch.outputs.base_ref }}
       - name: Build code
         id: build
         uses: kemadev/workflows-and-actions/.github/actions/go-build@main
@@ -513,6 +514,9 @@ jobs:
       - name: Checkout to latest sucessful deploy
         id: checkout-to-latest-sucessful-deploy
         uses: kemadev/workflows-and-actions/.github/actions/checkout-to-latest-successful-deploy@main
+        with:
+          force-rollback-to: ${{ needs.dispatch.outputs.rollback_sha }}
+          branch: ${{ needs.dispatch.outputs.base_ref }}
       - name: Go deploy
         id: go-deploy
         uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
