@@ -139,18 +139,20 @@ jobs:
         id: check-requirements
         if: ${{ steps.parse-command.outputs.valid == 'true' }}
         run: |
-          # check if running on main branch
+          if [ "${{ steps.parse-command.outputs.command }}" == 'rollback' ]; then
+            echo "Rollback command, skipping checks and fast forwarding to rollback"
+            echo "continue=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
           if [ "${{ steps.get-pr-infos.outputs.base_ref }}" != 'main' ]; then
             echo "Not running with base branch main, skipping checks"
             echo "continue=true" >> "${GITHUB_OUTPUT}"
+            exit 0
           fi
           if [ "${{ steps.get-pr-infos.outputs.mergeable_state }}" != 'clean' ]; then
             echo "PR is not mergeable, aborting"
             echo "continue=false" >> "${GITHUB_OUTPUT}"
-          fi
-          if [ "${{ steps.parse-command.outputs.command }}" == 'rollback' ]; then
-            echo "Rollback command, skipping checks and fast forwarding to rollback"
-            echo "continue=false" >> "${GITHUB_OUTPUT}"
+            exit 0
           fi
       - name: Comment on non-continue
         id: comment-on-non-continue
