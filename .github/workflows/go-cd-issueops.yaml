@@ -25,6 +25,12 @@ jobs:
     permissions:
       pull-requests: write
     steps:
+      - name: React to comment - start
+        id: react-to-comment-start
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          reactions: eyes
       # Checkout is useful for {owner} and {repo} placeholders in gh api command
       - name: Checkout
         id: checkout
@@ -85,13 +91,18 @@ jobs:
             command=preview
             params=${command[@]:1}
             valid=true
+            echo "Parsed command is preview"
+            echo "params=${params}"
           elif [ "${command[0]}" == ".up" ]; then
             command=up
             params=${command[@]:1}
             valid=true
+            echo "Parsed command is up"
+            echo "params=${params}"
           else
             command=unknown
             valid=false
+            echo "Parsed command is unknown, got ${command[0]}"
           fi
           echo "command=${command}" >> "${GITHUB_OUTPUT}"
           for param in "${params[@]}"; do
@@ -109,8 +120,8 @@ jobs:
             echo "continue=true" >> "${GITHUB_OUTPUT}"
           fi
           if [ "${{ steps.get-pr-infos.outputs.mergeable_state }}" != 'clean' ]; then
-            echo "PR is not mergeable, skipping checks"
-            echo "continue=true" >> "${GITHUB_OUTPUT}"
+            echo "PR is not mergeable, aborting"
+            echo "continue=false" >> "${GITHUB_OUTPUT}"
           fi
       - name: Comment on non-continue
         id: comment-on-non-continue
@@ -118,12 +129,20 @@ jobs:
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ github.event.comment.id }}
+          reactions: confused
           edit-mode: append
           append-separator: newline
           body: |
             <!-- comment-on-non-continue -->
 
             :warning: Invalid request, reason is **${{ steps.parse-command.outputs.valid != 'true' && 'invalid command' || 'PR is not mergeable' }}**
+      - name: React to comment - end
+        id: react-to-comment-end
+        if: ${{ steps.check-requirements.outputs.continue == 'true' }}
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          reactions: rocket
 
   start-deployment:
     name: Start deployment
