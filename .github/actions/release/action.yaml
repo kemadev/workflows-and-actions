@@ -31,26 +31,26 @@ runs:
     - name: Checkout reusable workflow scripts and configs
       id: checkout-reusable-scripts-and-configs
       uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
-    - name: Download build artifacts
-      id: download-build-artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: ${{ inputs.artifact-name }}
-        path: ${{ inputs.goreleaser-dist-dir }}
+    # - name: Download build artifacts
+    #   id: download-build-artifacts
+    #   uses: actions/download-artifact@v4
+    #   with:
+    #     name: ${{ inputs.artifact-name }}
+    #     path: ${{ inputs.goreleaser-dist-dir }}
     - name: Release
       id: release
       uses: googleapis/release-please-action@v4
       with:
         config-file: ${{ inputs.release-please-config-file }}
         manifest-file: ${{ inputs.release-please-manifest-file }}
-    - name: Upload release artifacts
-      id: upload-release-artifacts
-      shell: bash
-      if: ${{ steps.release.outputs.release_created }}
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        declare artifacts
-        artifacts=$(jq '.[] | select(.type == "Archive" or .type == "SBOM" or .type == "Checksum") | .path' ${{ inputs.goreleaser-dist-dir }}/artifacts.json | tr -d '"' | tr '\n' ' ')
-        echo "Uploading artifacts: ${artifacts}"
-        gh release upload "${{ steps.release.outputs.tag_name }}" ${artifacts}
+    # - name: Upload release artifacts
+    #   id: upload-release-artifacts
+    #   shell: bash
+    #   if: ${{ steps.release.outputs.release_created }}
+    #   env:
+    #     GH_TOKEN: ${{ github.token }}
+    #   run: |
+    #     declare artifacts
+    #     artifacts=$(jq '.[] | select(.type == "Archive" or .type == "SBOM" or .type == "Checksum") | .path' ${{ inputs.goreleaser-dist-dir }}/artifacts.json | tr -d '"' | tr '\n' ' ')
+    #     echo "Uploading artifacts: ${artifacts}"
+    #     gh release upload "${{ steps.release.outputs.tag_name }}" ${artifacts}
