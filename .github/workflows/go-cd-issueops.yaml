@@ -23,6 +23,7 @@ jobs:
       continue: ${{ steps.override-outputs.outputs.continue }}
       command: ${{ steps.override-outputs.outputs.command }}
     permissions:
+      contents: read
       pull-requests: write
     steps:
       - name: React to comment - start
