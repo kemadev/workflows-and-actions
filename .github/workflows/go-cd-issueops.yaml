@@ -103,7 +103,6 @@ jobs:
             valid=true
             echo "Parsed command is up"
             echo "Params are ${params}"
-          else
           elif [ "${command[0]}" == ".rollback" ]; then
             command=up
             params=${command[@]:1}
