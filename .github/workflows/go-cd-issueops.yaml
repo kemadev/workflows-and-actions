@@ -519,4 +519,4 @@ jobs:
           body: |
             <!-- comment-rollback -->
 
-            :hourglass_flowing_sand: Rollback to [${{ needs.rollback.outputs.latest-deploy-tag }}](${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ needs.rollback.outputs.latest-deploy-tag }}): outcome is **${{ needs.rollback.result == 'success' && 'success :white_check_mark:' || 'failure :x:' }}**
+            Outcome is **${{ needs.rollback.result == 'success' && 'success :white_check_mark:' || 'failure :x:' }}**. Rollbacked to [${{ needs.rollback.outputs.latest-deploy-tag }}](${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ needs.rollback.outputs.latest-deploy-tag }})
