@@ -38,6 +38,28 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
+      - name: Check actor permissions
+        id: check-actor-permissions
+        run: |
+          declare actor_permissions
+          actor_permissions="$(gh api \
+            repos/{owner}/{repo}/collaborators/${{ github.actor }}/permission)"
+          if [ -z "${actor_permissions}" ]; then
+            echo "Failed to determine actor permissions, got ${actor_permissions}"
+            exit 1
+          fi
+          echo "Actor permissions are ${actor_permissions}"
+          declare permission
+          permission="$(jq -r '.permission' <<< "${actor_permissions}")"
+          if [ -z "${permission}" ]; then
+            echo "Failed to determine permission, got ${permission}"
+            exit 1
+          fi
+          echo "Permission is ${permission}"
+          if [ "${permission}" != 'admin' && "${permission}" != 'write' ]; then
+            echo "Actor is not an admin, aborting"
+            exit 1
+          fi
       - name: Get PR infos
         id: get-pr-infos
         env:
