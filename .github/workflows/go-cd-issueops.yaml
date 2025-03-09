@@ -16,15 +16,12 @@ jobs:
     if: ${{ github.event.issue.pull_request }}
     runs-on: ubuntu-latest
     outputs:
-      inner_base_ref: ${{ steps.get-base-ref.outputs.base_ref }}
-      continue: ${{ steps.override-outputs.outputs.continue }}
-      command: ${{ steps.override-outputs.outputs.command }}
       sha: ${{ steps.override-outputs.outputs.sha }}
       ref: ${{ steps.override-outputs.outputs.ref }}
       base_ref: ${{ steps.override-outputs.outputs.base_ref }}
-      actor: ${{ steps.override-outputs.outputs.actor }}
       params: ${{ steps.override-outputs.outputs.params }}
-      issue_number: ${{ steps.override-outputs.outputs.issue_number }}
+      continue: ${{ steps.override-outputs.outputs.continue }}
+      command: ${{ steps.override-outputs.outputs.command }}
     permissions:
       pull-requests: write
     steps:
@@ -32,21 +29,83 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
-      - name: Get base ref
-        id: get-base-ref
+      - name: Get PR infos
+        id: get-pr-infos
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          declare base_ref
-          base_ref="$(gh api \
+          declare pr_infos
+          pr_infos="$(gh api \
             --jq '.base.ref' \
             repos/{owner}/{repo}/pulls/${{ github.event.issue.number }})"
+          if [ -z "${pr_infos}" ]; then
+            echo "Failed to determine PR infos, got ${pr_infos}"
+            exit 1
+          fi
+          echo "PR infos are ${pr_infos}"
+          declare base_ref
+          base_ref="$(jq -r '.base.ref' <<< "${pr_infos}")"
           if [ -z "${base_ref}" ]; then
             echo "Failed to determine base ref, got ${base_ref}"
             exit 1
           fi
           echo "Base ref is ${base_ref}"
           echo "base_ref=${base_ref}" >> "${GITHUB_OUTPUT}"
+          declare sha
+          sha="$(jq -r '.head.sha' <<< "${pr_infos}")"
+          if [ -z "${sha}" ]; then
+            echo "Failed to determine sha, got ${sha}"
+            exit 1
+          fi
+          echo "Sha is ${sha}"
+          echo "sha=${sha}" >> "${GITHUB_OUTPUT}"
+          declare ref
+          ref="$(jq -r '.head.ref' <<< "${pr_infos}")"
+          if [ -z "${ref}" ]; then
+            echo "Failed to determine ref, got ${ref}"
+            exit 1
+          fi
+          echo "Ref is ${ref}"
+          echo "ref=${ref}" >> "${GITHUB_OUTPUT}"
+      - name: Parse command
+        id: parse-command
+        run: |
+          declare valid
+          declare command
+          declare params
+          command=(${{ github.event.comment.body }})
+          if [ "${command[0]}" == ".preview" ]; then
+            command=preview
+            params=${command[@]:1}
+            valid=true
+          elif [ "${command[0]}" == ".up" ]; then
+            command=up
+            params=${command[@]:1}
+            valid=true
+          else
+            command=unknown
+            valid=false
+          fi
+          echo "command=${command}" >> "${GITHUB_OUTPUT}"
+          for param in "${params[@]}"; do
+            echo "${param}=${param}" >> "${GITHUB_OUTPUT}"
+          done
+          echo "params=${params}" >> "${GITHUB_OUTPUT}"
+          echo "valid=${valid}" >> "${GITHUB_OUTPUT}"
+      - name: Check requirements
+        id: check-requirements
+        if: ${{ steps.parse-command.outputs.valid == 'true' }}
+        run: |
+          # check if running on main branch
+          if [ "${{ steps.get-pr-infos.outputs.base_ref }}" != 'main' ]; then
+            echo "Not running with base branch main, skipping checks"
+            echo "continue=true" >> "${GITHUB_OUTPUT}"
+          fi
+          # Check if PR is mergeable
+          declare mergeable
+          mergeable="$(gh api \
+            --jq '.mergeable' \
+            repos/{owner}/{repo}/pulls/${{ github.event.issue.number }})"
       - name: Receive IssueOps preview command
         id: dispatch-issueops-preview-command
         uses: github/command@v2
@@ -66,8 +125,8 @@ jobs:
         with:
           command: .up
           param_separator: ' '
-          skip_reviews: ${{ steps.get-base-ref.outputs.inner_base_ref == 'main' && 'false' || 'true' }}
-          skip_ci: ${{ steps.get-base-ref.outputs.inner_base_ref == 'main' && 'false' || 'true' }}
+          skip_reviews: ${{ steps.get-pr-infos.outputs.inner_base_ref == 'main' && 'false' || 'true' }}
+          skip_ci: ${{ steps.get-pr-infos.outputs.inner_base_ref == 'main' && 'false' || 'true' }}
           permissions: write,admin
           reaction: eyes
           failure_reaction: x
