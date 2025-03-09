@@ -36,7 +36,6 @@ jobs:
         run: |
           declare pr_infos
           pr_infos="$(gh api \
-            --jq '.base.ref' \
             repos/{owner}/{repo}/pulls/${{ github.event.issue.number }})"
           if [ -z "${pr_infos}" ]; then
             echo "Failed to determine PR infos, got ${pr_infos}"
@@ -67,6 +66,14 @@ jobs:
           fi
           echo "Ref is ${ref}"
           echo "ref=${ref}" >> "${GITHUB_OUTPUT}"
+          declare mergeable_state
+          mergeable_state="$(jq -r '.mergeable_state' <<< "${pr_infos}")"
+          if [ -z "${mergeable_state}" ]; then
+            echo "Failed to determine mergeable state, got ${mergeable_state}"
+            exit 1
+          fi
+          echo "Mergeable state is ${mergeable_state}"
+          echo "mergeable_state=${mergeable_state}" >> "${GITHUB_OUTPUT}"
       - name: Parse command
         id: parse-command
         run: |
@@ -101,60 +108,22 @@ jobs:
             echo "Not running with base branch main, skipping checks"
             echo "continue=true" >> "${GITHUB_OUTPUT}"
           fi
-          # Check if PR is mergeable
-          declare mergeable
-          mergeable="$(gh api \
-            --jq '.mergeable' \
-            repos/{owner}/{repo}/pulls/${{ github.event.issue.number }})"
-      - name: Receive IssueOps preview command
-        id: dispatch-issueops-preview-command
-        uses: github/command@v2
-        with:
-          command: .preview
-          param_separator: ' '
-          skip_reviews: true
-          skip_ci: true
-          permissions: write,admin
-          reaction: eyes
-          failure_reaction: x
-          success_reaction: rocket
-      - name: Receive IssueOps up command
-        id: dispatch-issueops-up-command
-        if: ${{ steps.dispatch-issueops-preview-command.outputs.continue != 'true' }}
-        uses: github/command@v2
-        with:
-          command: .up
-          param_separator: ' '
-          skip_reviews: ${{ steps.get-pr-infos.outputs.inner_base_ref == 'main' && 'false' || 'true' }}
-          skip_ci: ${{ steps.get-pr-infos.outputs.inner_base_ref == 'main' && 'false' || 'true' }}
-          permissions: write,admin
-          reaction: eyes
-          failure_reaction: x
-          success_reaction: rocket
-      - name: Override outputs
-        id: override-outputs
-        run: |
-          if ${{ steps.dispatch-issueops-preview-command.outputs.continue == 'true' }} ; then
+          if [ "${{ steps.get-pr-infos.outputs.mergeable_state }}" != 'clean' ]; then
+            echo "PR is not mergeable, skipping checks"
             echo "continue=true" >> "${GITHUB_OUTPUT}"
-            echo "command=preview" >> "${GITHUB_OUTPUT}"
-            echo "sha=${{ steps.dispatch-issueops-preview-command.outputs.sha }}" >> "${GITHUB_OUTPUT}"
-            echo "ref=${{ steps.dispatch-issueops-preview-command.outputs.ref }}" >> "${GITHUB_OUTPUT}"
-            echo "base_ref=${{ steps.dispatch-issueops-preview-command.outputs.base_ref }}" >> "${GITHUB_OUTPUT}"
-            echo "actor=${{ steps.dispatch-issueops-preview-command.outputs.actor }}" >> "${GITHUB_OUTPUT}"
-            echo "params=${{ steps.dispatch-issueops-preview-command.outputs.params }}" >> "${GITHUB_OUTPUT}"
-            echo "issue_number=${{ steps.dispatch-issueops-preview-command.outputs.issue_number }}" >> "${GITHUB_OUTPUT}"
-          elif ${{ steps.dispatch-issueops-up-command.outputs.continue == 'true' }} ; then
-            echo "continue=true" >> "${GITHUB_OUTPUT}"
-            echo "command=up" >> "${GITHUB_OUTPUT}"
-            echo "sha=${{ steps.dispatch-issueops-up-command.outputs.sha }}" >> "${GITHUB_OUTPUT}"
-            echo "ref=${{ steps.dispatch-issueops-up-command.outputs.ref }}" >> "${GITHUB_OUTPUT}"
-            echo "base_ref=${{ steps.dispatch-issueops-up-command.outputs.base_ref }}" >> "${GITHUB_OUTPUT}"
-            echo "actor=${{ steps.dispatch-issueops-up-command.outputs.actor }}" >> "${GITHUB_OUTPUT}"
-            echo "params=${{ steps.dispatch-issueops-up-command.outputs.params }}" >> "${GITHUB_OUTPUT}"
-            echo "issue_number=${{ steps.dispatch-issueops-up-command.outputs.issue_number }}" >> "${GITHUB_OUTPUT}"
-          else
-            echo "continue=false" >> "${GITHUB_OUTPUT}"
           fi
+      - name: Comment on non-continue
+        id: comment-on-non-continue
+        if: ${{ steps.check-requirements.outputs.continue != 'true' }}
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          edit-mode: append
+          append-separator: newline
+          body: |
+            <!-- comment-on-non-continue -->
+
+            :warning: Invalid request, reason is **${{ steps.parse-command.outputs.valid != 'true' && 'invalid command' || 'PR is not mergeable' }}**
 
   start-deployment:
     name: Start deployment
