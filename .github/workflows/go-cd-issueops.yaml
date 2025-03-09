@@ -84,30 +84,11 @@ jobs:
       - dispatch
     runs-on: ubuntu-latest
     outputs:
-      target_env: ${{ steps.output-target-env.outputs.target_env }}
       deployment_id: ${{ steps.start-deployment.outputs.deployment_id }}
     permissions:
       pull-requests: write
       deployments: write
     steps:
-      - name: Output target environment
-        id: output-target-env
-        if: ${{ needs.dispatch.outputs.continue == 'true' }}
-        run: |
-          declare base_ref
-          base_ref="${{ needs.dispatch.outputs.base_ref }}"
-          if [ -z "${base_ref}" ]; then
-            echo "Failed to determine base ref, got ${base_ref}"
-            exit 1
-          fi
-          declare target_env
-          if [[ "${base_ref}" == "main" ]]; then
-            target_env="next"
-          else
-            target_env="dev"
-          fi
-          echo "target_env=${target_env}" >> "${GITHUB_OUTPUT}"
-          echo "Set target environment to ${target_env}"
       - name: Comment deploy start
         id: comment-deploy-start
         if: ${{ needs.dispatch.outputs.continue == 'true' }}
@@ -121,7 +102,7 @@ jobs:
 
             ## Deployment details :rocket:
 
-            Deploying to **[${{ steps.output-target-env.outputs.target_env }}](../deployments/${{ steps.output-target-env.outputs.target_env }})**
+            Deploying to **[${{ needs.dispatch.outputs.base_ref }}](../deployments/${{ needs.dispatch.outputs.base_ref }})**
 
             [Workflow run](../actions/runs/${{ github.run_id }})
       # Checkout is useful for {owner} and {repo} placeholders in gh api command
@@ -143,7 +124,7 @@ jobs:
           fi
           echo "Ref is ${ref}"
           declare target_env
-          target_env="${{ steps.output-target-env.outputs.target_env }}"
+          target_env="${{ needs.dispatch.outputs.base_ref }}"
           if [ -z "${target_env}" ]; then
             echo "Failed to determine target environment, got ${target_env}"
             exit 1
@@ -241,14 +222,13 @@ jobs:
       - get-deploys-list
     if: ${{ needs.dispatch.outputs.continue == 'true' }}
     concurrency:
-      # Same group as go-cd, target_env matches branch name
-      group: go-cd-${{ needs.start-deployment.outputs.target_env }}
+      group: go-cd-${{ needs.dispatch.outputs.base_ref }}
     permissions:
       contents: read
       packages: read
       pull-requests: write
     runs-on: ubuntu-latest
-    environment: ${{ needs.start-deployment.outputs.target_env }}
+    environment: ${{ needs.dispatch.outputs.base_ref }}
     strategy:
       matrix:
         deploy: ${{ fromJSON(needs.get-deploys-list.outputs.deployment-dirs-list) }}
@@ -264,7 +244,7 @@ jobs:
         uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
         with:
           command: ${{ needs.dispatch.outputs.params }}
-          environment: ${{ needs.start-deployment.outputs.target_env }}
+          environment: ${{ needs.dispatch.outputs.base_ref }}
 
   finish-deployment:
     name: Comment deploy end
