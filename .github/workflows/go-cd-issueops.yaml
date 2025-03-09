@@ -316,7 +316,7 @@ jobs:
         with:
           comment-id: ${{ github.event.comment.id }}
           reactions-edit-mode: replace
-          reactions: '+1'
+          reactions: hooray
 
   finish-deployment:
     name: Comment deploy end
