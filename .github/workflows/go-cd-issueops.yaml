@@ -519,4 +519,6 @@ jobs:
           body: |
             <!-- comment-rollback -->
 
-            Outcome is **${{ needs.rollback.result == 'success' && 'success :white_check_mark:' || 'failure :x:' }}**. Rollbacked to [${{ needs.rollback.outputs.latest-deploy-tag }}](${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ needs.rollback.outputs.latest-deploy-tag }})
+            Outcome is **${{ needs.rollback.result == 'success' && 'success :white_check_mark:' || 'failure :x:' }}**
+
+            Rollbacked to [${{ needs.rollback.outputs.latest-deploy-tag }}](${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ needs.rollback.outputs.latest-deploy-tag }})
