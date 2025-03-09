@@ -138,7 +138,7 @@ jobs:
               valid=false
             else
               echo "rollback_sha=${params[0]}" >> "${GITHUB_OUTPUT}"
-              echo "Set output rollback sha to ${rollback_sha}"
+              echo "Set output rollback sha to ${params[0]}"
             fi
           else
             command=unknown
