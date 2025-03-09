@@ -303,7 +303,7 @@ jobs:
     needs:
       - dispatch
       - deploy
-    if: ${{ needs.dispatch.outputs.base_ref == 'main' && needs.deploy.result == 'success' }}
+    if: ${{ needs.dispatch.outputs.base_ref == 'main' && needs.dispatch.outputs.command == 'up' && needs.deploy.result == 'success' }}
     permissions:
       contents: write
     runs-on: ubuntu-latest
