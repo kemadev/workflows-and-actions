@@ -16,6 +16,11 @@ inputs:
     required: false
     default: 'latest'
 
+outputs:
+  latest-deploy-tag:
+    description: Latest successful deploy tag
+    value: ${{ steps.checkout-to-latest-sucessful-deploy.outputs.checkout_target }}
+
 runs:
   using: composite
   steps:
@@ -34,3 +39,4 @@ runs:
         fi
         echo "Checking out to ${checkout_target}"
         git checkout "${checkout_target}"
+        echo "latest-deploy-tag=${checkout_target}" >> "${GITHUB_OUTPUT}"

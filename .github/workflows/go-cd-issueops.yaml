@@ -360,6 +360,8 @@ jobs:
       contents: read
       packages: read
       pull-requests: write
+    outputs:
+      latest-deploy-tag: ${{ steps.checkout-to-latest-sucessful-deploy.outputs.checkout_target }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -383,8 +385,8 @@ jobs:
           build-artifact-name: rollback-build-outputs
           environment: ${{ needs.dispatch.outputs.base_ref }}
 
-  warn-rollback:
-    name: Comment deploy end
+  comment-rollback:
+    name: Comment rollback
     needs:
       - dispatch
       - rollback
@@ -394,14 +396,14 @@ jobs:
       deployments: write
     runs-on: ubuntu-latest
     steps:
-      - name: Comment deploy end
-        id: warn-rollback
+      - name: Comment rollback
+        id: comment-rollback
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ github.event.comment.id }}
           edit-mode: append
           append-separator: newline
           body: |
-            <!-- warn-rollback -->
+            <!-- comment-rollback -->
 
-            :hourglass_flowing_sand: Rollback outcome is **${{ needs.rollback.result == 'success' && 'success :white_check_mark:' || 'failure :x:' }}**
+            :hourglass_flowing_sand: Rollback to ${{ github.repositoryUrl }}/releases/tag/${{ needs.rollback.outputs.latest-deploy-tag }} outcome is **${{ needs.rollback.result == 'success' && 'success :white_check_mark:' || 'failure :x:' }}**
