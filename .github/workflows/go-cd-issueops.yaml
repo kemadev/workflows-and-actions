@@ -217,13 +217,6 @@ jobs:
             exit 1
           fi
           echo "Repository is ${repo}"
-          declare pull_request_number
-          pull_request_number="${{ needs.dispatch.outputs.issue_number }}"
-          if [ -z "${pull_request_number}" ]; then
-            echo "Failed to determine pull request number, got ${pull_request_number}"
-            exit 1
-          fi
-          echo "Pull request number is ${pull_request_number}"
           declare deployment_id
           deployment_id="$(gh api \
             --jq '.id' \
@@ -233,7 +226,7 @@ jobs:
             -f task='deploy' \
             -f required_contexts\[\] \
             -f environment="${target_env}" \
-            -f description="Deploy request from IssueOps, initiated by ${github_actor} on ${repo}#${pull_request_number}")"
+            -f description="Deploy request from IssueOps, initiated by ${github_actor} on ${repo}#${{ github.event.issue.number }}")"
           if [ -z "${deployment_id}" ]; then
             echo "Failed to start deployment"
             exit 1
