@@ -244,7 +244,6 @@ jobs:
         with:
           command: ${{ needs.dispatch.outputs.params }}
           environment: ${{ needs.dispatch.outputs.base_ref }}
-      - run: exit 1
 
   finish-deployment:
     name: Comment deploy end
@@ -339,8 +338,6 @@ jobs:
       - name: Checkout to latest sucessful deploy
         id: checkout-to-latest-sucessful-deploy
         uses: kemadev/workflows-and-actions/.github/actions/checkout-to-latest-successful-deploy@main
-        with:
-          force-rollback-to: ${{ github.event.inputs.force-rollback-to }}
       - name: Build code
         id: build
         uses: kemadev/workflows-and-actions/.github/actions/go-build@main
@@ -378,8 +375,6 @@ jobs:
       - name: Checkout to latest sucessful deploy
         id: checkout-to-latest-sucessful-deploy
         uses: kemadev/workflows-and-actions/.github/actions/checkout-to-latest-successful-deploy@main
-        with:
-          force-rollback-to: ${{ github.event.inputs.force-rollback-to }}
       - name: Go deploy
         id: go-deploy
         uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
