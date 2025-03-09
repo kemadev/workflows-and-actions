@@ -148,9 +148,13 @@ jobs:
             echo "PR is not mergeable, aborting"
             echo "continue=false" >> "${GITHUB_OUTPUT}"
           fi
+          if [ "${{ steps.parse-command.outputs.command }}" == 'rollback' ]; then
+            echo "Rollback command, skipping checks and fast forwarding to rollback"
+            echo "continue=false" >> "${GITHUB_OUTPUT}"
+          fi
       - name: Comment on non-continue
         id: comment-on-non-continue
-        if: ${{ steps.check-requirements.outputs.continue != 'true' }}
+        if: ${{ steps.check-requirements.outputs.continue != 'true' && steps.parse-command.outputs.command != 'rollback' }}
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ github.event.comment.id }}
@@ -164,7 +168,7 @@ jobs:
             :warning: Invalid request, reason is **${{ steps.parse-command.outputs.valid != 'true' && 'invalid command' || 'PR is not mergeable' }}**
       - name: React to comment - end
         id: react-to-comment-end
-        if: ${{ steps.check-requirements.outputs.continue == 'true' }}
+        if: ${{ steps.check-requirements.outputs.continue == 'true' || steps.parse-command.outputs.command == 'rollback' }}
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ github.event.comment.id }}
