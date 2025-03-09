@@ -419,6 +419,7 @@ jobs:
     permissions:
       contents: read
       packages: read
+      pull-requests: write
     outputs:
       deployment-dirs-list: ${{ steps.get-deploys-list.outputs.deployment-dirs-list }}
     runs-on: ubuntu-latest
