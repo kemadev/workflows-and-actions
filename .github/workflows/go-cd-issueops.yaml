@@ -436,7 +436,7 @@ jobs:
 
             ## Rollback details :stopwatch:
 
-            Rollbacking to **[${{ (needs.dispatch.outputs.rollback_sha == '' && 'latest') || needs.dispatch.outputs.rollback_sha }}](../commit/${{ needs.dispatch.outputs.rollback_sha }})**
+            Rollbacking to **[${{ (needs.dispatch.outputs.rollback_sha == '' && 'latest') || needs.dispatch.outputs.rollback_sha }}](../commit/${{ ((needs.dispatch.outputs.rollback_sha == '' || needs.dispatch.outputs.rollback_sha == 'latest') && 'latest') || needs.dispatch.outputs.rollback_sha }})**
 
             [Workflow run](../actions/runs/${{ github.run_id }})
       - name: Checkout
