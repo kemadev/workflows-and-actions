@@ -31,12 +31,14 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Download build artifacts
-      id: download-build-artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: ${{ inputs.build-artifact-name }}
-        path: ${{ inputs.build-artifact-dir }}
+    - run: echo Deploying Go code
+      shell: bash
+    # - name: Download build artifacts
+    #   id: download-build-artifacts
+    #   uses: actions/download-artifact@v4
+    #   with:
+    #     name: ${{ inputs.build-artifact-name }}
+    #     path: ${{ inputs.build-artifact-dir }}
     # - name: Set up Go
     #   id: setup-go
     #   uses: actions/setup-go@v5
