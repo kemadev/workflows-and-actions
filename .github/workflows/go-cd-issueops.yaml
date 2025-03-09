@@ -28,6 +28,11 @@ jobs:
     permissions:
       pull-requests: write
     steps:
+      # Checkout is useful for {owner} and {repo} placeholders in gh api command
+      - name: Checkout
+        id: checkout
+        if: ${{ needs.dispatch.outputs.continue == 'true' }}
+        uses: actions/checkout@v4
       - name: Get base ref
         id: get-base-ref
         env:
