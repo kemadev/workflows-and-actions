@@ -361,7 +361,7 @@ jobs:
       packages: read
       pull-requests: write
     outputs:
-      latest-deploy-tag: ${{ steps.checkout-to-latest-sucessful-deploy.outputs.checkout_target }}
+      latest-deploy-tag: ${{ steps.checkout-to-latest-sucessful-deploy.outputs.latest-deploy-tag }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
