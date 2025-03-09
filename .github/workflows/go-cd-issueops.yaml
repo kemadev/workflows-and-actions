@@ -352,7 +352,7 @@ jobs:
         id: go-deploy
         uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
         with:
-          command: ${{ needs.dispatch.outputs.params }}
+          command: ${{ needs.dispatch.outputs.command }}
           environment: ${{ needs.dispatch.outputs.base_ref }}
       - name: React to comment - deploy success
         id: react-to-comment-deploy-success
@@ -517,8 +517,9 @@ jobs:
         id: go-deploy
         uses: kemadev/workflows-and-actions/.github/actions/go-deploy@main
         with:
-          build-artifact-name: rollback-build-outputs
+          command: up
           environment: ${{ needs.dispatch.outputs.base_ref }}
+          build-artifact-name: rollback-build-outputs
 
   comment-rollback:
     name: Comment rollback
