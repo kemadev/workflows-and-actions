@@ -163,9 +163,14 @@ jobs:
         id: check-requirements
         if: ${{ steps.parse-command.outputs.valid == 'true' }}
         run: |
-          if [ "${{ steps.parse-command.outputs.command }}" == 'rollback' || "${{ steps.parse-command.outputs.command }}" == 'preview' ]; then
+          if [ "${{ steps.parse-command.outputs.command }}" == 'rollback' ]; then
             echo "Rollback command, skipping checks and fast forwarding to rollback"
             echo "continue=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          if [ "${{ steps.parse-command.outputs.command }}" == 'preview' ]; then
+            echo "Preview command, skipping checks"
+            echo "continue=true" >> "${GITHUB_OUTPUT}"
             exit 0
           fi
           if [ "${{ steps.get-pr-infos.outputs.base_ref }}" != 'main' ]; then
