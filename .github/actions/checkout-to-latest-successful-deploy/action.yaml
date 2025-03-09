@@ -19,7 +19,7 @@ inputs:
 outputs:
   latest-deploy-tag:
     description: Latest successful deploy tag
-    value: ${{ steps.checkout-to-latest-sucessful-deploy.outputs.checkout_target }}
+    value: ${{ steps.checkout-to-latest-sucessful-deploy.outputs.latest-deploy-tag }}
 
 runs:
   using: composite
