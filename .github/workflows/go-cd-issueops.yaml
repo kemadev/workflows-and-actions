@@ -22,6 +22,7 @@ jobs:
       params: ${{ steps.parse-command.outputs.params }}
       command: ${{ steps.parse-command.outputs.command }}
       continue: ${{ steps.check-requirements.outputs.continue }}
+      rollback_sha: ${{ steps.parse-command.outputs.rollback_sha }}
     permissions:
       contents: read
       pull-requests: write
@@ -102,6 +103,20 @@ jobs:
             valid=true
             echo "Parsed command is up"
             echo "Params are ${params}"
+          else
+          elif [ "${command[0]}" == ".rollback" ]; then
+            command=up
+            params=${command[@]:1}
+            valid=true
+            echo "Parsed command is rollback"
+            echo "Params are ${params}"
+            if [ -z "${params}" ]; then
+              echo "Failed to determine rollback params, got ${params}"
+              valid=false
+            else
+              echo "rollback_sha=${params[0]}" >> "${GITHUB_OUTPUT}"
+              echo "Set output rollback sha to ${rollback_sha}"
+            fi
           else
             command=unknown
             valid=false
@@ -394,7 +409,7 @@ jobs:
     needs:
       - dispatch
       - deploy
-    if: ${{ always() && needs.dispatch.outputs.command == 'up' && needs.deploy.result != 'success' }}
+    if: ${{ always() && needs.dispatch.outputs.command == 'up' && needs.deploy.result != 'success' || needs.dispatch.outputs.command == 'rollback' }}
     permissions:
       contents: read
       packages: read
@@ -411,6 +426,8 @@ jobs:
       - name: Checkout to latest sucessful deploy
         id: checkout-to-latest-sucessful-deploy
         uses: kemadev/workflows-and-actions/.github/actions/checkout-to-latest-successful-deploy@main
+        with:
+          force-rollback-to: ${{ needs.dispatch.outputs.rollback_sha }}
       - name: Build code
         id: build
         uses: kemadev/workflows-and-actions/.github/actions/go-build@main
