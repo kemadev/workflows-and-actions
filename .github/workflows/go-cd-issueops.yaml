@@ -244,6 +244,7 @@ jobs:
         with:
           command: ${{ needs.dispatch.outputs.params }}
           environment: ${{ needs.dispatch.outputs.base_ref }}
+      - run: exit 1
 
   finish-deployment:
     name: Comment deploy end
