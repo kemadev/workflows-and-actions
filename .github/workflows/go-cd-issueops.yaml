@@ -382,3 +382,26 @@ jobs:
         with:
           build-artifact-name: rollback-build-outputs
           environment: ${{ needs.dispatch.outputs.base_ref }}
+
+  warn-rollback:
+    name: Comment deploy end
+    needs:
+      - dispatch
+      - rollback
+    if: ${{ always() }}
+    permissions:
+      pull-requests:  write
+      deployments: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment deploy end
+        id: warn-rollback
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          edit-mode: append
+          append-separator: newline
+          body: |
+            <!-- warn-rollback -->
+
+            :hourglass_flowing_sand: Rollback outcome is **${{ needs.rollback.result == 'success' && 'success :white_check_mark:' || 'failure :x:' }}**
