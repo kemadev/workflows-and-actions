@@ -66,8 +66,8 @@ jobs:
         with:
           command: .up
           param_separator: ' '
-          skip_reviews: ${{ steps.get-base-ref.outputs.inner_base_ref == 'main' && false || true }}
-          skip_ci: ${{ steps.get-base-ref.outputs.inner_base_ref == 'main' && false || true }}
+          skip_reviews: ${{ steps.get-base-ref.outputs.inner_base_ref == 'main' && 'false' || 'true' }}
+          skip_ci: ${{ steps.get-base-ref.outputs.inner_base_ref == 'main' && 'false' || 'true' }}
           permissions: write,admin
           reaction: eyes
           failure_reaction: x
