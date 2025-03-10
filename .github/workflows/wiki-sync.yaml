@@ -1,0 +1,43 @@
+name: Wiki - Sync
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'doc/**.md'
+  workflow_call: {}
+  workflow_dispatch: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  wiki-sync:
+    name: Wiki - Sync
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Checkout wiki
+        id: checkout-wiki
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: dist/wiki
+      - name: Sync wiki
+        id: sync-wiki
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "kemadev+github-actions[bot]@users.noreply.github.com"
+          cd dist/wiki
+          rm -rf *
+          cp -r ${{ github.workspace }}/doc/* .
+          rm -f PURPOSE.md
+          git add .
+          git commit -m "Sync wiki - ${{ github.sha }}"
+          git push
