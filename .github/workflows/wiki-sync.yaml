@@ -39,5 +39,5 @@ jobs:
           cp -r ${{ github.workspace }}/doc/* .
           rm -f PURPOSE.md
           git add .
-          git commit -m "Sync wiki - ${{ github.sha }}"
+          git commit -m "Sync wiki - ${{ github.sha }} - ${{ github.run_id }}"
           git push
