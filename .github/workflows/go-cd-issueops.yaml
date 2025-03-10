@@ -16,6 +16,7 @@ jobs:
     if: ${{ github.event.issue.pull_request }}
     runs-on: ubuntu-latest
     outputs:
+      actor_permission: ${{ steps.check-actor-permissions.outputs.permission }}
       sha: ${{ steps.get-pr-infos.outputs.sha }}
       ref: ${{ steps.get-pr-infos.outputs.ref }}
       base_ref: ${{ steps.get-pr-infos.outputs.base_ref }}
@@ -58,6 +59,7 @@ jobs:
             exit 1
           fi
           echo "Permission is ${permission}"
+          echo "permission=${permission}" >> "${GITHUB_OUTPUT}"
           if [ "${permission}" != 'admin' && "${permission}" != 'write' ]; then
             echo "Actor is not an admin, aborting"
             exit 1
@@ -182,8 +184,15 @@ jobs:
             exit 0
           fi
           if [ "${{ steps.get-pr-infos.outputs.mergeable_state }}" != 'clean' ]; then
-            echo "PR is not mergeable, aborting"
-            echo "continue=false" >> "${GITHUB_OUTPUT}"
+            if [ "${{ steps.parse-command.outputs.params }}" != '--force' ]; then
+              echo "PR on main is not mergeable, aborting"
+              echo "continue=false" >> "${GITHUB_OUTPUT}"
+              exit 0
+            else if [ "${{ steps.check-actor-permissions.outputs.permission }}" == 'admin' ]; then
+              echo "PR on main is not mergeable, but --force flag is set, continuing"
+              echo "continue=true" >> "${GITHUB_OUTPUT}"
+              exit 0
+            fi
             exit 0
           fi
       - name: Comment on non-continue
