@@ -20,15 +20,15 @@ jobs:
     permissions:
       contents: write
     steps:
-      # - name: Checkout
-      #   id: checkout
-      #   uses: actions/checkout@v4
-      # - name: Checkout wiki
-      #   id: checkout-wiki
-      #   uses: actions/checkout@v4
-      #   with:
-      #     repository: ${{ github.repository }}.wiki
-      #     path: dist/wiki
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Checkout wiki
+        id: checkout-wiki
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: dist/wiki
       - name: Sync wiki
         id: sync-wiki
         env:
