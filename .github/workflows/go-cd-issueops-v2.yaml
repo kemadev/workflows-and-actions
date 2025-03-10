@@ -1,0 +1,29 @@
+name: Go - CD IssueOps
+
+on:
+  issue_comment:
+    types:
+      - created
+  workflow_call: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  dispatch:
+    name: Dispatch IssueOps commands
+    if: ${{ github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Debug
+        id: issue-comment-dispatch
+        uses: kemadev/workflows-and-actions/.github/actions/issue-comment-dispatch@main
+        with:
+          command: ${{ github.event.comment.body }}
+          sha: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          base_ref: ${{ github.event.pull_request.base.ref }}
