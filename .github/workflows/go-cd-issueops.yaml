@@ -188,7 +188,7 @@ jobs:
               echo "PR on main is not mergeable, aborting"
               echo "continue=false" >> "${GITHUB_OUTPUT}"
               exit 0
-            else if [ "${{ steps.check-actor-permissions.outputs.permission }}" == 'admin' ]; then
+            elif [ "${{ steps.check-actor-permissions.outputs.permission }}" == 'admin' ]; then
               echo "PR on main is not mergeable, but --force flag is set, continuing"
               echo "continue=true" >> "${GITHUB_OUTPUT}"
               exit 0
