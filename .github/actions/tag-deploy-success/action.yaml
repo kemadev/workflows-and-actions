@@ -18,7 +18,12 @@ runs:
       id: tag-deploy-success
       shell: bash
       run: |
-        git config user.name "$github-actions[bot]"
+        git config user.name "github-actions[bot]"
         git config user.email "kemadev+github-actions[bot]@users.noreply.github.com"
-        git tag -a "deploy-success-${{ inputs.deployed-ref }}-${{ github.run_id }}" -m "Deploy success"
-        git push --tags
+        git clone https://github.com/${{ github.repository }} ${{ runner.temp }}/repo
+        cd ${{ runner.temp }}/repo
+        rm -rf *
+        cp -r ${{ github.workspace }}/* .
+        git add .
+        git commit -m "Sync wiki - ${{ github.run_id }}"
+        git push
