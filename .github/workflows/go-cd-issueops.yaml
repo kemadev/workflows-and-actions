@@ -23,7 +23,6 @@ jobs:
         id: issue-comment-dispatch
         uses: kemadev/workflows-and-actions/.github/actions/issue-comment-dispatch@main
         with:
-          command: ${{ github.event.comment.body }}
-          sha: ${{ github.event.pull_request.head.sha }}
-          ref: ${{ github.event.pull_request.head.ref }}
-          base_ref: ${{ github.event.pull_request.base.ref }}
+          issue-number: ${{ github.event.issue.number }}
+          comment-id: ${{ github.event.comment.id }}
+          comment-body: ${{ github.event.comment.body }}
