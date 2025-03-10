@@ -109,27 +109,30 @@ jobs:
           echo "mergeable_state=${mergeable_state}" >> "${GITHUB_OUTPUT}"
       - name: Parse command
         id: parse-command
+        env:
+          # mitigate script injection
+          COMMENT_BODY: ${{ github.event.comment.body }}
         run: |
           declare valid
           declare command
           declare params
-          command=(${{ github.event.comment.body }})
+          command=( ${COMMENT_BODY} )
           echo "Command is ${command[@]}"
           if [ "${command[0]}" == ".preview" ]; then
             command=preview
-            params=${command[@]:1}
+            params="${command[@]:1}"
             valid=true
             echo "Parsed command is preview"
             echo "Params are ${params}"
           elif [ "${command[0]}" == ".up" ]; then
             command=up
-            params=${command[@]:1}
+            params="${command[@]:1}"
             valid=true
             echo "Parsed command is up"
             echo "Params are ${params}"
           elif [ "${command[0]}" == ".rollback" ]; then
             command=rollback
-            params=${command[@]:1}
+            params="${command[@]:1}"
             valid=true
             echo "Parsed command is rollback"
             echo "Params are ${params}"
