@@ -268,13 +268,15 @@ func createIssueIfNeeded() error {
 
 func createOrUpdateIssue() error {
 	slog.Debug("START createOrUpdateIssue")
-	issueNumber, err := getIssueNumber()
+	issueNum, err := getIssueNumber()
+	issueNumber = issueNum
 	if err != nil {
 		return fmt.Errorf("Failed to get issue number: %s", err)
 	}
 	if issueNumber == -1 {
 		slog.Info("Issue not found, creating a new one")
-		issueNumber, err := createIssue()
+		issueNum, err := createIssue()
+		issueNumber = issueNum
 		if err != nil {
 			return fmt.Errorf("Failed to create issue: %s", err)
 		}
