@@ -1,0 +1,123 @@
+name: Issue comment dispatch
+description: React to issue comments
+
+author: kemadev
+branding:
+  icon: message-square
+  color: blue
+
+inputs:
+  issue-number:
+    description: Issue number
+    required: true
+  comment-id:
+    description: Comment ID
+    required: true
+  comment-body:
+    description: Comment body
+    required: true
+
+outputs:
+  permission:
+    description: Actor permissions
+    value: ${{ steps.check-actor-permissions.outputs.permission }}
+  command:
+    description: Command
+    value: ${{ steps.parse-comment-body.outputs.command }}
+  args:
+    description: Arguments
+    value: ${{ steps.parse-comment-body.outputs.args }}
+
+runs:
+  using: composite
+  steps:
+    - name: Notify message has been received
+      id: notify-received
+      uses: peter-evans/create-or-update-comment@v4
+      with:
+        comment-id: ${{ inputs.comment-id }}
+        reactions-edit-mode: replace
+        reactions: eyes
+    - name: Check actor permissions
+      id: check-actor-permissions
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { data: permissions } = await github.repos.getCollaboratorPermissionLevel({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            username: context.actor
+          });
+          console.log(`Actor permissions are ${permissions.permission}`);
+          core.setOutput('permission', permissions.permission);
+          if (permissions.permission !== 'admin' && permissions.permission !== 'write') {
+            core.setOutput('fail', 'Actor does not have required permissions');
+          }
+    - name: Parse comment body
+      id: parse-comment-body
+      if: ${{ steps.check-actor-permissions.outputs.fail == '' }}
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const commentBody = context.payload.comment.body;
+          const [command, ...args] = commentBody.split(' ');
+          if (command.startsWith('.')) {
+            command = command.slice(1);
+          } else {
+            core.setOutput('fail', `Command ${command} does not start with .`);
+          }
+          console.log(`Command is ${command}`);
+          core.setOutput('command', command);
+          console.log(`Arguments are ${args}`);
+          core.setOutput('args', args);
+          const supportedCommands = ['preview', 'up', 'rollback'];
+          if (!supportedCommands.includes(command)) {
+            core.setOutput('fail', `Command ${command} is not supported`);
+          }
+    - name: Check requirements
+      id: check-requirements
+      if: ${{ steps.parse-comment-body.outputs.fail == '' }}
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const command = core.getInput('command');
+          const args = core.getInput('args');
+          const baseRef = core.getInput('base_ref');
+          actorPermission = core.getInput('permission');
+          if (command === 'up' && baseRef === 'main') {
+            if (args[0] === '--force' && actorPermission === 'admin') {
+              console.log('Force deployment requested by admin');
+            } else {
+              const { data: pr } = await github.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.issue.number
+              });
+              if (pr.mergeable_state !== 'clean') {
+                core.setOutput('fail', 'Pull request is not mergeable');
+              }
+            }
+          }
+          console.log('Requirements are met');
+    - name: Notify message has been treated
+      id: notify-treated
+      if: ${{ steps.check-requirements.outputs.fail == '' }}
+      uses: peter-evans/create-or-update-comment@v4
+      with:
+        comment-id: ${{ inputs.comment-id }}
+        reactions-edit-mode: replace
+        reactions: rocket
+    - name: Notify message has failed
+      id: notify-failed
+      if: ${{ steps.check-requirements.outputs.fail != '' }}
+      uses: peter-evans/create-or-update-comment@v4
+      with:
+        comment-id: ${{ inputs.comment-id }}
+        reactions-edit-mode: replace
+        reactions: confused
+        edit-mode: append
+        append-separator: newline
+        body: |
+          <!-- notify-failed -->
+
+          ${{ steps.check-requirements.outputs.fail }}
