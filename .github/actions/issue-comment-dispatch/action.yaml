@@ -94,10 +94,10 @@ runs:
       uses: actions/github-script@v7
       with:
         script: |
-          const command = core.getInput('command');
-          const args = core.getInput('args');
-          const baseRef = core.getInput('base_ref');
-          actorPermission = core.getInput('permission');
+          const command = core.getInput('command', { required: true });
+          const args = core.getInput('args', { required: true }).split(' ');
+          const baseRef = core.getInput('base_ref', { required: true });
+          actorPermission = core.getInput('permission', { required: true });
           console.log(`Command is ${command}`);
           console.log(`Arguments are ${args}`);
           console.log(`Base ref is ${baseRef}`);
