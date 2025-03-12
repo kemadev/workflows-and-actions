@@ -150,4 +150,6 @@ runs:
         body: |
           <!-- notify-failed -->
 
+          ## Action failed :x:
+
           ${{ steps.parse-comment-body.outputs.fail != '' && steps.parse-comment-body.outputs.fail || steps.check-requirements.outputs.fail != '' && steps.check-requirements.outputs.fail }}
