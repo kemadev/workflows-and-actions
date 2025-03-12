@@ -98,6 +98,7 @@ jobs:
         uses: kemadev/workflows-and-actions/.github/actions/tag-deploy-success@main
         with:
           deployed-ref: ${{ inputs.base_ref }}
+      - run: exit 1
 
   prepare-rollback:
     name: Prepare rollback
