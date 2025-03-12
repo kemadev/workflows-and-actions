@@ -143,6 +143,7 @@ jobs:
               repo: context.repo.repo,
               ref: '${{ inputs.ref }}',
               task: 'deploy',
+              required_contexts: [],
               environment: '${{ inputs.base_ref }}',
               description: `Deploy request from IssueOps, initiated by ${context.actor}`
             });
