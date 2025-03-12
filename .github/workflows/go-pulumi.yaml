@@ -136,8 +136,6 @@ jobs:
 
   build-code:
     name: Build code
-    needs:
-      - start-deployment
     permissions:
       contents: read
       packages: write
@@ -156,7 +154,6 @@ jobs:
   get-deploys-list:
     name: Get deploys list
     needs:
-      - start-deployment
       - build-code
     runs-on: ubuntu-latest
     permissions:
@@ -180,7 +177,6 @@ jobs:
   deploy:
     name: Deploy
     needs:
-      - start-deployment
       - get-deploys-list
     concurrency:
       group: go-cd-${{ inputs.base_ref }}
