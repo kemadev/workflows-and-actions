@@ -88,19 +88,34 @@ runs:
             core.setOutput('fail', `Command ${command} is not supported`);
             console.log(`Command ${command} is not supported`);
           }
-    - name: Check requirements
-      id: check-requirements
-      if: ${{ steps.parse-comment-body.outputs.fail == '' }}
+    - name: Get PR infos
+      id: get-pr-infos
       uses: actions/github-script@v7
       with:
         script: |
-          const command = core.getInput('command', { required: true });
-          const args = core.getInput('args', { required: true }).split(' ');
-          const baseRef = core.getInput('base_ref', { required: true });
-          actorPermission = core.getInput('permission', { required: true });
+          const { data: pr } = await github.rest.pulls.get({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.payload.issue.number
+          });
+          console.log(`Base ref is ${pr.base.ref}`);
+          core.setOutput('base_ref', pr.base.ref);
+          console.log(`Ref is ${pr.head.ref}`);
+          core.setOutput('ref', pr.head.ref);
+          console.log(`SHA is ${pr.head.sha}`);
+          core.setOutput('sha', pr.head.sha);
+    - name: Check requirements
+      id: check-requirements
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const command = '${{ steps.parse-comment-body.outputs.command }}';
           console.log(`Command is ${command}`);
+          const args = '${{ steps.parse-comment-body.outputs.args }}'.split(',');
           console.log(`Arguments are ${args}`);
+          const baseRef = '${{ steps.get-pr-infos.outputs.base_ref }}';
           console.log(`Base ref is ${baseRef}`);
+          const actorPermission = '${{ steps.check-actor-permissions.outputs.permission }}';
           console.log(`Actor permission is ${actorPermission}`);
           if (command === 'up' && baseRef === 'main') {
             console.log('Command is up and base ref is main');
@@ -120,23 +135,6 @@ runs:
           }
           console.log('Requirements are met');
           core.setOutput('continue', 'true');
-    - name: Get PR infos
-      id: get-pr-infos
-      if: ${{ steps.check-requirements.outputs.continue == 'true' }}
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const { data: pr } = await github.rest.pulls.get({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: context.payload.issue.number
-          });
-          console.log(`Base ref is ${pr.base.ref}`);
-          core.setOutput('base_ref', pr.base.ref);
-          console.log(`Ref is ${pr.head.ref}`);
-          core.setOutput('ref', pr.head.ref);
-          console.log(`SHA is ${pr.head.sha}`);
-          core.setOutput('sha', pr.head.sha);
     - name: Notify message has been treated
       id: notify-treated
       if: ${{ steps.parse-comment-body.outputs.fail == '' && steps.check-requirements.outputs.fail == '' }}
