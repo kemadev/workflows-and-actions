@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       continue: ${{ steps.issue-comment-dispatch.outputs.continue }}
+      command: ${{ steps.issue-comment-dispatch.outputs.command }}
     permissions:
       contents: read
       pull-requests: write
@@ -33,7 +34,7 @@ jobs:
     name: Run pulumi command
     needs:
       - dispatch
-    if: ${{ needs.dispatch.outputs.continue == 'true' }}
+    if: ${{ needs.dispatch.outputs.continue == 'true' && (needs.dispatch.outputs.command == 'preview' || needs.dispatch.outputs.command == 'up') }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
