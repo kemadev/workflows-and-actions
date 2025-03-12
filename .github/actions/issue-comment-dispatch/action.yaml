@@ -102,6 +102,7 @@ runs:
             }
           }
           console.log('Requirements are met');
+          core.setOutput('continue', 'true');
     - name: Notify message has been treated
       id: notify-treated
       if: ${{ steps.check-requirements.outputs.fail == '' }}

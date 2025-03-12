@@ -16,8 +16,8 @@ jobs:
     if: ${{ github.event.issue.pull_request }}
     runs-on: ubuntu-latest
     outputs:
-      continue: ${{ steps.issue-comment-dispatch.outputs.continue }}
       command: ${{ steps.issue-comment-dispatch.outputs.command }}
+      continue: ${{ steps.issue-comment-dispatch.outputs.continue }}
     permissions:
       contents: read
       pull-requests: write
