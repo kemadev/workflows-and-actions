@@ -111,7 +111,7 @@ runs:
         script: |
           const command = '${{ steps.parse-comment-body.outputs.command }}';
           console.log(`Command is ${command}`);
-          const args = '${{ steps.parse-comment-body.outputs.args }}'.split(',');
+          const args = '${{ steps.parse-comment-body.outputs.args }}'.split(' ');
           console.log(`Arguments are ${args}`);
           const baseRef = '${{ steps.get-pr-infos.outputs.base_ref }}';
           console.log(`Base ref is ${baseRef}`);
