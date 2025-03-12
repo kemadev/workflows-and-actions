@@ -205,7 +205,6 @@ jobs:
         with:
           command: ${{ inputs.command }}
           environment: ${{ inputs.base_ref }}
-      - run: exit 1
 
   finish-deployment:
     name: Finish deployment
