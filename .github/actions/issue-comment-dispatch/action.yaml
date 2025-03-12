@@ -92,7 +92,13 @@ runs:
       uses: actions/github-script@v7
       with:
         script: |
+          const knownCommands = ['up', 'preview'];
           const command = core.getInput('command');
+          if (!knownCommands.includes(command)) {
+            console.log(`Unsupported command ${command}`);
+            core.setOutput('fail', `Command ${command} is not supported`);
+            exit 0
+          }
           const args = core.getInput('args');
           const baseRef = core.getInput('base_ref');
           actorPermission = core.getInput('permission');
@@ -110,11 +116,6 @@ runs:
                 exit 0
               }
             }
-          }
-          if (command != 'up' && command != 'preview') {
-            console.log(`Unsupported command ${command}`);
-            core.setOutput('fail', `Command ${command} is not supported`);
-            exit 0
           }
           console.log('Requirements are met');
           core.setOutput('continue', 'true');
