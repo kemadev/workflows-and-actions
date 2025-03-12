@@ -30,6 +30,7 @@ runs:
           declare dest="${dir%/*}"
           echo "Copying ${dir} to ${dest}"
           cp -r "${{ github.workspace }}/dist/workflows-and-actions/${dir}" "${dest}"
+          echo "Copied ${dir} to ${dest}"
         done
     - name: Ignore git changes
       id: ignore-git-changes
@@ -40,5 +41,6 @@ runs:
           if [ -f "${dir}/PURPOSE.md" ]; then
             echo "Ignoring changes to ${dir}/PURPOSE.md"
             git update-index --assume-unchanged "${dir}/PURPOSE.md"
+            echo "Ignored changes to ${dir}/PURPOSE.md"
           fi
         done

@@ -64,6 +64,7 @@ runs:
           core.setOutput('permission', permissions.permission);
           if (permissions.permission !== 'admin' && permissions.permission !== 'write') {
             core.setOutput('fail', 'Actor does not have required permissions');
+            console.log('Actor does not have required permissions');
           }
     - name: Parse comment body
       id: parse-comment-body
@@ -85,6 +86,7 @@ runs:
           const supportedCommands = ['preview', 'up'];
           if (!supportedCommands.includes(command)) {
             core.setOutput('fail', `Command ${command} is not supported`);
+            console.log(`Command ${command} is not supported`);
           }
     - name: Check requirements
       id: check-requirements
@@ -97,6 +99,7 @@ runs:
           const baseRef = core.getInput('base_ref');
           actorPermission = core.getInput('permission');
           if (command === 'up' && baseRef === 'main') {
+            console.log('Command is up and base ref is main');
             if (args[0] === '--force' && actorPermission === 'admin') {
               console.log('Force deployment requested by admin');
             } else {
@@ -107,6 +110,7 @@ runs:
               });
               if (pr.mergeable_state !== 'clean') {
                 core.setOutput('fail', 'Pull request is not mergeable');
+                console.log(`Pull request is not mergeable, got state ${pr.mergeable_state}`);
               }
             }
           }
