@@ -38,6 +38,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      deployments: write
     uses: kemadev/workflows-and-actions/.github/workflows/go-cd.yaml@main
     with:
       command: ${{ needs.dispatch.outputs.command }}
