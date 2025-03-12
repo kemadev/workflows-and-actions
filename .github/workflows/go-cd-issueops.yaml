@@ -46,6 +46,6 @@ jobs:
     uses: kemadev/workflows-and-actions/.github/workflows/go-cd.yaml@main
     with:
       command: ${{ needs.dispatch.outputs.command }}
-      sha: ${{ github.event.issue.pull_request.head.sha }}
-      base_ref: ${{ github.event.issue.pull_request.base.ref }}
-      ref: ${{ github.event.issue.pull_request.head.ref }}
+      sha: ${{ needs.dispatch.outputs.sha }}
+      base_ref: ${{ needs.dispatch.outputs.ref }}
+      ref: ${{ needs.dispatch.outputs.ref }}
