@@ -174,6 +174,8 @@ jobs:
       - name: Get deploys list
         id: get-deploys-list
         uses: kemadev/workflows-and-actions/.github/actions/go-get-deploys-list@main
+        with:
+          reverse: ${{ inputs.is-rollback == 'true' }}
 
   deploy:
     name: Deploy

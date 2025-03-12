@@ -20,12 +20,16 @@ on:
         type: string
         default: main
       enable_rollback:
-        description: Enable rollback
+        description: Enable rollback in case of deployment failure
         type: boolean
         default: true
       issue-comment-id:
         description: Issue comment ID
         type: number
+      rollback:
+        description: Wether to rollback instead of deploying
+        type: boolean
+        default: false
   workflow_call:
     inputs:
       command:
@@ -45,12 +49,16 @@ on:
         type: string
         default: main
       enable_rollback:
-        description: Enable rollback
+        description: Enable rollback in case of deployment failure
         type: boolean
         default: true
       issue-comment-id:
         description: Issue comment ID
         type: number
+      rollback:
+        description: Wether to rollback instead of deploying
+        type: boolean
+        default: false
 
 defaults:
   run:
@@ -59,6 +67,7 @@ defaults:
 jobs:
   deploy:
     name: Deploy
+    if: ${{ inputs.rollback != 'true' }}
     permissions:
       contents: read
       deployments: write
@@ -76,7 +85,7 @@ jobs:
     name: Tag deploy success
     needs:
       - deploy
-    if: ${{ inputs.base_ref == 'main' && inputs.command == 'up' && needs.deploy.result == 'success' }}
+    if: ${{ inputs.base_ref == 'main' && inputs.command == 'up' && needs.deploy.result == 'success' && inputs.rollback != 'true' }}
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -96,10 +105,10 @@ jobs:
       - deploy
     runs-on: ubuntu-latest
     outputs:
-      latest-deploy-success-tag: ${{ steps.get-latest-successful-deployment-tag.outputs.latest-deploy-success-tag }}
+      rollback-ref: ${{ steps.get-latest-successful-deployment-tag.outputs.rollback-ref }}
     permissions:
       contents: read
-    if: ${{ always() && inputs.command == 'up' && inputs.enable_rollback == 'true' }}
+    if: ${{ (always() && inputs.command == 'up' && inputs.enable_rollback == 'true') || inputs.rollback == 'true' }}
     steps:
       - name: Get latest successful deployment tag
         id: get-latest-successful-deployment-tag
@@ -111,7 +120,7 @@ jobs:
             exit 1
           fi
           echo "Latest successful deployment tag is ${latest_deploy_success_tag}"
-          echo "latest-deploy-success-tag=${latest_deploy_success_tag}" >> "${GITHUB_OUTPUT}"
+          echo "rollback-ref=${latest_deploy_success_tag}" >> "${GITHUB_OUTPUT}"
 
   rollback:
     name: Rollback
@@ -125,8 +134,8 @@ jobs:
     uses: kemadev/workflows-and-actions/.github/workflows/go-pulumi.yaml@main
     with:
       command: up
-      sha: ${{ needs.prepare-rollback.outputs.latest-deploy-success-tag }}
-      ref: ${{ needs.prepare-rollback.outputs.latest-deploy-success-tag }}
+      sha: ${{ needs.prepare-rollback.outputs.rollback-ref }}
+      ref: ${{ needs.prepare-rollback.outputs.rollback-ref }}
       base_ref: ${{ inputs.base_ref }}
       is-rollback: true
       comment-id: ${{ inputs.issue-comment-id }}
