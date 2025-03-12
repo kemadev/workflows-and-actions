@@ -110,6 +110,11 @@ jobs:
       contents: read
     if: ${{ always() }}
     steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.base_ref }}
       - name: Get latest successful deployment tag
         id: get-latest-successful-deployment-tag
         run: |
