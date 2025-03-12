@@ -119,9 +119,6 @@ runs:
           console.log(`Actor permission is ${actorPermission}`);
           if (command === 'up' && baseRef === 'main') {
             console.log('Command is up and base ref is main, checking if force deployment is requested');
-            console.log(args);
-            console.log(args[0]);
-            console.log(actorPermission);
             if (args[0] === '--force' && actorPermission === 'admin') {
               console.log('Force deployment requested by admin');
             } else {
