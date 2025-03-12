@@ -19,6 +19,7 @@ jobs:
     name: Lint shell scripts
     permissions:
       contents: read
+      checks: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

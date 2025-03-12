@@ -211,7 +211,6 @@ jobs:
       - deploy
     if: ${{ always() && (inputs.command == 'up' && needs.start-deployment.result == 'success') }}
     permissions:
-      pull-requests: write
       deployments: write
     runs-on: ubuntu-latest
     steps:
