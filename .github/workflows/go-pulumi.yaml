@@ -211,7 +211,7 @@ jobs:
     needs:
       - start-deployment
       - deploy
-    if: ${{ always() && inputs.command == 'up' }}
+    if: ${{ always() && (inputs.command == 'up' && needs.start-deployment.result == 'success') }}
     permissions:
       pull-requests: write
       deployments: write
@@ -223,7 +223,6 @@ jobs:
         uses: actions/checkout@v4
       - name: Set deployment status
         id: set-deployment-status
-        if: ${{ inputs.command == 'up' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
