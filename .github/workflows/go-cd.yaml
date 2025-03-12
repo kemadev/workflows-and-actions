@@ -57,6 +57,7 @@ jobs:
       contents: read
       deployments: write
       pull-requests: write
+      packages:  write
     uses: kemadev/workflows-and-actions/.github/workflows/go-pulumi.yaml@main
     with:
       command: ${{ inputs.command }}
@@ -113,6 +114,7 @@ jobs:
       contents: read
       deployments: write
       pull-requests: write
+      packages:  write
     uses: kemadev/workflows-and-actions/.github/workflows/go-pulumi.yaml@main
     with:
       command: up
