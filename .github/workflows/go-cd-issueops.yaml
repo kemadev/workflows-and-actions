@@ -46,26 +46,3 @@ jobs:
       sha: ${{ github.event.issue.pull_request.head.sha }}
       base_ref: ${{ github.event.issue.pull_request.base.ref }}
       ref: ${{ github.event.issue.pull_request.head.ref }}
-      enable_rollback: true
-
-  debug:
-    name: Debug
-    needs:
-      - dispatch
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Debug
-        run: |
-          echo "Command: ${{ needs.dispatch.outputs.command }}"
-          echo "Continue: ${{ needs.dispatch.outputs.continue }}"
-          echo "Issue number: ${{ github.event.issue.number }}"
-          echo "Comment ID: ${{ github.event.comment.id }}"
-          echo "Comment body: ${{ github.event.comment.body }}"
-          echo "PR head SHA: ${{ github.event.issue.pull_request.head.sha }}"
-          echo "PR base ref: ${{ github.event.issue.pull_request.base.ref }}"
-          echo "PR head ref: ${{ github.event.issue.pull_request.head.ref }}"
-          echo "op: ${{ (needs.dispatch.outputs.continue == 'true') && (needs.dispatch.outputs.command == 'preview' || needs.dispatch.outputs.command == 'up') }}"
-          echo "needs.dispatch.outputs.continue: ${{ needs.dispatch.outputs.continue }}"
-          echo "needs.dispatch.outputs.command: ${{ needs.dispatch.outputs.command }}"

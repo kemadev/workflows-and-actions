@@ -57,7 +57,7 @@ jobs:
       contents: read
       deployments: write
       pull-requests: write
-      packages:  write
+      packages: write
     uses: kemadev/workflows-and-actions/.github/workflows/go-pulumi.yaml@main
     with:
       command: ${{ inputs.command }}
@@ -89,7 +89,7 @@ jobs:
       - deploy
     runs-on: ubuntu-latest
     outputs:
-      latest-deploy-success-tag: ${{ steps.prepare-rollback.outputs.latest-deploy-success-tag }}
+      latest-deploy-success-tag: ${{ steps.get-latest-successful-deployment-tag.outputs.latest-deploy-success-tag }}
     permissions:
       contents: read
     if: ${{ always() && inputs.command == 'up' && inputs.enable_rollback == 'true' }}
@@ -114,7 +114,7 @@ jobs:
       contents: read
       deployments: write
       pull-requests: write
-      packages:  write
+      packages: write
     uses: kemadev/workflows-and-actions/.github/workflows/go-pulumi.yaml@main
     with:
       command: up
