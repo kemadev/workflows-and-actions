@@ -46,7 +46,7 @@ runs:
       uses: actions/github-script@v7
       with:
         script: |
-          const { data: permissions } = await github.repos.getCollaboratorPermissionLevel({
+          const { data: permissions } = await github.rest.repos.getCollaboratorPermissionLevel({
             owner: context.repo.owner,
             repo: context.repo.repo,
             username: context.actor
@@ -91,7 +91,7 @@ runs:
             if (args[0] === '--force' && actorPermission === 'admin') {
               console.log('Force deployment requested by admin');
             } else {
-              const { data: pr } = await github.pulls.get({
+              const { data: pr } = await github.rest.pulls.get({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: context.payload.issue.number
