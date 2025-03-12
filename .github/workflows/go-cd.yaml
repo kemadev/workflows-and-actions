@@ -82,7 +82,6 @@ jobs:
     permissions:
       contents: read
       deployments: write
-    needs: deploy
     if: ${{ always() && inputs.command == 'up' && inputs.enable_rollback == 'true' }}
     steps:
       shell: bash
