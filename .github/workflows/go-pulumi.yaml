@@ -59,41 +59,6 @@ defaults:
     shell: bash
 
 jobs:
-  start-deployment:
-    name: Start deployment
-    if: ${{ inputs.command == 'up' }}
-    runs-on: ubuntu-latest
-    outputs:
-      deployment_id: ${{ steps.start-deployment.outputs.deployment_id }}
-    permissions:
-      deployments: write
-    steps:
-      # Checkout is useful for {owner} and {repo} placeholders in gh api command
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v4
-      - name: Start deployment
-        id: start-deployment
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          deployment_id="$(gh api \
-            --jq '.id' \
-            --method POST \
-            repos/{owner}/{repo}/deployments \
-            -f ref="${{ inputs.ref }}" \
-            -f task='deploy' \
-            -f required_contexts\[\] \
-            -f environment="${{ inputs.base_ref }}" \
-            -f description="Deploy request from IssueOps, initiated by ${{ github.actor }}")"
-          if [ -z "${deployment_id}" ]; then
-            echo "Failed to start deployment"
-            exit 1
-          fi
-          echo "Deployment started with ID ${deployment_id}"
-          echo "deployment_id=${deployment_id}" >> "${GITHUB_OUTPUT}"
-          echo "Set deployment ID to ${deployment_id}"
-
   comment-start:
     name: Comment start
     if: ${{ inputs.comment-id != '' }}
@@ -133,6 +98,41 @@ jobs:
             Rollbacking to **[${{ inputs.sha }}](${{ inputs.sha }})**
 
             [Workflow run](../actions/runs/${{ github.run_id }})
+
+  start-deployment:
+    name: Start deployment
+    if: ${{ inputs.command == 'up' }}
+    runs-on: ubuntu-latest
+    outputs:
+      deployment_id: ${{ steps.start-deployment.outputs.deployment_id }}
+    permissions:
+      deployments: write
+    steps:
+      # Checkout is useful for {owner} and {repo} placeholders in gh api command
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Start deployment
+        id: start-deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          deployment_id="$(gh api \
+            --jq '.id' \
+            --method POST \
+            repos/{owner}/{repo}/deployments \
+            -f ref="${{ inputs.ref }}" \
+            -f task='deploy' \
+            -f required_contexts\[\] \
+            -f environment="${{ inputs.base_ref }}" \
+            -f description="Deploy request from IssueOps, initiated by ${{ github.actor }}")"
+          if [ -z "${deployment_id}" ]; then
+            echo "Failed to start deployment"
+            exit 1
+          fi
+          echo "Deployment started with ID ${deployment_id}"
+          echo "deployment_id=${deployment_id}" >> "${GITHUB_OUTPUT}"
+          echo "Set deployment ID to ${deployment_id}"
 
   build-code:
     name: Build code
