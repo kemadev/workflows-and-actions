@@ -108,7 +108,7 @@ jobs:
       rollback-ref: ${{ steps.get-latest-successful-deployment-tag.outputs.rollback-ref }}
     permissions:
       contents: read
-    if: ${{ always() && ((inputs.command == 'up' && inputs.enable_rollback == 'true') || inputs.rollback == 'true') }}
+    if: ${{ always() }}
     steps:
       - name: Get latest successful deployment tag
         id: get-latest-successful-deployment-tag
