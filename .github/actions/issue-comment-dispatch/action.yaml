@@ -82,7 +82,7 @@ runs:
           core.setOutput('command', command);
           console.log(`Arguments are ${args}`);
           core.setOutput('args', args);
-          const supportedCommands = ['preview', 'up', 'rollback'];
+          const supportedCommands = ['preview', 'up'];
           if (!supportedCommands.includes(command)) {
             core.setOutput('fail', `Command ${command} is not supported`);
           }
@@ -92,13 +92,7 @@ runs:
       uses: actions/github-script@v7
       with:
         script: |
-          const knownCommands = ['up', 'preview'];
           const command = core.getInput('command');
-          if (!knownCommands.includes(command)) {
-            console.log(`Unsupported command ${command}`);
-            core.setOutput('fail', `Command ${command} is not supported`);
-            exit 0
-          }
           const args = core.getInput('args');
           const baseRef = core.getInput('base_ref');
           actorPermission = core.getInput('permission');
@@ -113,7 +107,6 @@ runs:
               });
               if (pr.mergeable_state !== 'clean') {
                 core.setOutput('fail', 'Pull request is not mergeable');
-                exit 0
               }
             }
           }
