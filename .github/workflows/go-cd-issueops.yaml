@@ -38,7 +38,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: kemadev/workflows-and-actions/.github/workflows/go-cd@main
+    uses: kemadev/workflows-and-actions/.github/workflows/go-cd.yaml@main
     with:
       command: ${{ steps.issue-comment-dispatch.outputs.command }}
       sha: ${{ github.event.issue.pull_request.head.sha }}
