@@ -122,7 +122,7 @@ jobs:
             for file in $(echo "${git_status}" | awk '{print $2}'); do
               if [[ "${file}" == *"go.mod" ]]; then
                 unused_deps+=("$(git diff --name-only "${file}")")
-                echo "::error file=${file}::Unused dependencies found in go.mod"
+                echo "::error file=${file},line=1::Unused dependencies found in ${file}"
               fi
             done
           fi
