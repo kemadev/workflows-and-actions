@@ -84,16 +84,17 @@ jobs:
       deployments: write
     if: ${{ always() && inputs.command == 'up' && inputs.enable_rollback == 'true' }}
     steps:
-      shell: bash
-      run: |
-        declare latest_deploy_success_tag
-        latest_deploy_success_tag="$(git tag --list "${{ inputs.git-deployment-success-tag-prefix }}${{ inputs.branch }}-*" | sort -V | tail -n 1)"
-        if [[ -z "${latest_deploy_success_tag}" ]]; then
-          echo "No successful deployment found for branch ${{ inputs.branch }}"
-          exit 1
-        fi
-        echo "Latest successful deployment tag is ${latest_deploy_success_tag}"
-        echo "latest-deploy-success-tag=${latest_deploy_success_tag}" >> "${GITHUB_OUTPUT}"
+      - name: Get latest successful deployment tag
+        id: get-latest-successful-deployment-tag
+        run: |
+          declare latest_deploy_success_tag
+          latest_deploy_success_tag="$(git tag --list "${{ inputs.git-deployment-success-tag-prefix }}${{ inputs.branch }}-*" | sort -V | tail -n 1)"
+          if [[ -z "${latest_deploy_success_tag}" ]]; then
+            echo "No successful deployment found for branch ${{ inputs.branch }}"
+            exit 1
+          fi
+          echo "Latest successful deployment tag is ${latest_deploy_success_tag}"
+          echo "latest-deploy-success-tag=${latest_deploy_success_tag}" >> "${GITHUB_OUTPUT}"
 
   rollback:
     name: Rollback
