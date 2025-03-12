@@ -209,6 +209,8 @@ jobs:
 
   finish-deployment:
     name: Finish deployment
+    # Prevent blocking next steps
+    timeout-minutes: 1
     needs:
       - start-deployment
       - deploy
@@ -248,6 +250,8 @@ jobs:
 
   comment-end:
     name: Comment end
+    # Prevent blocking next steps
+    timeout-minutes: 1
     needs:
       - start-deployment
       - deploy
