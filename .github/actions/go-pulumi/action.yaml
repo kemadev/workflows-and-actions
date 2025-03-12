@@ -78,4 +78,5 @@ runs:
           echo "No PR number found in commit message"
           exit 0
         fi
+        echo "PR number: ${pr_number}"
         gh pr comment "${pr_number}" --repo "${{ github.repository }}" --body "This PR has been deployed from **${{ github.ref_name }}**. [View deployment details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
