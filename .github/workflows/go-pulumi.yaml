@@ -141,9 +141,9 @@ jobs:
             const { data: deployment } = await github.rest.repos.createDeployment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: ${{ inputs.ref }},
+              ref: '${{ inputs.ref }}',
               task: 'deploy',
-              environment: ${{ inputs.base_ref }},
+              environment: '${{ inputs.base_ref }}',
               description: `Deploy request from IssueOps, initiated by ${context.actor}`
             });
             console.log(`Deployment started with ID ${deployment.id}`);
