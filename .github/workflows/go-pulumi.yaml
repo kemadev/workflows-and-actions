@@ -21,7 +21,7 @@ on:
         default: main
       comment-id:
         description: Comment ID
-        type: string
+        type: number
         required: false
       is-rollback:
         description: Run is a rollback
@@ -47,7 +47,7 @@ on:
         default: ${{ github.ref }}
       comment-id:
         description: Comment ID
-        type: string
+        type: number
         required: false
       is-rollback:
         description: Run is a rollback
@@ -207,7 +207,7 @@ jobs:
           environment: ${{ inputs.base_ref }}
 
   finish-deployment:
-    name: Comment deploy end
+    name: Finish deployment
     needs:
       - start-deployment
       - deploy
@@ -250,7 +250,7 @@ jobs:
     needs:
       - start-deployment
       - deploy
-    if: ${{ always() && (inputs.comment-id != '' && needs.start-deployment.outputs.deployment_id != '') }}
+    if: ${{ always() && (inputs.comment-id != '0' && needs.start-deployment.outputs.deployment_id != '') }}
     permissions:
       pull-requests: write
     runs-on: ubuntu-latest
