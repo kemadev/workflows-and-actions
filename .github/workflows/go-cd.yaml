@@ -113,14 +113,22 @@ jobs:
       - name: Get latest successful deployment tag
         id: get-latest-successful-deployment-tag
         run: |
-          declare latest_deploy_success_tag
-          latest_deploy_success_tag="$(git tag --list "${{ inputs.git-deployment-success-tag-prefix }}${{ inputs.branch }}-*" | sort -V | tail -n 1)"
-          if [[ -z "${latest_deploy_success_tag}" ]]; then
-            echo "No successful deployment found for branch ${{ inputs.branch }}"
+          declare rollback_ref
+          if [[ "${{ inputs.rollback }}" != "true" ]]; then
+            rollback_ref="$(git tag --list "deploy-success-${{ inputs.base_ref }}-*" | sort -V | tail -n 1)"
+          else
+            if [[ "${{ inputs.sha }}" == "latest" ]]; then
+              rollback_ref="$(git tag --list "deploy-success-${{ inputs.base_ref }}-*" | sort -V | tail -n 2 | head -n 1)"
+            else
+              rollback_ref="${{ inputs.sha }}"
+            fi
+          fi
+          if [[ -z "${rollback_ref}" ]]; then
+            echo "No successful deployment found for branch ${{ inputs.base_ref }}"
             exit 1
           fi
-          echo "Latest successful deployment tag is ${latest_deploy_success_tag}"
-          echo "rollback-ref=${latest_deploy_success_tag}" >> "${GITHUB_OUTPUT}"
+          echo "Latest successful deployment tag is ${rollback_ref}"
+          echo "rollback-ref=${rollback_ref}" >> "${GITHUB_OUTPUT}"
 
   rollback:
     name: Rollback

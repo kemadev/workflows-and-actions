@@ -10,7 +10,7 @@ on:
       sha:
         description: SHA to deploy
         type: string
-        default: latest
+        required: true
       ref:
         description: Ref to deploy
         type: string
