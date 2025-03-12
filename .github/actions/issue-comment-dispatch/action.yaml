@@ -63,7 +63,7 @@ runs:
       with:
         script: |
           const commentBody = context.payload.comment.body;
-          const [command, ...args] = commentBody.split(' ');
+          let [command, ...args] = commentBody.split(' ');
           if (command.startsWith('.')) {
             command = command.slice(1);
           } else {
