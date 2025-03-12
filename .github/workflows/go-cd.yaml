@@ -139,6 +139,7 @@ jobs:
     name: Rollback
     needs:
       - prepare-rollback
+    if: ${{ always() }}
     permissions:
       contents: read
       deployments: write
