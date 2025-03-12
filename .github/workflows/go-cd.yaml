@@ -115,6 +115,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.base_ref }}
+          fetch-depth: 0
+          fetch-tags: true
       - name: Get latest successful deployment tag
         id: get-latest-successful-deployment-tag
         run: |
