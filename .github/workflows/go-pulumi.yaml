@@ -5,41 +5,53 @@ on:
     inputs:
       command:
         description: Command to run
+        type: string
         default: up
       sha:
         description: SHA to deploy
-        default: ${{ github.sha }}
+        type: string
+        default: latest
       ref:
         description: Ref to deploy
-        default: ${{ github.ref }}
+        type: string
+        default: main
       base_ref:
         description: Base ref to deploy
-        default: ${{ github.ref }}
+        type: string
+        default: main
       comment-id:
         description: Comment ID
+        type: string
         required: false
       is-rollback:
         description: Run is a rollback
+        type: boolean
         default: false
   workflow_call:
     inputs:
       command:
         description: Command to run
+        type: string
         default: up
       sha:
         description: SHA to deploy
+        type: string
         default: ${{ github.sha }}
       ref:
         description: Ref to deploy
+        type: string
         default: ${{ github.ref }}
       base_ref:
         description: Base ref to deploy
+        type: string
         default: ${{ github.ref }}
       comment-id:
         description: Comment ID
+        type: string
         required: false
       is-rollback:
         description: Run is a rollback
+        type: boolean
         default: false
 
 defaults:
@@ -69,10 +81,10 @@ jobs:
             --jq '.id' \
             --method POST \
             repos/{owner}/{repo}/deployments \
-            -f ref="${{ input.ref }}" \
+            -f ref="${{ inputs.ref }}" \
             -f task='deploy' \
             -f required_contexts\[\] \
-            -f environment="${{ input.base_ref }}" \
+            -f environment="${{ inputs.base_ref }}" \
             -f description="Deploy request from IssueOps, initiated by ${{ github.actor }}")"
           if [ -z "${deployment_id}" ]; then
             echo "Failed to start deployment"
@@ -125,7 +137,6 @@ jobs:
   build-code:
     name: Build code
     needs:
-      - dispatch
       - start-deployment
     permissions:
       contents: read

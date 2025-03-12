@@ -100,7 +100,6 @@ jobs:
     name: Rollback
     needs:
       - prepare-rollback
-    runs-on: ubuntu-latest
     permissions:
       contents: read
       deployments: write
