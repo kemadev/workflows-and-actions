@@ -1,4 +1,4 @@
-name: Go - CD
+name: Go - Pulumi
 
 on:
   workflow_dispatch:
