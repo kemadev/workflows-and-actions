@@ -139,7 +139,7 @@ runs:
         reactions: rocket
     - name: Notify message has failed
       id: notify-failed
-      if: ${{ steps.check-requirements.outputs.fail != '' }}
+      if: ${{ steps.parse-comment-body.outputs.fail != '' || steps.check-requirements.outputs.fail != '' }}
       uses: peter-evans/create-or-update-comment@v4
       with:
         comment-id: ${{ inputs.comment-id }}
@@ -150,4 +150,4 @@ runs:
         body: |
           <!-- notify-failed -->
 
-          ${{ steps.check-requirements.outputs.fail }}
+          ${{ steps.parse-comment-body.outputs.fail != '' || steps.check-requirements.outputs.fail != '' }}
