@@ -19,10 +19,20 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - name: Debug
+      - name: Issue comment dispatch
         id: issue-comment-dispatch
         uses: kemadev/workflows-and-actions/.github/actions/issue-comment-dispatch@main
         with:
           issue-number: ${{ github.event.issue.number }}
           comment-id: ${{ github.event.comment.id }}
           comment-body: ${{ github.event.comment.body }}
+      - name: Run pulumi command
+        id: run-pulumi-command
+        if: ${{ steps.issue-comment-dispatch.outputs.continue == 'true' }}
+        uses: kemadev/workflows-and-actions/.github/actions/go-cd@main
+        with:
+          command: ${{ steps.issue-comment-dispatch.outputs.command }}
+          sha: ${{ github.event.issue.pull_request.head.sha }}
+          base_ref: ${{ github.event.issue.pull_request.base.ref }}
+          ref: ${{ github.event.issue.pull_request.base.ref }}
+          enable_rollback: ${{ steps.issue-comment-dispatch.outputs.enable_rollback }}

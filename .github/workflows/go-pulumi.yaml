@@ -1,0 +1,255 @@
+name: Go - CD
+
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: Command to run
+        default: up
+      sha:
+        description: SHA to deploy
+        default: ${{ github.sha }}
+      ref:
+        description: Ref to deploy
+        default: ${{ github.ref }}
+      base_ref:
+        description: Base ref to deploy
+        default: ${{ github.ref }}
+      comment-id:
+        description: Comment ID
+        required: false
+      is-rollback:
+        description: Run is a rollback
+        default: false
+  workflow_call:
+    inputs:
+      command:
+        description: Command to run
+        default: up
+      sha:
+        description: SHA to deploy
+        default: ${{ github.sha }}
+      ref:
+        description: Ref to deploy
+        default: ${{ github.ref }}
+      base_ref:
+        description: Base ref to deploy
+        default: ${{ github.ref }}
+      comment-id:
+        description: Comment ID
+        required: false
+      is-rollback:
+        description: Run is a rollback
+        default: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  start-deployment:
+    name: Start deployment
+    if: ${{ inputs.command == 'up' }}
+    runs-on: ubuntu-latest
+    outputs:
+      deployment_id: ${{ steps.start-deployment.outputs.deployment_id }}
+    permissions:
+      deployments: write
+    steps:
+      # Checkout is useful for {owner} and {repo} placeholders in gh api command
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Start deployment
+        id: start-deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          deployment_id="$(gh api \
+            --jq '.id' \
+            --method POST \
+            repos/{owner}/{repo}/deployments \
+            -f ref="${{ input.ref }}" \
+            -f task='deploy' \
+            -f required_contexts\[\] \
+            -f environment="${{ input.base_ref }}" \
+            -f description="Deploy request from IssueOps, initiated by ${{ github.actor }}")"
+          if [ -z "${deployment_id}" ]; then
+            echo "Failed to start deployment"
+            exit 1
+          fi
+          echo "Deployment started with ID ${deployment_id}"
+          echo "deployment_id=${deployment_id}" >> "${GITHUB_OUTPUT}"
+          echo "Set deployment ID to ${deployment_id}"
+
+  comment-start:
+    name: Comment start
+    if: ${{ inputs.comment-id != '' }}
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment start
+        id: comment-start
+        if: ${{ inputs.is-rollback == 'false' }}
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ inputs.comment-id }}
+          edit-mode: append
+          append-separator: newline
+          body: |
+            <!-- comment-start -->
+
+            ## Action details :rocket:
+
+            Running **${{ inputs.command }}** on **${{ inputs.base_ref }}**
+
+            [Workflow run](../actions/runs/${{ github.run_id }})
+      - name: Comment rollback
+        id: comment-rollback
+        if: ${{ inputs.is-rollback == 'true' }}
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ inputs.comment-id }}
+          edit-mode: append
+          append-separator: newline
+          body: |
+            <!-- comment-rollback -->
+
+            ## Rollback details :stopwatch:
+
+            Rollbacking to **[${{ inputs.sha }}](${{ inputs.sha }})**
+
+            [Workflow run](../actions/runs/${{ github.run_id }})
+
+  build-code:
+    name: Build code
+    needs:
+      - dispatch
+      - start-deployment
+    permissions:
+      contents: read
+      packages: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.sha }}
+          fetch-depth: 0
+      - name: Build code
+        id: build
+        uses: kemadev/workflows-and-actions/.github/actions/go-build@main
+
+  get-deploys-list:
+    name: Get deploys list
+    needs:
+      - start-deployment
+      - build-code
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    outputs:
+      deployment-dirs-list: ${{ steps.get-deploys-list.outputs.deployment-dirs-list }}
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.sha }}
+          fetch-depth: 0
+      - name: Get deploys list
+        id: get-deploys-list
+        uses: kemadev/workflows-and-actions/.github/actions/go-get-deploys-list@main
+
+  deploy:
+    name: Deploy
+    needs:
+      - start-deployment
+      - get-deploys-list
+    concurrency:
+      group: go-cd-${{ inputs.base_ref }}
+    permissions:
+      contents: read
+      packages: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        deploy: ${{ fromJSON(needs.get-deploys-list.outputs.deployment-dirs-list) }}
+      max-parallel: 1
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.sha }}
+      - name: Go deploy
+        id: go-pulumi
+        uses: kemadev/workflows-and-actions/.github/actions/go-pulumi@main
+        with:
+          command: ${{ inputs.command }}
+          environment: ${{ inputs.base_ref }}
+
+  finish-deployment:
+    name: Comment deploy end
+    needs:
+      - start-deployment
+      - deploy
+    if: ${{ always() && inputs.command == 'up' }}
+    permissions:
+      pull-requests: write
+      deployments: write
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout is useful for {owner} and {repo} placeholders in gh api command
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+      - name: Set deployment status
+        id: set-deployment-status
+        if: ${{ inputs.command == 'up' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          declare state
+          state="${{ needs.deploy.result == 'success' && 'success' || 'failure' }}"
+          if [ -z "${state}" ]; then
+            echo "Failed to determine deployment status, got ${state}"
+            exit 1
+          fi
+          echo "Deployment status is ${state}"
+          declare deployment_id
+          deployment_id="${{ needs.start-deployment.outputs.deployment_id }}"
+          if [ -z "${deployment_id}" ]; then
+            echo "Failed to determine deployment ID, got ${deployment_id}"
+            exit 1
+          fi
+          gh api \
+            --method POST \
+            repos/{owner}/{repo}/deployments/${deployment_id}/statuses \
+            -f state="${state}"
+          echo "Deployment status set to ${state} for deployment ID ${deployment_id}"
+
+  comment-end:
+    name: Comment end
+    needs:
+      - deploy
+    if: ${{ always() && inputs.comment-id != '' }}
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment end
+        id: comment-end
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ inputs.comment-id }}
+          edit-mode: append
+          append-separator: newline
+          body: |
+            <!-- comment-end -->
+
+            Outcome is **${{ needs.deploy.result == 'success' && 'success :white_check_mark:' || 'failure :x:' }}**

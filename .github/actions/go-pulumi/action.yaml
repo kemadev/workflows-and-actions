@@ -1,5 +1,5 @@
-name: Deploy Go code
-description: Deploy Go code
+name: Run Pulumi command for Go
+description: Run Pulumi command for Go
 
 author: kemadev
 branding:
