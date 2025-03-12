@@ -249,7 +249,7 @@ jobs:
     needs:
       - start-deployment
       - deploy
-    if: ${{ always() && inputs.comment-id != '' && needs.start-deployment.outputs.deployment_id != '' }}
+    if: ${{ always() && (inputs.comment-id != '' && needs.start-deployment.outputs.deployment_id != '') }}
     permissions:
       pull-requests: write
     runs-on: ubuntu-latest
