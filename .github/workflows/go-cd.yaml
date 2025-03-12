@@ -5,35 +5,45 @@ on:
     inputs:
       command:
         description: Command to run
+        type: string
         default: up
       sha:
         description: SHA to deploy
-        default: ${{ github.sha }}
+        type: string
+        default: latest
       ref:
         description: Ref to deploy
-        default: ${{ github.ref }}
+        type: string
+        default: main
       base_ref:
         description: Base ref to deploy
-        default: ${{ github.ref }}
+        type: string
+        default: main
       enable_rollback:
         description: Enable rollback
+        type: boolean
         default: true
   workflow_call:
     inputs:
       command:
         description: Command to run
+        type: string
         default: up
       sha:
         description: SHA to deploy
-        default: ${{ github.sha }}
+        type: string
+        default: latest
       ref:
         description: Ref to deploy
-        default: ${{ github.ref }}
+        type: string
+        default: main
       base_ref:
         description: Base ref to deploy
-        default: ${{ github.ref }}
+        type: string
+        default: main
       enable_rollback:
         description: Enable rollback
+        type: boolean
         default: true
 
 defaults:
@@ -43,7 +53,6 @@ defaults:
 jobs:
   deploy:
     name: Deploy
-    runs-on: ubuntu-latest
     permissions:
       contents: read
       deployments: write
@@ -109,4 +118,4 @@ jobs:
       sha: ${{ needs.prepare-rollback.outputs.latest-deploy-success-tag }}
       ref: ${{ needs.prepare-rollback.outputs.latest-deploy-success-tag }}
       base_ref: ${{ inputs.base_ref }}
-      is_rollback: true
+      is-rollback: true
