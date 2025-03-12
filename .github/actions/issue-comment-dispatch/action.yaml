@@ -98,6 +98,10 @@ runs:
           const args = core.getInput('args');
           const baseRef = core.getInput('base_ref');
           actorPermission = core.getInput('permission');
+          console.log(`Command is ${command}`);
+          console.log(`Arguments are ${args}`);
+          console.log(`Base ref is ${baseRef}`);
+          console.log(`Actor permission is ${actorPermission}`);
           if (command === 'up' && baseRef === 'main') {
             console.log('Command is up and base ref is main');
             if (args[0] === '--force' && actorPermission === 'admin') {
