@@ -31,10 +31,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - run: |
-        echo command is ${{ inputs.command }}
-        echo environment is ${{ inputs.environment }}
-      shell: bash
     # - name: Download build artifacts
     #   id: download-build-artifacts
     #   uses: actions/download-artifact@v4
@@ -69,3 +65,17 @@ runs:
     #     always-include-summary: true
     #     stack-name: ${{ inputs.environment }}
     #     github-token: ${{ github.token }}
+    - name: Backlink PR
+      id: backlink-pr
+      env:
+        GH_TOKEN: ${{ github.token }}
+      shell: bash
+      # Assuming we use format `<PR title> (#<PR number>)`, which is the organization's convention
+      run: |
+        declare pr_number
+        pr_number="$(git log -1 --pretty=format:"%s" | grep -oP '(?<=\(#)\d+(?=\)$)')"
+        if [[ -z "${pr_number}" ]]; then
+          echo "No PR number found in commit message"
+          exit 0
+        fi
+        gh pr comment "${pr_number}" --repo "${{ github.repository }}" --body "This PR has been deployed from **${{ github.ref_name }}**. [View deployment details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
