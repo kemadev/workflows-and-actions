@@ -47,7 +47,7 @@ jobs:
     permissions:
       contents: read
       deployments: write
-    uses: kemadev/workflows-and-actions/.github/actions/go-pulumi@main
+    uses: kemadev/workflows-and-actions/.github/workflows/go-pulumi.yaml@main
     with:
       command: ${{ inputs.command }}
       sha: ${{ inputs.sha }}
@@ -105,7 +105,7 @@ jobs:
       contents: read
       deployments: write
     needs: prepare-rollback
-    uses: kemadev/workflows-and-actions/.github/actions/go-pulumi@main
+    uses: kemadev/workflows-and-actions/.github/workflows/go-pulumi.yaml@main
     with:
       command: up
       sha: ${{ needs.prepare-rollback.outputs.latest-deploy-success-tag }}
