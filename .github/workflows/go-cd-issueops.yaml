@@ -40,8 +40,8 @@ jobs:
       pull-requests: write
     uses: kemadev/workflows-and-actions/.github/workflows/go-cd.yaml@main
     with:
-      command: ${{ steps.issue-comment-dispatch.outputs.command }}
+      command: ${{ needs.dispatch.outputs.command }}
       sha: ${{ github.event.issue.pull_request.head.sha }}
       base_ref: ${{ github.event.issue.pull_request.base.ref }}
-      ref: ${{ github.event.issue.pull_request.base.ref }}
-      enable_rollback: ${{ steps.issue-comment-dispatch.outputs.enable_rollback }}
+      ref: ${{ github.event.issue.pull_request.head.ref }}
+      enable_rollback: true
