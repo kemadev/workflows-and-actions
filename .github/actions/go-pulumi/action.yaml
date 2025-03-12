@@ -34,6 +34,7 @@ runs:
     - run: |
         echo command is ${{ inputs.command }}
         echo environment is ${{ inputs.environment }}
+        exit 1
       shell: bash
     # - name: Download build artifacts
     #   id: download-build-artifacts
