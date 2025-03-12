@@ -29,7 +29,7 @@ outputs:
     value: ${{ steps.parse-comment-body.outputs.args }}
   continue:
     description: Continue
-    value: ${{ steps.check-requirements.outputs.fail == '' }}
+    value: ${{ steps.check-requirements.outputs.continue }}
 
 runs:
   using: composite
