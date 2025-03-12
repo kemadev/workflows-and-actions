@@ -67,7 +67,7 @@ defaults:
 jobs:
   deploy:
     name: Deploy
-    if: ${{ inputs.rollback != 'true' }}
+    if: ${{ inputs.rollback != true }}
     permissions:
       contents: read
       deployments: write
@@ -85,7 +85,7 @@ jobs:
     name: Tag deploy success
     needs:
       - deploy
-    if: ${{ inputs.base_ref == 'main' && inputs.command == 'up' && needs.deploy.result == 'success' && inputs.rollback != 'true' }}
+    if: ${{ inputs.base_ref == 'main' && inputs.command == 'up' && needs.deploy.result == 'success' && inputs.rollback != true }}
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -108,8 +108,7 @@ jobs:
       rollback-ref: ${{ steps.get-latest-successful-deployment-tag.outputs.rollback-ref }}
     permissions:
       contents: read
-    # if: ${{ always() && ((inputs.command == 'up' && inputs.enable_rollback == 'true') || inputs.rollback == 'true') }}
-    if: ${{ always() && inputs.command == 'up' && inputs.enable_rollback == true }}
+    if: ${{ always() && ((inputs.command == 'up' && inputs.enable_rollback == true) || inputs.rollback == true) }}
     steps:
       - name: Checkout
         id: checkout
