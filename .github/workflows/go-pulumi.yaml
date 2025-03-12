@@ -68,7 +68,7 @@ jobs:
     steps:
       - name: Comment start
         id: comment-start
-        # if: ${{ inputs.is-rollback == 'false' }}
+        if: ${{ inputs.is-rollback == 'false' }}
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ inputs.comment-id }}
@@ -84,7 +84,7 @@ jobs:
             [Workflow run](../actions/runs/${{ github.run_id }})
       - name: Comment rollback
         id: comment-rollback
-        # if: ${{ inputs.is-rollback == 'true' }}
+        if: ${{ inputs.is-rollback == 'true' }}
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ inputs.comment-id }}
