@@ -47,9 +47,9 @@ runs:
       with:
         script: |
           const { data: permissions } = await github.repos.getCollaboratorPermissionLevel({
-            context.repo.owner,
-            context.repo.repo,
-            context.actor
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            username: context.actor
           });
           console.log(`Actor permissions are ${permissions.permission}`);
           core.setOutput('permission', permissions.permission);
