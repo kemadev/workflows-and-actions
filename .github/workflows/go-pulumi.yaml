@@ -248,7 +248,6 @@ jobs:
     # Prevent blocking next steps
     timeout-minutes: 1
     needs:
-      - start-deployment
       - deploy
     if: ${{ always() && (inputs.comment-id != 0 && needs.start-deployment.outputs.deployment_id != '') }}
     permissions:
