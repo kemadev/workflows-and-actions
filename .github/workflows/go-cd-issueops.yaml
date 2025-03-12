@@ -34,12 +34,12 @@ jobs:
     name: Run pulumi command
     needs:
       - dispatch
-    if: ${{ needs.dispatch.outputs.continue == 'true' && (needs.dispatch.outputs.command == 'preview' || needs.dispatch.outputs.command == 'up') }}
+    if: ${{ needs.dispatch.outputs.continue == 'true' }}
     permissions:
       contents: write
       pull-requests: write
       deployments: write
-      packages:  write
+      packages: write
     uses: kemadev/workflows-and-actions/.github/workflows/go-cd.yaml@main
     with:
       command: ${{ needs.dispatch.outputs.command }}
