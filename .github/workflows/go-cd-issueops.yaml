@@ -18,6 +18,9 @@ jobs:
     outputs:
       command: ${{ steps.issue-comment-dispatch.outputs.command }}
       continue: ${{ steps.issue-comment-dispatch.outputs.continue }}
+      base_ref: ${{ steps.issue-comment-dispatch.outputs.base_ref }}
+      ref: ${{ steps.issue-comment-dispatch.outputs.ref }}
+      sha: ${{ steps.issue-comment-dispatch.outputs.sha }}
     permissions:
       contents: read
       pull-requests: write
