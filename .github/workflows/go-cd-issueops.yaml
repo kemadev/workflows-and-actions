@@ -30,7 +30,7 @@ jobs:
           comment-id: ${{ github.event.comment.id }}
           comment-body: ${{ github.event.comment.body }}
 
-  run:
+  pulumi:
     name: Run pulumi command
     needs:
       - dispatch
