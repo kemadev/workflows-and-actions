@@ -95,7 +95,7 @@ jobs:
 
             ## Rollback details :stopwatch:
 
-            Rollbacking to **[${{ inputs.sha }}](${{ inputs.sha }})**
+            Rollbacking to **[${{ inputs.sha }}](../commits/${{ inputs.sha }})**
 
             [Workflow run](../actions/runs/${{ github.run_id }})
 
