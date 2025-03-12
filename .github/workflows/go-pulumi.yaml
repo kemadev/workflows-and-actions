@@ -249,7 +249,7 @@ jobs:
     timeout-minutes: 1
     needs:
       - deploy
-    if: ${{ always() && (inputs.comment-id != 0 && needs.start-deployment.outputs.deployment_id != '') }}
+    if: ${{ always() && (inputs.comment-id != 0) }}
     permissions:
       pull-requests: write
     runs-on: ubuntu-latest
