@@ -36,7 +36,7 @@ jobs:
       - dispatch
     if: ${{ needs.dispatch.outputs.continue == 'true' && (needs.dispatch.outputs.command == 'preview' || needs.dispatch.outputs.command == 'up') }}
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
       deployments: write
     uses: kemadev/workflows-and-actions/.github/workflows/go-cd.yaml@main
