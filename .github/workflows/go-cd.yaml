@@ -104,7 +104,6 @@ jobs:
     permissions:
       contents: read
       deployments: write
-    needs: prepare-rollback
     uses: kemadev/workflows-and-actions/.github/workflows/go-pulumi.yaml@main
     with:
       command: up
