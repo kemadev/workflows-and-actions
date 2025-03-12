@@ -108,7 +108,8 @@ jobs:
       rollback-ref: ${{ steps.get-latest-successful-deployment-tag.outputs.rollback-ref }}
     permissions:
       contents: read
-    if: ${{ always() }}
+    # if: ${{ always() && ((inputs.command == 'up' && inputs.enable_rollback == 'true') || inputs.rollback == 'true') }}
+    if: ${{ always() && inputs.command == 'up' }}
     steps:
       - name: Checkout
         id: checkout
