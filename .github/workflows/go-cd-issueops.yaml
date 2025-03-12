@@ -47,5 +47,6 @@ jobs:
     with:
       command: ${{ needs.dispatch.outputs.command }}
       sha: ${{ needs.dispatch.outputs.sha }}
-      base_ref: ${{ needs.dispatch.outputs.ref }}
       ref: ${{ needs.dispatch.outputs.ref }}
+      base_ref: ${{ needs.dispatch.outputs.base_ref }}
+      issue-comment-id: ${{ github.event.comment.id }}

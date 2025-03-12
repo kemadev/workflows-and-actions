@@ -23,6 +23,9 @@ on:
         description: Enable rollback
         type: boolean
         default: true
+      issue-comment-id:
+        description: Issue comment ID
+        type: number
   workflow_call:
     inputs:
       command:
@@ -45,6 +48,9 @@ on:
         description: Enable rollback
         type: boolean
         default: true
+      issue-comment-id:
+        description: Issue comment ID
+        type: number
 
 defaults:
   run:
@@ -64,6 +70,7 @@ jobs:
       sha: ${{ inputs.sha }}
       ref: ${{ inputs.ref }}
       base_ref: ${{ inputs.base_ref }}
+      comment-id: ${{ inputs.issue-comment-id }}
 
   tag-deploy-success:
     name: Tag deploy success
@@ -122,3 +129,4 @@ jobs:
       ref: ${{ needs.prepare-rollback.outputs.latest-deploy-success-tag }}
       base_ref: ${{ inputs.base_ref }}
       is-rollback: true
+      comment-id: ${{ inputs.issue-comment-id }}
