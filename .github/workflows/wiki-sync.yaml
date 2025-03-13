@@ -33,13 +33,16 @@ jobs:
         id: sync-wiki
         env:
           GH_TOKEN: ${{ github.token }}
+          GITHUB_WORKSPACE: ${{ github.workspace }}
+          SHA: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "kemadev+github-actions[bot]@users.noreply.github.com"
           cd dist/wiki
           rm -rf *
-          cp -r ${{ github.workspace }}/doc/* .
+          cp -r "${GITHUB_WORKSPACE}/doc/"* .
           rm -f PURPOSE.md
           git add .
-          git commit -m "Sync wiki - ${{ github.sha }} - ${{ github.run_id }}"
+          git commit -m "Sync wiki - ${SHA} - ${RUN_ID}"
           git push

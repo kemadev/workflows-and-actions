@@ -62,7 +62,7 @@ runs:
     #     BUILDS_DIR: cmd
     #   working-directory: ${{ inputs.goreleaser-render-config-script-dir }}
     #   run: |
-    #     mkdir -p ${{ env.GORELEASER_CONFIG_TEMPLATE_DIR }}
+    #     mkdir -p ${GORELEASER_CONFIG_TEMPLATE_DIR}
     #     go run ./...
     # - name: Install syft
     #   id: install-syft

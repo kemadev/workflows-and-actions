@@ -107,15 +107,18 @@ runs:
     - name: Check requirements
       id: check-requirements
       uses: actions/github-script@v7
+      env:
+        # Prevent script injection
+        command: ${{ steps.parse-comment-body.outputs.command }}
+        args: ${{ steps.parse-comment-body.outputs.args }}
+        base_ref: ${{ steps.get-pr-infos.outputs.base_ref }}
+        permission: ${{ steps.check-actor-permissions.outputs.permission }}
       with:
         script: |
-          const command = '${{ steps.parse-comment-body.outputs.command }}';
+          const { command, args, baseRef, actorPermission } = process.env;
           console.log(`Command is ${command}`);
-          const args = ${{ steps.parse-comment-body.outputs.args }};
           console.log(`Arguments are ${args}`);
-          const baseRef = '${{ steps.get-pr-infos.outputs.base_ref }}';
           console.log(`Base ref is ${baseRef}`);
-          const actorPermission = '${{ steps.check-actor-permissions.outputs.permission }}';
           console.log(`Actor permission is ${actorPermission}`);
           if (command === 'up' && baseRef === 'main') {
             console.log('Command is up and base ref is main, checking if force deployment is requested');

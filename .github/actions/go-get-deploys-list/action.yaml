@@ -27,9 +27,12 @@ runs:
     - name: Get deploys list
       id: get-deploys-list
       shell: bash
+      env:
+        DEPLOYS_BASE_DIR: ${{ inputs.deploys-base-dir }}
+        REVERSE: ${{ inputs.reverse }}
       run: |
-        echo "Getting list of deploy configurations from: ${{ inputs.deploys-base-dir }} and reverse: ${{ inputs.reverse }}"
-        mapfile -t dirs < <(find "./${{ inputs.deploys-base-dir }}" -mindepth 1 -maxdepth 1 -type d | sort)
+        echo "Getting list of deploy configurations from: ${DEPLOYS_BASE_DIR} and reverse: ${REVERSE}"
+        mapfile -t dirs < <(find "./${DEPLOYS_BASE_DIR}" -mindepth 1 -maxdepth 1 -type d | sort)
         declare result="["
         for dir in "${dirs[@]}"; do
             dir_name=$(basename "$dir")
@@ -37,7 +40,7 @@ runs:
         done
         result="${result%, }]"
         echo "Found deploy configurations: ${result}"
-        if [[ "${{ inputs.deploys-base-dir }}" == "true" ]]; then
+        if [[ "${DEPLOYS_BASE_DIR}" == "true" ]]; then
           echo "Reversing the list"
           declare reverse_result="["
           for ((i=${#dirs[@]}-1; i>=0; i--)); do

@@ -112,39 +112,22 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
-      # - name: Start deployment
-      #   id: start-deployment
-      #   env:
-      #     GH_TOKEN: ${{ github.token }}
-      #   run: |
-      #     deployment_id="$(gh api \
-      #       --jq '.id' \
-      #       --method POST \
-      #       repos/{owner}/{repo}/deployments \
-      #       -f ref="${{ inputs.ref }}" \
-      #       -f task='deploy' \
-      #       -f required_contexts\[\] \
-      #       -f environment="${{ inputs.base_ref }}" \
-      #       -f description="Deploy request from IssueOps, initiated by ${{ github.actor }}")"
-      #     if [ -z "${deployment_id}" ]; then
-      #       echo "Failed to start deployment"
-      #       exit 1
-      #     fi
-      #     echo "Deployment started with ID ${deployment_id}"
-      #     echo "deployment_id=${deployment_id}" >> "${GITHUB_OUTPUT}"
-      #     echo "Set deployment ID to ${deployment_id}"
       - name: Start deployment
         id: start-deployment
         uses: actions/github-script@v7
+        env:
+          ref: ${{ inputs.ref }}
+          base_ref: ${{ inputs.base_ref }}
         with:
           script: |
+            const { ref, baseRef } = process.env;
             const { data: deployment } = await github.rest.repos.createDeployment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: '${{ inputs.ref }}',
+              ref: ref,
               task: 'deploy',
               required_contexts: [],
-              environment: '${{ inputs.base_ref }}',
+              environment: baseRef,
               description: `Deploy request from IssueOps, initiated by ${context.actor}`
             });
             console.log(`Deployment started with ID ${deployment.id}`);
@@ -238,6 +221,7 @@ jobs:
         id: set-deployment-status
         env:
           GH_TOKEN: ${{ github.token }}
+          DEPLOYMENT_ID: ${{ needs.start-deployment.outputs.deployment_id }}
         run: |
           declare state
           state="${{ needs.deploy.result == 'success' && 'success' || 'failure' }}"
@@ -247,7 +231,7 @@ jobs:
           fi
           echo "Deployment status is ${state}"
           declare deployment_id
-          deployment_id="${{ needs.start-deployment.outputs.deployment_id }}"
+          deployment_id="${DEPLOYMENT_ID}"
           if [ -z "${deployment_id}" ]; then
             echo "Failed to determine deployment ID, got ${deployment_id}"
             exit 1

@@ -69,6 +69,9 @@ runs:
       id: backlink-pr
       env:
         GH_TOKEN: ${{ github.token }}
+        REPO: ${{ github.repository }}
+        REF_NAME: ${{ github.ref_name }}
+        RUN_ID: ${{ github.run_id }}
       shell: bash
       # Assuming we use format `<PR title> (#<PR number>)`, which is the organization's convention
       run: |
@@ -79,4 +82,4 @@ runs:
           exit 0
         fi
         echo "PR number: ${pr_number}"
-        gh pr comment "${pr_number}" --repo "${{ github.repository }}" --body "This PR has been deployed from **${{ github.ref_name }}**. [View deployment details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+        gh pr comment "${pr_number}" --repo "${REPO}" --body "This PR has been deployed from **${REF_NAME}**. [View deployment details](https://github.com/${REPO}/actions/runs/${RUN_ID})"

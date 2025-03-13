@@ -24,9 +24,12 @@ runs:
     - name: Copy reusable scripts and configs
       id: copy-reusable-scripts-and-configs
       shell: bash
+      env:
+        # Prevent script injection
+        REUSABLE_DIRECTORIES: ${{ inputs.reusable-diretories }}
       run: |
         echo "Copying reusable scripts and configs for directories: ${{ inputs.reusable-diretories }}"
-        for dir in ${{ inputs.reusable-diretories }}; do
+        for dir in ${REUSABLE_DIRECTORIES}; do
           declare dest="${dir%/*}"
           echo "Copying ${dir} to ${dest}"
           cp -r "${{ github.workspace }}/dist/workflows-and-actions/${dir}" "${dest}"
@@ -35,9 +38,12 @@ runs:
     - name: Ignore git changes
       id: ignore-git-changes
       shell: bash
+      env:
+        # Prevent script injection
+        REUSABLE_DIRECTORIES: ${{ inputs.reusable-diretories }}
       run: |
         echo "Ignoring changes to keep git clean"
-        for dir in ${{ inputs.reusable-diretories }}; do
+        for dir in ${REUSABLE_DIRECTORIES}; do
           if [ -f "${dir}/PURPOSE.md" ]; then
             echo "Ignoring changes to ${dir}/PURPOSE.md"
             git update-index --assume-unchanged "${dir}/PURPOSE.md"

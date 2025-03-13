@@ -17,8 +17,11 @@ runs:
     - name: Tag deploy success
       id: tag-deploy-success
       shell: bash
+      env:
+        DEPLOYED_REF: ${{ inputs.deployed-ref }}
+        RUN_ID: ${{ github.run_id }}
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "kemadev+github-actions[bot]@users.noreply.github.com"
-        git tag -a "deploy-success-${{ inputs.deployed-ref }}-${{ github.run_id }}" -m "Deploy success"
+        git tag -a "deploy-success-${DEPLOYED_REF}-${RUN_ID}" -m "Deploy success"
         git push --tags

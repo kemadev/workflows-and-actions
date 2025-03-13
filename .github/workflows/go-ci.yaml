@@ -183,7 +183,7 @@ jobs:
         id: lint
         uses: golangci/golangci-lint-action@v6
         with:
-          args: --config ${{ env.REUSABLE_CONFIGS_DIR }}/.golangci.yaml
+          args: --config ${REUSABLE_CONFIGS_DIR}/.golangci.yaml
 
   scan-dependencies:
     name: Scan dependencies
