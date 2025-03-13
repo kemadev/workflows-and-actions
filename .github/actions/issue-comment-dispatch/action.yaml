@@ -110,8 +110,8 @@ runs:
       env:
         command: ${{ steps.parse-comment-body.outputs.command }}
         args: ${{ steps.parse-comment-body.outputs.args }}
-        base_ref: ${{ steps.get-pr-infos.outputs.base_ref }}
-        permission: ${{ steps.check-actor-permissions.outputs.permission }}
+        baseRef: ${{ steps.get-pr-infos.outputs.base_ref }}
+        actorPermission: ${{ steps.check-actor-permissions.outputs.permission }}
       with:
         script: |
           const { command, args, baseRef, actorPermission } = process.env;
