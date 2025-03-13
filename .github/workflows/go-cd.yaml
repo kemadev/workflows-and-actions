@@ -120,7 +120,6 @@ jobs:
       - name: Get latest successful deployment tag
         id: get-latest-successful-deployment-tag
         env:
-          # Prevent script injection
           rollback: ${{ inputs.rollback }}
           sha: ${{ inputs.sha }}
           base_ref: ${{ inputs.base_ref }}

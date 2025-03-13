@@ -108,7 +108,6 @@ runs:
       id: check-requirements
       uses: actions/github-script@v7
       env:
-        # Prevent script injection
         command: ${{ steps.parse-comment-body.outputs.command }}
         args: ${{ steps.parse-comment-body.outputs.args }}
         base_ref: ${{ steps.get-pr-infos.outputs.base_ref }}

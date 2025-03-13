@@ -25,7 +25,6 @@ runs:
       id: copy-reusable-scripts-and-configs
       shell: bash
       env:
-        # Prevent script injection
         REUSABLE_DIRECTORIES: ${{ inputs.reusable-diretories }}
       run: |
         echo "Copying reusable scripts and configs for directories: ${{ inputs.reusable-diretories }}"
@@ -39,7 +38,6 @@ runs:
       id: ignore-git-changes
       shell: bash
       env:
-        # Prevent script injection
         REUSABLE_DIRECTORIES: ${{ inputs.reusable-diretories }}
       run: |
         echo "Ignoring changes to keep git clean"
