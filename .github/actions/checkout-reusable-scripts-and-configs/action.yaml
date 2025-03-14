@@ -34,6 +34,7 @@ runs:
           cp -r "${{ github.workspace }}/dist/workflows-and-actions/${dir}" "${dest}"
           echo "Copied ${dir} to ${dest}"
         done
+        rm -rf "${{ github.workspace }}/dist/workflows-and-actions"
     - name: Ignore git changes
       id: ignore-git-changes
       shell: bash
