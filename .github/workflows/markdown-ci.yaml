@@ -34,6 +34,8 @@ jobs:
       - name: Checkout reusable workflow scripts and configs
         id: checkout-reusable-scripts-and-configs
         uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
+      with:
+        reusable-diretories: 'config/reusable'
       - name: Lint markdown files
         id: lint-markdown-files
         uses: DavidAnson/markdownlint-cli2-action@v19

@@ -31,6 +31,8 @@ runs:
     - name: Checkout reusable workflow scripts and configs
       id: checkout-reusable-scripts-and-configs
       uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
+      with:
+        reusable-diretories: 'config/reusable'
     # - name: Download build artifacts
     #   id: download-build-artifacts
     #   uses: actions/download-artifact@v4
