@@ -12,9 +12,9 @@ on:
       - reopened
       - unlocked
     paths:
-      - '**go.mod'
-      - '**go.sum'
-      - '**.go'
+      - "**go.mod"
+      - "**go.sum"
+      - "**.go"
   workflow_call: {}
   workflow_dispatch: {}
 
@@ -76,7 +76,7 @@ jobs:
         id: checkout-reusable-scripts-and-configs
         uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
         with:
-          reusable-diretories: '.github/script/reusable'
+          reusable-diretories: ".github/script/reusable"
       - name: Set up Go
         uses: actions/setup-go@v5
         id: setup-go
@@ -182,7 +182,7 @@ jobs:
         id: checkout-reusable-scripts-and-configs
         uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
         with:
-          reusable-diretories: 'config/reusable'
+          reusable-diretories: "config/reusable"
       - name: Lint Go
         id: lint
         uses: golangci/golangci-lint-action@v6
@@ -202,7 +202,9 @@ jobs:
         id: checkout-reusable-scripts-and-configs
         uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
         with:
-          reusable-diretories: 'config/reusable'
+          reusable-diretories: "config/reusable"
+      - run: ls -Rla
+        shell: bash
       - name: Create SBOM
         uses: anchore/sbom-action@v0
         with:
