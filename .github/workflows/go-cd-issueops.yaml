@@ -40,6 +40,7 @@ jobs:
     needs:
       - dispatch
     if: ${{ needs.dispatch.outputs.continue == 'true' && (needs.dispatch.outputs.command == 'lock' || needs.dispatch.outputs.command == 'unlock') }}
+    runs-on: ubuntu-latest
     permissions:
       contents: write
       issues: write
