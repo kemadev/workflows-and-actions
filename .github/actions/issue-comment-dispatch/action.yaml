@@ -1,7 +1,7 @@
 name: Issue comment dispatch
 description: React to issue comments
 
-# Inspired from https://github.com/github/command
+# Inspired from https://github.com/github/command & https://github.com/github/branch-deploy
 
 author: kemadev
 branding:

@@ -35,6 +35,27 @@ jobs:
           comment-id: ${{ github.event.comment.id }}
           comment-body: ${{ github.event.comment.body }}
 
+  lock:
+    name: Lock environment
+    needs:
+      - dispatch
+    if: ${{ needs.dispatch.outputs.continue == 'true' && (needs.dispatch.outputs.command == 'lock' || needs.dispatch.outputs.command == 'unlock') }}
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - name: Lock or unlock environment
+        id: lock
+        uses: github/lock@v2
+        with:
+          environment: ${{ needs.dispatch.outputs.base_ref }}
+          environment_targets: main,next,dev
+          reaction:
+          lock_trigger: lock
+          unlock_trigger: unlock
+          lock_info_alias: infolock
+          global_lock_flag: --global
+
   pulumi:
     name: Run pulumi command
     needs:
