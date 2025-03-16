@@ -54,7 +54,7 @@ jobs:
           reaction:
           lock_trigger: lock
           unlock_trigger: unlock
-          lock_info_alias: infolock
+          lock_info_alias: lockinfo
           global_lock_flag: --global
 
   pulumi:
