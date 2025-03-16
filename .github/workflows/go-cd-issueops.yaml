@@ -1,5 +1,7 @@
 name: Go - CD IssueOps
 
+# Inspired from https://github.com/github/branch-deploy
+
 on:
   issue_comment:
     types:

@@ -1,6 +1,8 @@
 name: Issue comment dispatch
 description: React to issue comments
 
+# Inspired from https://github.com/github/command
+
 author: kemadev
 branding:
   icon: message-square
