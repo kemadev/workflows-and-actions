@@ -108,6 +108,7 @@ runs:
           core.setOutput('sha', pr.head.sha);
     - name: Check requirements
       id: check-requirements
+      if: ${{ steps.parse-comment-body.outputs.fail == '' }}
       uses: actions/github-script@v7
       env:
         command: ${{ steps.parse-comment-body.outputs.command }}
