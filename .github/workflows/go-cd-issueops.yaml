@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      issues: write
+      pull-requests: write
     steps:
       - name: Lock or unlock environment
         id: lock
