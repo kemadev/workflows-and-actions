@@ -28,6 +28,10 @@ defaults:
   run:
     shell: bash
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   unit-test:
     name: Unit test
