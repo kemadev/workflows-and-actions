@@ -28,7 +28,7 @@ jobs:
     name: Lint Dockerfiles
     permissions:
       contents: read
-      checks: none
+      packages: none
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
