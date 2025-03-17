@@ -62,6 +62,10 @@ defaults:
 env:
   HOUSEKEEP_FAILED_WORKFLOWS_SCRIPT_DIR: .github/script/reusable/report-failed-workflows
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   report-failed-workflows:
     name: Report failed workflows

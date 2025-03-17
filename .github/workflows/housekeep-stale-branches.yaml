@@ -14,6 +14,10 @@ defaults:
 env:
   HOUSEKEEP_STALE_BRANCHES_SCRIPT_DIR: .github/script/reusable/report-stale-branches
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   report-stale-branches:
     name: Report stale branches
