@@ -106,7 +106,6 @@ jobs:
     name: Clean go.mod
     permissions:
       contents: read
-      checks: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -140,7 +139,6 @@ jobs:
     name: Check go.mod name
     permissions:
       contents: read
-      checks: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
