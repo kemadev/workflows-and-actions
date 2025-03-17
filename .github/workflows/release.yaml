@@ -18,6 +18,8 @@ jobs:
       contents: write
       pull-requests: write
     runs-on: ubuntu-latest
+    concurrency:
+      group: release
     steps:
       - name: Checkout
         id: checkout
@@ -26,7 +28,5 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
       - name: Release
-        concurrency:
-          greoup: release
         id: release
         uses: kemadev/workflows-and-actions/.github/actions/release@main
