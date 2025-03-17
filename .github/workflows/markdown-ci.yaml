@@ -20,12 +20,14 @@ defaults:
   run:
     shell: bash
 
+permissions:
+  contents: read
+
 jobs:
   lint-markdown-files:
     name: Lint markdown files
     permissions:
       contents: read
-      checks: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
