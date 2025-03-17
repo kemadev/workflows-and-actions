@@ -18,6 +18,9 @@ defaults:
   run:
     shell: bash
 
+permissions:
+  contents: read
+
 jobs:
   scan-secrets:
     name: Scan secrets
@@ -40,7 +43,6 @@ jobs:
       image: semgrep/semgrep
     permissions:
       contents: read
-      checks: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
