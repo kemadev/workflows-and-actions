@@ -58,6 +58,12 @@ defaults:
   run:
     shell: bash
 
+permissions:
+  contents: read
+  deployments: write
+  pull-requests: write
+  packages: write
+
 jobs:
   comment-start:
     name: Comment start
