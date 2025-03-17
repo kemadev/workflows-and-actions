@@ -12,6 +12,13 @@ defaults:
   run:
     shell: bash
 
+permissions:
+  contents: write
+  pull-requests: write
+  deployments: write
+  packages: write
+
+
 jobs:
   dispatch:
     name: Dispatch IssueOps commands

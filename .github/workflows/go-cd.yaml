@@ -64,6 +64,12 @@ defaults:
   run:
     shell: bash
 
+permissions:
+  contents: write
+  deployments: write
+  pull-requests: write
+  packages: write
+
 jobs:
   deploy:
     name: Deploy
