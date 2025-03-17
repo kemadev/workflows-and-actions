@@ -5,13 +5,16 @@ on:
     branches:
       - main
     paths:
-      - 'doc/**.md'
+      - "doc/**.md"
   workflow_call: {}
   workflow_dispatch: {}
 
 defaults:
   run:
     shell: bash
+
+permissions:
+  contents: write
 
 jobs:
   wiki-sync:
