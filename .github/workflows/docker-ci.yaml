@@ -23,12 +23,14 @@ defaults:
 env:
   FINDINGS_JSON_OUTPUT: ./dist/docker.json
 
+permissions:
+  contents: read
+
 jobs:
   lint-dockerfiles:
     name: Lint Dockerfiles
     permissions:
       contents: read
-      packages: none
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
