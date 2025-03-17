@@ -7,9 +7,6 @@ on:
   workflow_call:
   workflow_dispatch:
 
-concurrency:
-  group: release
-
 defaults:
   run:
     shell: bash
@@ -29,5 +26,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
       - name: Release
+        concurrency:
+          greoup: release
         id: release
         uses: kemadev/workflows-and-actions/.github/actions/release@main
