@@ -12,7 +12,7 @@ on:
       - unlocked
       - reopened
     paths:
-      - '**Dockerfile'
+      - "**Dockerfile"
   workflow_call: {}
   workflow_dispatch: {}
 
@@ -28,6 +28,7 @@ jobs:
     name: Lint Dockerfiles
     permissions:
       contents: read
+      checks: none
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
