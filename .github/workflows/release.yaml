@@ -11,6 +11,10 @@ defaults:
   run:
     shell: bash
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   release:
     name: Release
