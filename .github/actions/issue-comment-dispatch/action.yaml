@@ -85,7 +85,7 @@ runs:
           core.setOutput('command', command);
           console.log(`Arguments are ${args}`);
           core.setOutput('args', args);
-          const supportedCommands = ['preview', 'up', 'lock', 'unlock', 'lockinfo'];
+          const supportedCommands = ['preview', 'up'];
           if (!supportedCommands.includes(command)) {
             core.setOutput('fail', `Command ${command} is not supported`);
             console.log(`Command ${command} is not supported`);
