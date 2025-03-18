@@ -66,7 +66,7 @@ jobs:
     name: Report test coverage
     needs: unit-test
     # Report only on PRs, don't run on forks or dependabot as they don't have write access to the repository
-    if: github.event_name == 'pull_request' && ! github.event.pull_request.head.repo.fork
+    if: ${{ github.event_name == 'pull_request' && ! github.event.pull_request.head.repo.fork }}
     permissions:
       contents: read
       pull-requests: write
