@@ -31,7 +31,6 @@ defaults:
 permissions:
   contents: read
   pull-requests: write
-  checks: write
 
 jobs:
   unit-test:
@@ -169,7 +168,6 @@ jobs:
     name: Lint
     permissions:
       contents: read
-      checks: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
