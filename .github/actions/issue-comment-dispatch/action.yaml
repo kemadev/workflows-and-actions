@@ -92,6 +92,7 @@ runs:
           }
     - name: Get PR infos
       id: get-pr-infos
+      if: ${{ steps.parse-comment-body.outputs.fail == '' }}
       uses: actions/github-script@v7
       with:
         script: |
