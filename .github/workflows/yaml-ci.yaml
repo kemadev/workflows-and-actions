@@ -37,7 +37,7 @@ jobs:
         env:
           EXCLUDED_FILES: .github/FUNDING.yml
         run: |
-          find . -name "*.yml" -exec echo "::warning file={},line=1,title=Unsupported .yml extension::File is using .yml extension. Please rename to .yaml" \;
+          find . -name "*.yml" -exec echo "::warning file={},title=Unsupported .yml extension::File is using .yml extension. Please rename to .yaml" \;
       - name: Lint YAML files
         id: lint-yaml-files
         uses: ibiqlik/action-yamllint@v3

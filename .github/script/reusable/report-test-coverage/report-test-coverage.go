@@ -129,7 +129,7 @@ func parseCoverageReport(profiles []*cover.Profile) (string, error) {
 		}
 		filenameWithoutRepoPath := filenameWithoutRepoPathArray[1]
 		// https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#setting-a-warning-message
-		fmt.Println("::warning file=" + filenameWithoutRepoPath + "mline=1,title=Poor test coverage::" + fmt.Sprintf("Coverage on file %s: %.2f%%", filenameWithoutRepoPath, fileCoveragePercentage))
+		fmt.Println("::warning file=" + filenameWithoutRepoPath + ",title=Poor test coverage::" + fmt.Sprintf("Coverage on file %s: %.2f%%", filenameWithoutRepoPath, fileCoveragePercentage))
 		var emoji string
 		switch {
 		case fileCoveragePercentage < 70:

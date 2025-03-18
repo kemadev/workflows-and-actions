@@ -128,7 +128,7 @@ jobs:
             for file in $(echo "${git_status}" | awk '{print $2}'); do
               if [[ "${file}" == *"go.mod" ]]; then
                 unused_deps+=("$(git diff --name-only "${file}")")
-                echo "::error file=${file},line=1::Unused dependencies found in ${file}"
+                echo "::error file=${file}::Unused dependencies found in ${file}"
               fi
             done
           fi
@@ -157,7 +157,7 @@ jobs:
             go_mod_name=$(awk '/module/ {print $2}' "${go_mod_file}")
             expected_go_mod_name="$(echo "${github_base_domain}/${GITHUB_REPOSITORY}/${go_mod_dir}" | sed 's|/$||')"
             if [[ "${go_mod_name}" != "${expected_go_mod_name}" ]]; then
-              echo "::error file=${go_mod_file},line=1::go mod name in ${go_mod_file} is not correct, expected ${expected_go_mod_name}, got ${go_mod_name}"
+              echo "::error file=${go_mod_file}::go mod name in ${go_mod_file} is not correct, expected ${expected_go_mod_name}, got ${go_mod_name}"
               go_mod_file_bad_name+=("${go_mod_file}")
             fi
           done
