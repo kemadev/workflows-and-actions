@@ -99,6 +99,7 @@ runs:
             if (args[i].startsWith('--')) {
               args[i] = args[i].slice(2);
               core.setOutput(args[i], 'true');
+              console.log(`Argument ${args[i]} is true`);
             } else {
               const validEnvs = ['dev', 'next', 'main'];
               if (validEnvs.includes(args[i])) {
@@ -119,6 +120,7 @@ runs:
             env = 'dev';
           }
           core.setOutput('environment', env);
+          console.log(`Environment is ${env}`);
     - name: Get PR infos
       id: get-pr-infos
       if: ${{ steps.parse-comment-body.outputs.fail == '' }}
