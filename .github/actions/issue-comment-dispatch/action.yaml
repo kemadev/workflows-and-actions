@@ -137,7 +137,7 @@ runs:
         actorPermission: ${{ steps.check-actor-permissions.outputs.permission }}
       with:
         script: |
-          const { command, args, baseRef, actorPermission } = process.env;
+          const { command, args, force, baseRef, actorPermission } = process.env;
           console.log(`Command is ${command}`);
           console.log(`Arguments are ${args}`);
           console.log(`Force is ${force}`);
