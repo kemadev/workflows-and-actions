@@ -93,6 +93,7 @@ runs:
             core.setOutput('fail', `Command ${command} is not supported`);
             console.log(`Command ${command} is not supported`);
           }
+          var env = '';
           for (let i = 0; i < args.length; i++) {
             if (args[i].startsWith('--')) {
               args[i] = args[i].slice(2);
@@ -100,14 +101,23 @@ runs:
             } else {
               const validEnvs = ['dev', 'next', 'main'];
               if (validEnvs.includes(args[i])) {
-                core.setOutput('env', args[i]);
-                console.log(`Environment is ${args[i]}`);
+                if (env === '') {
+                  env = args[i];
+                  console.log(`Environment is ${args[i]}`);
+                } else {
+                  core.setOutput('fail', 'Only one environment can be specified');
+                  console.log('Only one environment can be specified');
+                }
               } else {
                 core.setOutput('fail', `Argument ${args[i]} is not a valid environment`);
                 console.log(`Argument ${args[i]} is not a valid environment`);
               }
             }
           }
+          if (env === '') {
+            env = 'dev';
+          }
+          core.setOutput('env', env);
     - name: Get PR infos
       id: get-pr-infos
       if: ${{ steps.parse-comment-body.outputs.fail == '' }}
@@ -138,14 +148,14 @@ runs:
         actorPermission: ${{ steps.check-actor-permissions.outputs.permission }}
       with:
         script: |
-          const { command, args, force, baseRef, actorPermission } = process.env;
+          const { command, args, force, env, baseRef, actorPermission } = process.env;
           console.log(`Command is ${command}`);
           console.log(`Arguments are ${args}`);
           console.log(`Force is ${force}`);
           console.log(`Base ref is ${baseRef}`);
           console.log(`Actor permission is ${actorPermission}`);
-          if (command === 'up' && baseRef === 'main') {
-            console.log('Command is up and base ref is main, checking if force deployment is needed');
+          if (command === 'up' && env === 'main') {
+            console.log('Command is up and env is main, checking if force deployment is needed');
             if (actorPermission === 'admin' && force === 'true') {
               console.log('Force deployment requested by admin, skipping requirements check');
             } else {
