@@ -56,5 +56,5 @@ jobs:
       command: ${{ needs.dispatch.outputs.command }}
       sha: ${{ needs.dispatch.outputs.sha }}
       ref: ${{ needs.dispatch.outputs.ref }}
-      base_ref: ${{ needs.dispatch.outputs.env != '' && needs.dispatch.outputs.env || needs.dispatch.outputs.base_ref }}
+      environment: ${{ needs.dispatch.outputs.env != '' && needs.dispatch.outputs.env || needs.dispatch.outputs.base_ref }}
       issue-comment-id: ${{ github.event.comment.id }}
