@@ -15,10 +15,10 @@ on:
         description: Ref to deploy
         type: string
         default: main
-      base_ref:
+      environment:
         description: Base ref to deploy
         type: string
-        default: main
+        default: dev
       comment-id:
         description: Comment ID
         type: number
@@ -41,10 +41,10 @@ on:
         description: Ref to deploy
         type: string
         default: ${{ github.ref }}
-      base_ref:
+      environment:
         description: Base ref to deploy
         type: string
-        default: ${{ github.ref }}
+        default: dev
       comment-id:
         description: Comment ID
         type: number
@@ -85,7 +85,7 @@ jobs:
 
             ## Action details :rocket:
 
-            Running **${{ inputs.command }}** on **${{ inputs.base_ref }}**
+            Running **${{ inputs.command }}** on **${{ inputs.environment }}**
 
             [Workflow run](../actions/runs/${{ github.run_id }})
       - name: Comment rollback
@@ -123,17 +123,17 @@ jobs:
         uses: actions/github-script@v7
         env:
           ref: ${{ inputs.ref }}
-          baseRef: ${{ inputs.base_ref }}
+          env: ${{ inputs.environment }}
         with:
           script: |
-            const { ref, baseRef } = process.env;
+            const { ref, env } = process.env;
             const { data: deployment } = await github.rest.repos.createDeployment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: ref,
               task: 'deploy',
               required_contexts: [],
-              environment: baseRef,
+              environment: env,
               description: `Deploy request from IssueOps, initiated by ${context.actor}`
             });
             console.log(`Deployment started with ID ${deployment.id}`);
@@ -184,7 +184,7 @@ jobs:
     needs:
       - get-deploys-list
     concurrency:
-      group: go-cd-${{ inputs.base_ref }}
+      group: go-cd-${{ inputs.environment }}
     permissions:
       contents: read
       packages: read
@@ -205,7 +205,7 @@ jobs:
         uses: kemadev/workflows-and-actions/.github/actions/go-pulumi@main
         with:
           command: ${{ inputs.command }}
-          environment: ${{ inputs.base_ref }}
+          environment: ${{ inputs.environment }}
 
   finish-deployment:
     name: Finish deployment
