@@ -130,7 +130,7 @@ jobs:
           environment: ${{ inputs.environment }}
         run: |
           declare rollback_ref
-          if [[ "${sha}" == "latest" ]]; then
+          if [[ "${sha}" == "latest" || "${sha}" == "" ]]; then
             rollback_ref="$(git tag --list "deploy-success-${environment}-*" | sort -V | tail -n 1)"
           else
             rollback_ref="${sha}"
