@@ -146,7 +146,7 @@ runs:
         command: ${{ steps.parse-comment-body.outputs.command }}
         args: ${{ steps.parse-comment-body.outputs.args }}
         force: ${{ steps.parse-comment-body.outputs.force }}
-        environment: ${{ steps.get-pr-infos.outputs.environment }}
+        environment: ${{ steps.parse-comment-body.outputs.environment }}
         baseRef: ${{ steps.get-pr-infos.outputs.base_ref }}
         actorPermission: ${{ steps.check-actor-permissions.outputs.permission }}
       with:
