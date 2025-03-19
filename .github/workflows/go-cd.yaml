@@ -15,10 +15,6 @@ on:
         description: Ref to deploy
         type: string
         default: main
-      base_ref:
-        description: Base ref to deploy
-        type: string
-        default: main
       enable_rollback:
         description: Enable rollback in case of deployment failure
         type: boolean
@@ -42,10 +38,6 @@ on:
         default: latest
       ref:
         description: Ref to deploy
-        type: string
-        default: main
-      base_ref:
-        description: Base ref to deploy
         type: string
         default: main
       enable_rollback:
