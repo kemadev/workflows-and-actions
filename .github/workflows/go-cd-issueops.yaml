@@ -56,7 +56,7 @@ jobs:
     uses: kemadev/workflows-and-actions/.github/workflows/go-cd.yaml@main
     with:
       command: ${{ needs.dispatch.outputs.command }}
-      sha: ${{ needs.dispatch.outputs.sha }}
+      sha: ${{ needs.dispatch.outputs.command == 'rollback' && 'latest' || needs.dispatch.outputs.sha }}
       ref: ${{ needs.dispatch.outputs.ref }}
       environment: ${{ needs.dispatch.outputs.environment != '' && needs.dispatch.outputs.environment || needs.dispatch.outputs.base_ref }}
       issue-comment-id: ${{ github.event.comment.id }}
