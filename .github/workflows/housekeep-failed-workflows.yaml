@@ -72,6 +72,8 @@ jobs:
     permissions:
       contents: read
       issues: write
+      concurrency:
+        group: housekeep-report-failed-workflows
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -90,8 +92,6 @@ jobs:
           cache-dependency-path: ${{ env.HOUSEKEEP_FAILED_WORKFLOWS_SCRIPT_DIR}}/go.sum
       - name: Report failed workflows
         id: report-failed-workflows
-        concurrency:
-          group: housekeep-report-failed-workflows
         working-directory: ${{ env.HOUSEKEEP_FAILED_WORKFLOWS_SCRIPT_DIR }}
         env:
           GH_TOKEN: ${{ github.token }}
