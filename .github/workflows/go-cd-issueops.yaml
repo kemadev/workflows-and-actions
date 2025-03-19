@@ -47,7 +47,7 @@ jobs:
     name: Run pulumi command
     needs:
       - dispatch
-    if: ${{ needs.dispatch.outputs.continue == 'true' && (needs.dispatch.outputs.command == 'preview' || needs.dispatch.outputs.command == 'up') }}
+    if: ${{ needs.dispatch.outputs.continue == 'true' && (needs.dispatch.outputs.command == 'preview' || needs.dispatch.outputs.command == 'up' || needs.dispatch.outputs.command == 'rollback') }}
     permissions:
       contents: write
       pull-requests: write
