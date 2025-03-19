@@ -124,9 +124,9 @@ runs:
           console.log(`Base ref is ${baseRef}`);
           console.log(`Actor permission is ${actorPermission}`);
           if (command === 'up' && baseRef === 'main') {
-            console.log('Command is up and base ref is main, checking if force deployment is requested');
+            console.log('Command is up and base ref is main, checking if force deployment is needed');
             if (args[0] === '--force' && actorPermission === 'admin') {
-              console.log('Force deployment requested by admin');
+              console.log('Force deployment requested by admin, skipping requirements check');
             } else {
               const { data: pr } = await github.rest.pulls.get({
                 owner: context.repo.owner,
@@ -138,9 +138,23 @@ runs:
                 console.log(`Pull request is not mergeable, got state ${pr.mergeable_state}`);
                 return;
               }
+              console.log('Pull request is mergeable');
+              const { data: compare } = await github.rest.repos.compareCommits({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                base: baseRef,
+                head: pr.head.ref
+              });
+              const acceptables = ['ahead', 'identical'];
+              if (!acceptables.includes(compare.status)) {
+                core.setOutput('fail', 'Base branch is not up-to-date');
+                console.log('Base branch is not up-to-date');
+                return;
+              }
+              console.log('Base branch is up-to-date');
+              console.log('Requirements are met');
             }
           }
-          console.log('Requirements are met');
           core.setOutput('continue', 'true');
     - name: Notify message has been treated
       id: notify-treated
