@@ -84,14 +84,14 @@ jobs:
       command: ${{ inputs.command }}
       sha: ${{ inputs.sha }}
       ref: ${{ inputs.ref }}
-      base_ref: ${{ inputs.base_ref }}
+      environment: ${{ inputs.environment }}
       comment-id: ${{ inputs.issue-comment-id }}
 
   tag-deploy-success:
     name: Tag deploy success
     needs:
       - deploy
-    if: ${{ inputs.base_ref == 'main' && inputs.command == 'up' && needs.deploy.result == 'success' && inputs.rollback != true }}
+    if: ${{ inputs.environment == 'main' && inputs.command == 'up' && needs.deploy.result == 'success' && inputs.rollback != true }}
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -103,7 +103,7 @@ jobs:
         id: tag-deploy-success
         uses: kemadev/workflows-and-actions/.github/actions/tag-deploy-success@main
         with:
-          deployed-ref: ${{ inputs.base_ref }}
+          deployed-ref: ${{ inputs.environment }}
 
   prepare-rollback:
     name: Prepare rollback
@@ -120,7 +120,6 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.base_ref }}
           fetch-depth: 0
           fetch-tags: true
       - name: Get latest successful deployment tag
@@ -128,20 +127,16 @@ jobs:
         env:
           rollback: ${{ inputs.rollback }}
           sha: ${{ inputs.sha }}
-          base_ref: ${{ inputs.base_ref }}
+          environment: ${{ inputs.environment }}
         run: |
           declare rollback_ref
-          if [[ "${rollback}" != "true" ]]; then
-            rollback_ref="$(git tag --list "deploy-success-${inputs.base_ref}-*" | sort -V | tail -n 1)"
+          if [[ "${sha}" == "latest" ]]; then
+            rollback_ref="$(git tag --list "deploy-success-${environment}-*" | sort -V | tail -n 1)"
           else
-            if [[ "${inputs.sha}" == "latest" ]]; then
-              rollback_ref="$(git tag --list "deploy-success-${inputs.base_ref}-*" | sort -V | tail -n 2 | head -n 1)"
-            else
-              rollback_ref="${inputs.sha}"
-            fi
+            rollback_ref="${sha}"
           fi
           if [[ -z "${rollback_ref}" ]]; then
-            echo "No successful deployment found for branch ${inputs.base_ref}"
+            echo "No successful deployment found for ${environment}"
             exit 1
           fi
           echo "Latest successful deployment tag is ${rollback_ref}"
@@ -162,6 +157,6 @@ jobs:
       command: up
       sha: ${{ needs.prepare-rollback.outputs.rollback-ref }}
       ref: ${{ needs.prepare-rollback.outputs.rollback-ref }}
-      base_ref: ${{ inputs.base_ref }}
+      environment: ${{ inputs.environment }}
       is-rollback: true
       comment-id: ${{ inputs.issue-comment-id }}
