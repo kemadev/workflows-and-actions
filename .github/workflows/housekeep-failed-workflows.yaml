@@ -3,7 +3,7 @@ name: Housekeep - Report failed workflows
 on:
   workflow_run:
     workflows:
-      - '*'
+      - "*"
     types:
       - completed
     branches:
@@ -72,8 +72,8 @@ jobs:
     permissions:
       contents: read
       issues: write
-      concurrency:
-        group: housekeep-report-failed-workflows
+    concurrency:
+      group: housekeep-report-failed-workflows
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -83,7 +83,7 @@ jobs:
         id: checkout-reusable-scripts-and-configs
         uses: kemadev/workflows-and-actions/.github/actions/checkout-reusable-scripts-and-configs@main
         with:
-          reusable-diretories: '.github/script/reusable'
+          reusable-diretories: ".github/script/reusable"
       - name: Set up Go
         id: setup-go
         uses: actions/setup-go@v5
