@@ -99,6 +99,8 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.sha }}
       - name: Tag deploy success
         id: tag-deploy-success
         uses: kemadev/workflows-and-actions/.github/actions/tag-deploy-success@main
