@@ -32,6 +32,9 @@ outputs:
   environment:
     description: Environment to deploy to
     value: ${{ steps.parse-comment-body.outputs.environment }}
+  no-rollback:
+    description: Whether to avoid rollbacks
+    value: ${{ steps.parse-comment-body.outputs.no_rollbacks }}
   continue:
     description: Continue
     value: ${{ steps.check-requirements.outputs.continue }}
