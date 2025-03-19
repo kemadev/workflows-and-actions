@@ -7,7 +7,6 @@ on:
   pull_request:
     types:
       - opened
-      - edited
       - synchronize
       - reopened
       - unlocked
@@ -19,7 +18,7 @@ on:
       additional-args:
         description: Additional arguments to pass to the actionlint command
         required: false
-        default: ''
+        default: ""
 
 defaults:
   run:
