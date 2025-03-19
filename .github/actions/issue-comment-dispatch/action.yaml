@@ -32,6 +32,9 @@ outputs:
   continue:
     description: Continue
     value: ${{ steps.check-requirements.outputs.continue }}
+  env:
+    description: Environment to deploy to
+    value: ${{ steps.parse-comment-body.outputs.env }}
   base_ref:
     description: Base ref
     value: ${{ steps.get-pr-infos.outputs.base_ref }}
@@ -90,6 +93,19 @@ runs:
             core.setOutput('fail', `Command ${command} is not supported`);
             console.log(`Command ${command} is not supported`);
           }
+          for (let i = 0; i < args.length; i++) {
+            if (args[i].startsWith('--')) {
+              args[i] = args[i].slice(2);
+              core.setOutput(args[i], 'true');
+            } else {
+              const validEnvs = ['dev', 'next', 'main'];
+              if (validEnvs.includes(args[i])) {
+                core.setOutput('env', args[i]);
+              } else {
+                core.setOutput('fail', `Argument ${args[i]} is not a valid environment`);
+                console.log(`Argument ${args[i]} is not a valid environment`);
+            }
+          }
     - name: Get PR infos
       id: get-pr-infos
       if: ${{ steps.parse-comment-body.outputs.fail == '' }}
@@ -114,6 +130,8 @@ runs:
       env:
         command: ${{ steps.parse-comment-body.outputs.command }}
         args: ${{ steps.parse-comment-body.outputs.args }}
+        force: ${{ steps.parse-comment-body.outputs.force }}
+        env: ${{ steps.get-pr-infos.outputs.env }}
         baseRef: ${{ steps.get-pr-infos.outputs.base_ref }}
         actorPermission: ${{ steps.check-actor-permissions.outputs.permission }}
       with:
@@ -121,13 +139,12 @@ runs:
           const { command, args, baseRef, actorPermission } = process.env;
           console.log(`Command is ${command}`);
           console.log(`Arguments are ${args}`);
+          console.log(`Force is ${force}`);
           console.log(`Base ref is ${baseRef}`);
           console.log(`Actor permission is ${actorPermission}`);
           if (command === 'up' && baseRef === 'main') {
             console.log('Command is up and base ref is main, checking if force deployment is needed');
-            console.log(`Arguments are ${args}`);
-            console.log(`Argument 0 is ${args[0]}`);
-            if (args[0] === '--force' && actorPermission === 'admin') {
+            if (actorPermission === 'admin' && force === 'true') {
               console.log('Force deployment requested by admin, skipping requirements check');
             } else {
               const { data: pr } = await github.rest.pulls.get({
