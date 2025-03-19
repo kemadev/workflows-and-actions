@@ -91,7 +91,7 @@ jobs:
     name: Tag deploy success
     needs:
       - deploy
-    if: ${{ inputs.environment == 'main' && inputs.command == 'up' && needs.deploy.result == 'success' && inputs.rollback != true }}
+    if: ${{ inputs.command == 'up' && needs.deploy.result == 'success' && inputs.rollback != true }}
     permissions:
       contents: write
     runs-on: ubuntu-latest
