@@ -153,6 +153,7 @@ runs:
           console.log(`Command is ${command}`);
           console.log(`Arguments are ${args}`);
           console.log(`Force is ${force}`);
+          console.log(`Environment is ${environment}`);
           console.log(`Base ref is ${baseRef}`);
           console.log(`Actor permission is ${actorPermission}`);
           if (command === 'up' && environment === 'main') {
