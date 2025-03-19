@@ -59,3 +59,4 @@ jobs:
       ref: ${{ needs.dispatch.outputs.ref }}
       environment: ${{ needs.dispatch.outputs.environment != '' && needs.dispatch.outputs.environment || needs.dispatch.outputs.base_ref }}
       issue-comment-id: ${{ github.event.comment.id }}
+      enable_rollback: ${{ needs.dispatch.outputs.environment == 'main' }}
