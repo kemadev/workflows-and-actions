@@ -29,12 +29,12 @@ outputs:
   args:
     description: Arguments
     value: ${{ steps.parse-comment-body.outputs.args }}
-  continue:
-    description: Continue
-    value: ${{ steps.check-requirements.outputs.continue }}
   env:
     description: Environment to deploy to
     value: ${{ steps.parse-comment-body.outputs.env }}
+  continue:
+    description: Continue
+    value: ${{ steps.check-requirements.outputs.continue }}
   base_ref:
     description: Base ref
     value: ${{ steps.get-pr-infos.outputs.base_ref }}
@@ -101,6 +101,7 @@ runs:
               const validEnvs = ['dev', 'next', 'main'];
               if (validEnvs.includes(args[i])) {
                 core.setOutput('env', args[i]);
+                console.log(`Environment is ${args[i]}`);
               } else {
                 core.setOutput('fail', `Argument ${args[i]} is not a valid environment`);
                 console.log(`Argument ${args[i]} is not a valid environment`);
