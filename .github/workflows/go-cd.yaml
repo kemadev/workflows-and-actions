@@ -15,10 +15,10 @@ on:
         description: Ref to deploy
         type: string
         default: main
-      base_ref:
-        description: Base ref to deploy
+      environment:
+        description: Environment to deploy to
         type: string
-        default: main
+        default: dev
       enable_rollback:
         description: Enable rollback in case of deployment failure
         type: boolean
@@ -44,10 +44,10 @@ on:
         description: Ref to deploy
         type: string
         default: main
-      base_ref:
-        description: Base ref to deploy
+      environment:
+        description: Environment to deploy to
         type: string
-        default: main
+        default: dev
       enable_rollback:
         description: Enable rollback in case of deployment failure
         type: boolean
@@ -120,7 +120,6 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.base_ref }}
           fetch-depth: 0
           fetch-tags: true
       - name: Get latest successful deployment tag
@@ -128,20 +127,20 @@ jobs:
         env:
           rollback: ${{ inputs.rollback }}
           sha: ${{ inputs.sha }}
-          base_ref: ${{ inputs.base_ref }}
+          environment: ${{ inputs.environment }}
         run: |
           declare rollback_ref
           if [[ "${rollback}" != "true" ]]; then
-            rollback_ref="$(git tag --list "deploy-success-${inputs.base_ref}-*" | sort -V | tail -n 1)"
+            rollback_ref="$(git tag --list "deploy-success-${inputs.environment}-*" | sort -V | tail -n 1)"
           else
             if [[ "${inputs.sha}" == "latest" ]]; then
-              rollback_ref="$(git tag --list "deploy-success-${inputs.base_ref}-*" | sort -V | tail -n 1)"
+              rollback_ref="$(git tag --list "deploy-success-${inputs.environment}-*" | sort -V | tail -n 1)"
             else
               rollback_ref="${inputs.sha}"
             fi
           fi
           if [[ -z "${rollback_ref}" ]]; then
-            echo "No successful deployment found for branch ${inputs.base_ref}"
+            echo "No successful deployment found for ${environment}"
             exit 1
           fi
           echo "Latest successful deployment tag is ${rollback_ref}"
