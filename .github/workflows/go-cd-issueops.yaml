@@ -61,3 +61,4 @@ jobs:
       environment: ${{ needs.dispatch.outputs.environment != '' && needs.dispatch.outputs.environment || needs.dispatch.outputs.base_ref }}
       issue-comment-id: ${{ github.event.comment.id }}
       enable_rollback: ${{ needs.dispatch.outputs.no-rollback != 'true' && needs.dispatch.outputs.environment == 'main' }}
+      rollback: ${{ needs.dispatch.outputs.command == 'rollback' }}
