@@ -27,6 +27,7 @@ jobs:
       command: ${{ steps.issue-comment-dispatch.outputs.command }}
       continue: ${{ steps.issue-comment-dispatch.outputs.continue }}
       base_ref: ${{ steps.issue-comment-dispatch.outputs.base_ref }}
+      environment: ${{ steps.issue-comment-dispatch.outputs.environment }}
       ref: ${{ steps.issue-comment-dispatch.outputs.ref }}
       sha: ${{ steps.issue-comment-dispatch.outputs.sha }}
     permissions:
@@ -56,5 +57,5 @@ jobs:
       command: ${{ needs.dispatch.outputs.command }}
       sha: ${{ needs.dispatch.outputs.sha }}
       ref: ${{ needs.dispatch.outputs.ref }}
-      environment: ${{ needs.dispatch.outputs.env != '' && needs.dispatch.outputs.env || needs.dispatch.outputs.base_ref }}
+      environment: ${{ needs.dispatch.outputs.environment != '' && needs.dispatch.outputs.environment || needs.dispatch.outputs.base_ref }}
       issue-comment-id: ${{ github.event.comment.id }}

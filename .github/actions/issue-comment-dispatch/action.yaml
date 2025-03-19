@@ -29,9 +29,9 @@ outputs:
   args:
     description: Arguments
     value: ${{ steps.parse-comment-body.outputs.args }}
-  env:
+  environment:
     description: Environment to deploy to
-    value: ${{ steps.parse-comment-body.outputs.env }}
+    value: ${{ steps.parse-comment-body.outputs.environment }}
   continue:
     description: Continue
     value: ${{ steps.check-requirements.outputs.continue }}
@@ -117,7 +117,7 @@ runs:
           if (env === '') {
             env = 'dev';
           }
-          core.setOutput('env', env);
+          core.setOutput('environment', env);
     - name: Get PR infos
       id: get-pr-infos
       if: ${{ steps.parse-comment-body.outputs.fail == '' }}
