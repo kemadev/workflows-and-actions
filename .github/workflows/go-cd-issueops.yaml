@@ -28,6 +28,7 @@ jobs:
       continue: ${{ steps.issue-comment-dispatch.outputs.continue }}
       base_ref: ${{ steps.issue-comment-dispatch.outputs.base_ref }}
       environment: ${{ steps.issue-comment-dispatch.outputs.environment }}
+      no-rollback: ${{ steps.issue-comment-dispatch.outputs.no-rollback }}
       ref: ${{ steps.issue-comment-dispatch.outputs.ref }}
       sha: ${{ steps.issue-comment-dispatch.outputs.sha }}
     permissions:
