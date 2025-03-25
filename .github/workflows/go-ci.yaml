@@ -185,7 +185,7 @@ jobs:
           reusable-diretories: "config/reusable"
       - name: Lint Go
         id: lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v7
         with:
           args: --config ${REUSABLE_CONFIGS_DIR}/.golangci.yaml
 
