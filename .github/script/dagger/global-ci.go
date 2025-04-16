@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"dagger/dagger/internal/dagger"
 )
@@ -34,7 +35,7 @@ func (m *Dagger) GitleaksCi(
 		WithMountedDirectory("/src", source).
 		WithWorkdir("/src").
 		// Local
-		WithExec([]string{"sh", "-c", "gitleaks git --verbose"}).
+		WithExec([]string{"sh", "-c", "gitleaks git --verbose --redact=80"}).
 		// PR
 		// WithExec([]string{"sh", "-c", "trufflehog --fail --no-update --github-actions--no-verification  git file://. --since-commit main"}).
 		// TODO cron
@@ -50,9 +51,9 @@ func (m *Dagger) GlobalCi(
 	s1, err1 := m.SemgrepCi(ctx, source)
 	s2, err2 := m.GitleaksCi(ctx, source)
 	fs := s1 + s2
-	ferr := err1.Error() + err2.Error()
-	if ferr != "" {
-		return fs, err1
+	ferr := fmt.Errorf("%v %v", err1, err2)
+	if ferr != nil {
+		return fs, ferr
 	}
 	return fs, nil
 }
