@@ -84,6 +84,8 @@ ARG TARGETOS
 ARG TARGETARCH
 
 # Single binary tar archives
+# TODO add renovate tracking
+# TODO move this closer to the top of the file if possible (ARG scope is limited to the stage)
 ARG HELM_VERSION=v3.17.3
 ARG GITHUB_CLI_VERSION=2.70.0
 ARG RELEASE_PLEASE_VERSION=17.0.0
