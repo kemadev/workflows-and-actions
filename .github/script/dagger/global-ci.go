@@ -18,7 +18,7 @@ func (m *Dagger) SemgrepCi(
 		WithMountedDirectory("/src", source).
 		WithWorkdir("/src").
 		WithEnvVariable(findingsJsonPathVarName, "/tmp/findings.json").
-		WithExec([]string{"sh", "-c", "semgrep scan --metrics=off --no-error --sarif --output=${" + findingsJsonPathVarName + "} --config 'p/default' --config 'p/kubernetes' --config 'p/dockerfile'"}).
+		WithExec([]string{"sh", "-c", "semgrep scan --metrics=off --no-error --sarif --output=${FINDINGS_PATH} --config 'p/default' --config 'p/kubernetes' --config 'p/dockerfile'"}).
 		WithExec([]string{"sh", "-c", jqSarifToGithubAnnotations}).
 		Stdout(ctx)
 }

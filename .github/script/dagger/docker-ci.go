@@ -20,7 +20,7 @@ func (m *Dagger) DockerCi(
 		WithWorkdir("/src").
 		WithEnvVariable(findingsJsonPathVarName, "/tmp/findings.json").
 		WithExec([]string{"sh", "-c", `
-find . -name '*Dockerfile*' -print0 | xargs -0 -I {} sh -c 'hadolint --no-fail --format sarif {} >> ${` + findingsJsonPathVarName + `}'
+find . -name '*Dockerfile*' -print0 | xargs -0 -I {} sh -c 'hadolint --no-fail --format sarif {} >> ${FINDINGS_PATH}'
 `}).
 		WithExec([]string{"sh", "-c", jqSarifToGithubAnnotations}).
 		Stdout(ctx)
