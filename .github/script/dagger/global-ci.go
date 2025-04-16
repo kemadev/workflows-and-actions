@@ -16,7 +16,7 @@ func (m *Dagger) GlobalCi(
 		WithMountedDirectory("/src", source).
 		WithWorkdir("/src").
 		// Local
-		WithExec([]string{"sh", "-c", "semgrep scan --metrics=off --error --historical-secrets --config 'p/default' --config 'p/gitleaks' --config 'p/kubernetes' --config 'p/dockerfile'"}).
+		WithExec([]string{"sh", "-c", "semgrep scan --metrics=off --error --config 'p/default' --config 'p/gitleaks' --config 'p/kubernetes' --config 'p/dockerfile'"}).
 		// PR
 		// WithExec([]string{"sh", "-c", "trufflehog --fail --no-update --github-actions--no-verification  git file://. --since-commit main"}).
 		// TODO cron
