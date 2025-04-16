@@ -18,14 +18,10 @@ func (m *Dagger) DockerCi(
 		WithUser("guest").
 		WithMountedDirectory("/src", source).
 		WithWorkdir("/src").
-		WithEnvVariable("FINDINGS_PATH", "/tmp/findings.json").
+		WithEnvVariable(findingsJsonPathVarName, "/tmp/findings.json").
 		WithExec([]string{"sh", "-c", `
-find . -name '*Dockerfile*' -print0 | xargs -0 -I {} sh -c 'hadolint --no-fail --format json {} >> ${FINDINGS_PATH}'
+find . -name '*Dockerfile*' -print0 | xargs -0 -I {} sh -c 'hadolint --no-fail --format sarif {} >> ${FINDINGS_PATH}'
 `}).
-		WithExec([]string{"sh", "-c", `
-if [ -f "${FINDINGS_PATH}" ] && [ "$(cat "${FINDINGS_PATH}")" != "[]" ]; then
-	jq -r '.[] | "::error file=\(.file),line=\(.line),col=\(.column)::\(.message) - \(.code)"' "${FINDINGS_PATH}"
-fi
-`}).
+		WithExec([]string{"sh", "-c", jqSarifToGithubAnnotations}).
 		Stdout(ctx)
 }
