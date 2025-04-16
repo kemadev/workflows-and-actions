@@ -88,7 +88,7 @@ func (m *Dagger) GHActionsCi(
 		WithMountedDirectory("/src", source).
 		WithWorkdir("/src").
 		WithEnvVariable(findingsJsonPathVarName, "/tmp/findings.json").
-		WithExec([]string{"sh", "-c", "actionlint -format '" + actionlintSarifFormat + "' > ${FINDINGS_PATH} || true"}).
+		WithExec([]string{"sh", "-c", "actionlint -format '" + actionlintSarifFormat + "' > ${" + findingsJsonPathVarName + "} || true"}).
 		WithExec([]string{"sh", "-c", jqSarifToGithubAnnotations}).
 		Stdout(ctx)
 	if err != nil {
