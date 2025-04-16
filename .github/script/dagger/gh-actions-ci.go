@@ -79,30 +79,20 @@ func (m *Dagger) GHActionsCi(
 	ctx context.Context,
 	// +defaultPath="/"
 	source *dagger.Directory,
-) Results {
-	ctr, err := dag.Container().
+) (string, error) {
+	f, err := dag.Container().
 		From("rhysd/actionlint:latest").
+		WithUser("root").
+		WithExec([]string{"apk", "add", "--no-cache", "jq"}).
+		WithUser("guest").
 		WithMountedDirectory("/src", source).
 		WithWorkdir("/src").
-		WithEnvVariable(findingsJsonPathVarName, findingsJsonPathVarValue).
-		WithExec([]string{"sh", "-c", "actionlint -format '" + actionlintSarifFormat + "' > ${" + findingsJsonPathVarName + "}"}).
-		Sync(ctx)
+		WithEnvVariable(findingsJsonPathVarName, "/tmp/findings.json").
+		WithExec([]string{"sh", "-c", "actionlint -format '" + actionlintSarifFormat + "' > ${" + findingsJsonPathVarName + "} || true"}).
+		WithExec([]string{"sh", "-c", jqSarifToGithubAnnotations}).
+		Stdout(ctx)
 	if err != nil {
-		return Results{"", 1, err}
+		return "", err
 	}
-	e, err := ctr.ExitCode(ctx)
-	if err != nil {
-		return Results{"", e, err}
-	}
-	f := ctr.File(findingsJsonPathVarValue)
-	l, err := processResults(ctx, f)
-	if err != nil {
-		return Results{"", e, err}
-	}
-
-	return Results{
-		Logs:     l,
-		ExitCode: e,
-		Error:    nil,
-	}
+	return f, nil
 }
