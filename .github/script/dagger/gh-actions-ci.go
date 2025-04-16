@@ -6,75 +6,6 @@ import (
 	"dagger/dagger/internal/dagger"
 )
 
-// From https://github.com/rhysd/actionlint/blob/v1.7.7/docs/usage.md#example-sarif-format
-// From https://github.com/rhysd/actionlint/blob/v1.7.7/testdata/format/test.sarif
-const actionlintSarifFormat = `{
-    "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
-    "version": "2.1.0",
-    "runs": [
-        {
-            "tool": {
-                "driver": {
-                    "name": "GitHub Actions lint",
-                    "version": {{ getVersion | json }},
-                    "informationUri": "https://github.com/rhysd/actionlint",
-                    "rules": [
-                        {{$first := true}}
-                        {{range $ := allKinds }}
-                            {{if $first}}{{$first = false}}{{else}},{{end}}
-                            {
-                                "id": {{json $.Name}},
-                                "name": {{$.Name | toPascalCase | json}},
-                                "defaultConfiguration": {
-                                    "level": "error"
-                                },
-                                "properties": {
-                                    "description": {{json $.Description}},
-                                    "queryURI": "https://github.com/rhysd/actionlint/blob/main/docs/checks.md"
-                                },
-                                "fullDescription": {
-                                    "text": {{json $.Description}}
-                                },
-                                "helpUri": "https://github.com/rhysd/actionlint/blob/main/docs/checks.md"
-                            }
-                        {{end}}
-                    ]
-                }
-            },
-            "results": [
-                {{$first := true}}
-                {{range $ := .}}
-                    {{if $first}}{{$first = false}}{{else}},{{end}}
-                    {
-                        "ruleId": {{json $.Kind}},
-                        "message": {
-                            "text": {{json $.Message}}
-                        },
-                        "locations": [
-                            {
-                                "physicalLocation": {
-                                    "artifactLocation": {
-                                        "uri": {{json $.Filepath}},
-                                        "uriBaseId": "%SRCROOT%"
-                                    },
-                                    "region": {
-                                        "startLine": {{$.Line}},
-                                        "startColumn": {{$.Column}},
-                                        "endColumn": {{$.EndColumn}},
-                                        "snippet": {
-                                            "text": {{json $.Snippet}}
-                                        }
-                                    }
-                                }
-                            }
-                        ]
-                    }
-                {{end}}
-            ]
-        }
-    ]
-}`
-
 func (m *Dagger) GHActionsCi(
 	ctx context.Context,
 	// +defaultPath="/"
@@ -87,9 +18,13 @@ func (m *Dagger) GHActionsCi(
 		WithUser("guest").
 		WithMountedDirectory("/src", source).
 		WithWorkdir("/src").
-		WithEnvVariable(findingsJsonPathVarName, "/tmp/findings.json").
-		WithExec([]string{"sh", "-c", "actionlint -format '" + actionlintSarifFormat + "' > ${FINDINGS_PATH} || true"}).
-		WithExec([]string{"sh", "-c", jqSarifToGithubAnnotations}).
+		WithEnvVariable("FINDINGS_PATH", "/tmp/findings.json").
+		WithExec([]string{"sh", "-c", "actionlint -format '{{json .}}' > ${FINDINGS_PATH} || true"}).
+		WithExec([]string{"sh", "-c", `
+if [ -f "${FINDINGS_PATH}" ] && [ "$(cat "${FINDINGS_PATH}")" != "[]" ]; then
+	jq -r '.[] | "::error file=\(.filepath),line=\(.line),col=\(.column)::\(.message) - \(.kind)"' "${FINDINGS_PATH}"
+fi
+`}).
 		Stdout(ctx)
 	if err != nil {
 		return "", err
