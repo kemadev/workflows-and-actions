@@ -1,0 +1,14 @@
+name: Dummy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      # should trigger deprecated action warning from actionlint
+      uses: actions/checkout@v2

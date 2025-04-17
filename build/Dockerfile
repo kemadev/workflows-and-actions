@@ -161,7 +161,9 @@ FROM --platform=${BUILDPLATFORM} clean AS workflow-base
 RUN mkdir -p /tool && chown root:root /tool
 
 # Copy tool sources
-COPY ./pkg/ /tool/
+COPY --link ./pkg/ /tool/pkg/
 
 # Where to store SARIF reports, used in workflows
 ENV KEMA_CI_SARIF_REPORT_PATH=/tmp/report.sarif
+
+ENTRYPOINT [ "/tool/pkg/docker-entrypoint.sh" ]
