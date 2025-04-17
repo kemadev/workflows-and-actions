@@ -105,10 +105,9 @@ func printFindings(sarif SarifFile, format string) (int, error) {
 				// repo is mounted at /src
 				relpath := location.PhysicalLocation.ArtifactLocation.URI
 				l := len(filesfinder.RootPath) + 1
-				if !(len(relpath) > l && relpath[:l] == filesfinder.RootPath+"/") {
-					return 1, fmt.Errorf("invalid path: %s", relpath)
+				if len(relpath) > l && relpath[:l] == filesfinder.RootPath+"/" {
+					relpath = relpath[l:]
 				}
-				relpath = relpath[l:]
 				annotation := Finding{
 					ToolName:  run.Tool.Driver.Name,
 					RuleID:    result.RuleID,

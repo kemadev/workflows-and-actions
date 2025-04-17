@@ -45,12 +45,8 @@ func runLinter(a linterArgs) (int, error) {
 	for _, file := range f {
 		slog.Debug("found file", slog.String("file", file))
 	}
-	ca := []string{
-		"--format",
-		"sarif",
-	}
-	ca = append(ca, f...)
 
+	ca := append(a.CliArgs, f...)
 	cmd := exec.Command(a.Bin, ca...)
 
 	var stdout, stderr bytes.Buffer
