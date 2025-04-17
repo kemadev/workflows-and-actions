@@ -1,0 +1,9 @@
+array:
+  - key: value
+
+# empty-lines should trigger
+
+
+
+
+  - key: value
