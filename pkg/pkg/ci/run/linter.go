@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -10,16 +11,26 @@ import (
 	sarifparser "github.com/kemadev/workflows-and-actions/pkg/pkg/sarif-parser"
 )
 
-func docker(args []string) (int, error) {
-	slog.Debug("docker called")
+type linterArgs struct {
+	Bin     string
+	Ext     string
+	Paths   []string
+	CliArgs []string
+}
 
-	if len(args) == 0 {
-		args = []string{}
+func runLinter(a linterArgs) (int, error) {
+	if a.Bin == "" {
+		return 1, fmt.Errorf("linter binary is required")
 	}
-
-	// TODO parse args into filesfinder.Args
+	if a.Ext == "" {
+		return 1, fmt.Errorf("file extension is required")
+	}
+	if a.Paths == nil {
+		a.Paths = []string{filesfinder.RootPath}
+	}
 	f, err := filesfinder.FindFilesByExtension(filesfinder.Args{
-		Extension: "Dockerfile",
+		Extension: a.Ext,
+		Paths:     a.Paths,
 		Recursive: true,
 	})
 	if err != nil {
@@ -28,19 +39,19 @@ func docker(args []string) (int, error) {
 	}
 
 	if len(f) == 0 {
-		slog.Info("no Dockerfiles found")
+		slog.Info("no file found")
 		return 0, nil
 	}
 	for _, file := range f {
-		slog.Debug("found Dockerfile", slog.String("file", file))
+		slog.Debug("found file", slog.String("file", file))
 	}
-	a := []string{
+	ca := []string{
 		"--format",
 		"sarif",
 	}
-	a = append(a, f...)
+	ca = append(ca, f...)
 
-	cmd := exec.Command("hadolint", a...)
+	cmd := exec.Command(a.Bin, ca...)
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
