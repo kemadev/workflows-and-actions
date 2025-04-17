@@ -60,6 +60,30 @@ RUN apk add --no-cache \
 
 SHELL ["/bin/bash", "-uo", "pipefail", "-c"]
 
+FROM --platform=${BUILDPLATFORM} base AS deps
+
+# Docker buildx ARGs
+ARG TARGETOS
+ARG TARGETARCH
+
+# Single binary tar archives (can't add those args with ones above as ARG has stage scope)
+# TODO add renovate tracking
+ARG HELM_VERSION=v3.17.3
+ARG GITHUB_CLI_VERSION=2.70.0
+ARG RELEASE_PLEASE_VERSION=17.0.0
+
+# Install helm
+RUN curl -sSL "https://get.helm.sh/helm-${HELM_VERSION}-${TARGETOS}-${TARGETARCH}.tar.gz" | tar -xz --strip-components=1 -C /usr/local/bin "${TARGETOS}-${TARGETARCH}/helm"
+
+# Install gh (note the v prefix after download)
+RUN curl -sSL "https://github.com/cli/cli/releases/download/v${GITHUB_CLI_VERSION}/gh_${GITHUB_CLI_VERSION}_${TARGETOS}_${TARGETARCH}.tar.gz" | tar -xz --strip-components=2 -C /usr/local/bin "gh_${GITHUB_CLI_VERSION}_${TARGETOS}_${TARGETARCH}/bin/gh"
+
+# Install nodejs
+COPY --from=nodejs /usr/local /usr/local
+
+# Install release-please
+RUN npm --cache=false install --global "release-please@${RELEASE_PLEASE_VERSION}"
+
 FROM --platform=${BUILDPLATFORM} base AS clean
 
 # Copy tools from the respective stages
@@ -79,25 +103,9 @@ COPY --from=goreleaser /usr/bin/goreleaser /usr/local/bin/goreleaser
 COPY --from=golang /usr/local/go/ /usr/local/go/
 COPY --from=nodejs /usr/local /usr/local
 COPY --from=python /usr/local /usr/local
-
-# Docker buildx ARGs
-ARG TARGETOS
-ARG TARGETARCH
-
-# Single binary tar archives (can't add those args with ones above as ARG has stage scope)
-# TODO add renovate tracking
-ARG HELM_VERSION=v3.17.3
-ARG GITHUB_CLI_VERSION=2.70.0
-ARG RELEASE_PLEASE_VERSION=17.0.0
-
-# Install helm
-RUN curl -sSL "https://get.helm.sh/helm-${HELM_VERSION}-${TARGETOS}-${TARGETARCH}.tar.gz" | tar -xz --strip-components=1 -C /usr/local/bin "${TARGETOS}-${TARGETARCH}/helm"
-
-# Install gh (note the v prefix after download)
-RUN curl -sSL "https://github.com/cli/cli/releases/download/v${GITHUB_CLI_VERSION}/gh_${GITHUB_CLI_VERSION}_${TARGETOS}_${TARGETARCH}.tar.gz" | tar -xz --strip-components=2 -C /usr/local/bin "gh_${GITHUB_CLI_VERSION}_${TARGETOS}_${TARGETARCH}/bin/gh"
-
-# Install release-please
-RUN npm --cache=false install --global "release-please@${RELEASE_PLEASE_VERSION}"
+COPY --from=deps /usr/local/bin/helm /usr/local/bin/helm
+COPY --from=deps /usr/local/bin/gh /usr/local/bin/gh
+COPY --from=deps /usr/local/bin/release-please /usr/local/bin/release-please
 
 # Configure Go
 ENV GOROOT=/usr/local/go
@@ -114,5 +122,7 @@ RUN git config --global user.name "${GIT_USERNAME}" && git config --global user.
 # Create base directory
 RUN mkdir -p /src
 WORKDIR /src
+
+USER nobody:nobody
 
 CMD [ "bash" ]
