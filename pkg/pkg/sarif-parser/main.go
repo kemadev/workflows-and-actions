@@ -1,4 +1,4 @@
-package main
+package sarifparser
 
 import (
 	"encoding/json"
@@ -68,7 +68,7 @@ func init() {
 	flag.StringVar(&outputFormat, "output-format", "human", "Output format (human, json, github)")
 }
 
-func main() {
+func ParseSarifFile() {
 	s := time.Now()
 	flag.Parse()
 	sarifFilePath := flag.Arg(0)
@@ -122,7 +122,7 @@ func main() {
 			fmt.Printf("Tool: %s\n", annotation.ToolName)
 			fmt.Printf("Rule ID: %s\n", annotation.RuleID)
 			fmt.Printf("Level: %s\n", annotation.Level)
-			fmt.Printf("File: %s\n", annotation.FilePath + ":" + fmt.Sprintf("%d", annotation.StartLine))
+			fmt.Printf("File: %s\n", annotation.FilePath+":"+fmt.Sprintf("%d", annotation.StartLine))
 			fmt.Printf("Message: %s\n", annotation.Message)
 			fmt.Println()
 		}

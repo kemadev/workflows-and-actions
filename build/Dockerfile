@@ -157,8 +157,8 @@ USER nobody:nobody
 # Final image for workflows
 FROM --platform=${BUILDPLATFORM} clean AS workflow-base
 
-ENV CI_SARIF_REPORT_PATH=/tmp/sarif.json
-
 RUN mkdir -p /tool && chown root:root /tool
 
 COPY ./pkg/ /tool/
+
+ENV CI_SARIF_REPORT_PATH=/tmp/report.sarif
