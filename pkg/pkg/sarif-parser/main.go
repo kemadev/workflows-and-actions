@@ -122,11 +122,7 @@ func main() {
 			fmt.Printf("Tool: %s\n", annotation.ToolName)
 			fmt.Printf("Rule ID: %s\n", annotation.RuleID)
 			fmt.Printf("Level: %s\n", annotation.Level)
-			fmt.Printf("File: %s\n", annotation.FilePath)
-			fmt.Printf("Start Line: %d\n", annotation.StartLine)
-			fmt.Printf("End Line: %d\n", annotation.EndLine)
-			fmt.Printf("Start Column: %d\n", annotation.StartCol)
-			fmt.Printf("End Column: %d\n", annotation.EndCol)
+			fmt.Printf("File: %s\n", annotation.FilePath + ":" + fmt.Sprintf("%d", annotation.StartLine))
 			fmt.Printf("Message: %s\n", annotation.Message)
 			fmt.Println()
 		}

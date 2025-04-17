@@ -137,6 +137,7 @@ RUN mkdir -p /src
 WORKDIR /src
 
 # Run as root
+# hadolint ignore=DL3002
 USER root:root
 
 CMD [ "bash" ]
