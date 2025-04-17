@@ -139,10 +139,18 @@ WORKDIR /src
 # Run as root
 USER root:root
 
+# ENV
+
 CMD [ "bash" ]
 
 # Final image as non-root
 FROM --platform=${BUILDPLATFORM} clean AS clean-nonroot
+
+# Set home directory
+ENV HOME=/home/nobody
+
+# Create home directory
+RUN mkdir -p ${HOME} && chown nobody:nobody ${HOME}
 
 # Run as non-root
 USER nobody:nobody
