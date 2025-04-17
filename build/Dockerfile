@@ -160,10 +160,25 @@ FROM --platform=${BUILDPLATFORM} clean AS workflow-base
 # Create tool directory
 RUN mkdir -p /tool && chown root:root /tool
 
-# Copy tool sources
-COPY --link ./pkg/ /tool/pkg/
+WORKDIR /tool/pkg/pkg/ci/run
+
+# Add cache layer for dependencies, mount from host to avoid COPY layer, verbose output for cache behavior logging
+RUN --mount=type=cache,target=/root/go/pkg \
+	--mount=type=bind,source=./pkg/pkg/ci/run/go.mod,target=go.mod \
+	--mount=type=bind,source=./pkg/pkg/ci/run/go.sum,target=go.sum \
+	go mod download -x
+
+# Add cache layer for dependencies, mount from host to avoid COPY layer
+RUN --mount=type=cache,target=/root/go/pkg \
+	--mount=type=cache,target=/root/.cache \
+	--mount=type=bind,source=./pkg,target=/tool/pkg \
+	go build -ldflags='-s -w' -o /usr/local/bin/kema-ci .
+
+FROM --platform=${BUILDPLATFORM} clean AS workflow-clean
+
+COPY --link --from=workflow-base /usr/local/bin/kema-ci /usr/local/bin/kema-ci
 
 # Where to store SARIF reports, used in workflows
 ENV KEMA_CI_SARIF_REPORT_PATH=/tmp/report.sarif
 
-ENTRYPOINT [ "/tool/pkg/docker-entrypoint.sh" ]
+ENTRYPOINT [ "/usr/local/bin/kema-ci" ]

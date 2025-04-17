@@ -176,7 +176,7 @@ func createOrUpdateIssue() error {
 func main() {
 	startTime := time.Now()
 	defer func() {
-		slog.Info("Execution time", slog.String("duration", time.Since(startTime).String()))
+		slog.Debug("Execution time", slog.String("duration", time.Since(startTime).String()))
 	}()
 	initLogger()
 	err := checkAndSetVariables()
