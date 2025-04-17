@@ -68,17 +68,22 @@ func init() {
 	flag.StringVar(&outputFormat, "output-format", "human", "Output format (human, json, github)")
 }
 
-func ParseSarifFile() {
+func ParseSarifFile(path string, gha bool) int {
 	s := time.Now()
 	flag.Parse()
-	sarifFilePath := flag.Arg(0)
+	sarifFilePath := path
 	if sarifFilePath == "" {
-		flag.Usage()
-		return
+		sarifFilePath = flag.Arg(0)
+		if sarifFilePath == "" {
+			flag.Usage()
+			return 1
+		}
 	}
-	if outputFormat != "human" && outputFormat != "json" && outputFormat != "github" {
+	if gha {
+		outputFormat = "github"
+	} else if outputFormat != "human" && outputFormat != "json" && outputFormat != "github" {
 		flag.Usage()
-		return
+		return 1
 	}
 	slog.Debug("SARIF file path: ", slog.String("path", sarifFilePath))
 	slog.Debug("Output format: ", slog.String("format", outputFormat))
@@ -140,5 +145,10 @@ func ParseSarifFile() {
 			fmt.Printf("::%s title=%s file=%s,line=%d,endLine=%d,col=%d,endColumn=%d::%s\n", annotation.Level, annotation.ToolName, annotation.FilePath, annotation.StartLine, annotation.EndLine, annotation.StartCol, annotation.EndCol, annotation.Message)
 		}
 	}
+	rc := 0
+	if len(annotations) > 0 {
+		rc = 1
+	}
 	slog.Debug("Execution time: ", slog.Duration("duration", time.Since(s)))
+	return rc
 }

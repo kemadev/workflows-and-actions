@@ -161,4 +161,4 @@ RUN mkdir -p /tool && chown root:root /tool
 
 COPY ./pkg/ /tool/
 
-ENV CI_SARIF_REPORT_PATH=/tmp/report.sarif
+ENV KEMA_CI_SARIF_REPORT_PATH=/tmp/report.sarif
