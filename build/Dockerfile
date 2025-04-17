@@ -108,8 +108,8 @@ COPY --link --from=grype /grype /usr/local/bin/grype
 COPY --link --from=syft /syft /usr/local/bin/syft
 COPY --link --from=goreleaser /usr/bin/goreleaser /usr/local/bin/goreleaser
 COPY --link --from=golang /usr/local/go/ /usr/local/go/
-COPY --link --from=nodejs-deps /usr/local /usr/local
-COPY --link --from=python /usr/local /usr/local
+COPY --link --from=nodejs-deps /usr/local/ /usr/local/
+COPY --link --from=python /usr/local/ /usr/local/
 COPY --link --from=misc-deps /usr/local/bin/helm /usr/local/bin/helm
 COPY --link --from=misc-deps /usr/local/bin/gh /usr/local/bin/gh
 COPY --link --from=misc-deps /usr/local/lib/node_modules/release-please /usr/local/lib/node_modules/release-please
@@ -133,7 +133,7 @@ ARG GIT_EMAIL="kemadev+github-actions[bot]@users.noreply.github.com"
 RUN git config --global user.name "${GIT_USERNAME}" && git config --global user.email "${GIT_EMAIL}"
 
 # Create base directory
-RUN mkdir -p /src
+RUN mkdir -p /src && chown root:root /src
 WORKDIR /src
 
 # Run as root
@@ -158,3 +158,7 @@ USER nobody:nobody
 FROM --platform=${BUILDPLATFORM} clean AS workflow-base
 
 ENV CI_SARIF_REPORT_PATH=/tmp/sarif.json
+
+RUN mkdir -p /tool && chown root:root /tool
+
+COPY ./pkg/ /tool/
