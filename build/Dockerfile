@@ -111,6 +111,7 @@ COPY --link --from=archive-deps /usr/local/bin/helm /usr/local/bin/helm
 COPY --link --from=archive-deps /usr/local/bin/gh /usr/local/bin/gh
 COPY --link --from=archive-deps /usr/local/lib/node_modules/release-please /usr/local/lib/node_modules/release-please
 
+# Link nodejs tools
 RUN ln -s /usr/local/lib/node_modules/release-please/build/src/bin/release-please.js /usr/local/bin/release-please
 
 # Make all tools root-owned and executable
