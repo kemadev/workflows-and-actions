@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	rootPath = "/src"
+	RootPath = "/src"
 )
 
 type Args struct {

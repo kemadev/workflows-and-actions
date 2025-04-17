@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/kemadev/workflows-and-actions/pkg/pkg/ci/filesfinder"
 	_ "github.com/kemadev/workflows-and-actions/pkg/pkg/logger/runner"
 )
 
@@ -60,22 +61,25 @@ type Finding struct {
 	Message   string `json:"message"`
 }
 
-func HandleSarifString(s string, format string) int {
+func HandleSarifString(s string, format string) (int, error) {
 	var sarif SarifFile
 	if err := json.Unmarshal([]byte(s), &sarif); err != nil {
 		slog.Error("Error unmarshalling SARIF string", slog.String("error", err.Error()))
-		return 1
+		return 1, err
 	}
 
-	rc := printFindings(sarif, format)
-	return rc
+	rc, err := printFindings(sarif, format)
+	if err != nil {
+		return 1, err
+	}
+	return rc, nil
 }
 
-func HandleSarifFile(path string, format string) int {
+func HandleSarifFile(path string, format string) (int, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		slog.Error("Error opening SARIF file", slog.String("error", err.Error()))
-		return 1
+		return 1, err
 	}
 	defer file.Close()
 
@@ -83,23 +87,32 @@ func HandleSarifFile(path string, format string) int {
 	decoder := json.NewDecoder(file)
 	if err := decoder.Decode(&sarif); err != nil {
 		slog.Error("Error decoding SARIF file", slog.String("error", err.Error()))
-		return 1
+		return 1, err
 	}
 
-	rc := printFindings(sarif, format)
-	return rc
+	rc, err := printFindings(sarif, format)
+	if err != nil {
+		return 1, err
+	}
+	return rc, nil
 }
 
-func printFindings(sarif SarifFile, format string) int {
+func printFindings(sarif SarifFile, format string) (int, error) {
 	var annotations []Finding
 	for _, run := range sarif.Runs {
 		for _, result := range run.Results {
 			for _, location := range result.Locations {
+				relpath := location.PhysicalLocation.ArtifactLocation.URI
+				l := len(filesfinder.RootPath) + 1
+				if !(len(relpath) > l && relpath[:l] == filesfinder.RootPath+"/") {
+					return 1, fmt.Errorf("invalid path: %s", relpath)
+				}
+				relpath = relpath[l:]
 				annotation := Finding{
 					ToolName:  run.Tool.Driver.Name,
 					RuleID:    result.RuleID,
 					Level:     result.Level,
-					FilePath:  location.PhysicalLocation.ArtifactLocation.URI,
+					FilePath:  relpath,
 					StartLine: location.PhysicalLocation.Region.StartLine,
 					EndLine:   location.PhysicalLocation.Region.EndLine,
 					StartCol:  location.PhysicalLocation.Region.StartColumn,
@@ -124,8 +137,7 @@ func printFindings(sarif SarifFile, format string) int {
 	case "json":
 		output, err := json.MarshalIndent(annotations, "", "  ")
 		if err != nil {
-			slog.Error("Error marshalling JSON", slog.String("error", err.Error()))
-			return 1
+			return 1, err
 		}
 		fmt.Println(string(output))
 	case "github":
@@ -133,12 +145,11 @@ func printFindings(sarif SarifFile, format string) int {
 			fmt.Printf("::%s title=%s file=%s,line=%d,endLine=%d,col=%d,endColumn=%d::%s\n", annotation.Level, annotation.ToolName, annotation.FilePath, annotation.StartLine, annotation.EndLine, annotation.StartCol, annotation.EndCol, annotation.Message)
 		}
 	default:
-		slog.Error("Unknown format", slog.String("format", format))
-		return 1
+		return 1, fmt.Errorf("unknown format: %s", format)
 	}
 	rc := 0
 	if len(annotations) > 0 {
 		rc = 1
 	}
-	return rc
+	return rc, nil
 }
