@@ -1,11 +1,11 @@
+# TODO add renovate tracking
 # Base image version
-ARG ALPINE_VERSION=3.21.3
+ARG ALPINE_MAJOR_MINOR_VERSION=3.21
+ARG ALPINE_MAJOR_MINOR_PATCH_VERSION=3.21.3
 
 # Tools versions
-# TODO add renovate tracking
 
 ## Single binary copy from container
-ARG GO_VERSION=1.24.2
 ARG HADOLINT_VERSION=v2.12.0
 ARG ACTIONLINT_VERSION=1.7.7
 ARG TRUFFLEHOG_VERSION=3.88.23
@@ -19,13 +19,13 @@ ARG PULUMI_VERSION=3.162.0
 ARG GRYPE_VERSION=v0.91.0
 ARG SYFT_VERSION=v1.22.0
 ARG GORELEASER_VERSION=v2.8.2
+ARG GO_VERSION=1.24.2
 
 ## Multi-directory copy from container
 ARG NODEJS_VERSION=23.11.0
 ARG PYTHON_VERSION=3.13.3
 
 # Define images to copy from (can't use ARG in COPY statements)
-FROM --platform=${BUILDPLATFORM} docker.io/golang:${GO_VERSION}-alpine AS golang
 FROM --platform=${BUILDPLATFORM} docker.io/hadolint/hadolint:${HADOLINT_VERSION} AS hadolint
 FROM --platform=${BUILDPLATFORM} docker.io/rhysd/actionlint:${ACTIONLINT_VERSION} AS actionlint
 FROM --platform=${BUILDPLATFORM} docker.io/trufflesecurity/trufflehog:${TRUFFLEHOG_VERSION} AS trufflehog
@@ -39,11 +39,12 @@ FROM --platform=${BUILDPLATFORM} docker.io/pulumi/pulumi:${PULUMI_VERSION} AS pu
 FROM --platform=${BUILDPLATFORM} docker.io/anchore/grype:${GRYPE_VERSION} AS grype
 FROM --platform=${BUILDPLATFORM} docker.io/anchore/syft:${SYFT_VERSION} AS syft
 FROM --platform=${BUILDPLATFORM} docker.io/goreleaser/goreleaser:${GORELEASER_VERSION} AS goreleaser
-FROM --platform=${BUILDPLATFORM} docker.io/node:${NODEJS_VERSION}-alpine AS nodejs
-FROM --platform=${BUILDPLATFORM} docker.io/python:${PYTHON_VERSION}-alpine AS python
+FROM --platform=${BUILDPLATFORM} docker.io/golang:${GO_VERSION}-alpine${ALPINE_MAJOR_MINOR_VERSION} AS golang
+FROM --platform=${BUILDPLATFORM} docker.io/node:${NODEJS_VERSION}-alpine${ALPINE_MAJOR_MINOR_VERSION} AS nodejs
+FROM --platform=${BUILDPLATFORM} docker.io/python:${PYTHON_VERSION}-alpine${ALPINE_MAJOR_MINOR_VERSION} AS python
 
 # Define base image
-FROM --platform=${BUILDPLATFORM} docker.io/alpine:${ALPINE_VERSION} AS base
+FROM --platform=${BUILDPLATFORM} docker.io/alpine:${ALPINE_MAJOR_MINOR_PATCH_VERSION} AS base
 
 # Install core dependencies
 # hadolint ignore=DL3018
@@ -62,7 +63,6 @@ SHELL ["/bin/bash", "-uo", "pipefail", "-c"]
 FROM --platform=${BUILDPLATFORM} base AS clean
 
 # Copy tools from the respective stages
-COPY --from=golang /usr/local/go/ /usr/local/go/
 COPY --from=hadolint /bin/hadolint /usr/local/bin/hadolint
 COPY --from=actionlint /usr/local/bin/actionlint /usr/local/bin/actionlint
 COPY --from=trufflehog /usr/bin/trufflehog /usr/local/bin/trufflehog
@@ -76,6 +76,7 @@ COPY --from=pulumi /usr/bin/pulumi /usr/local/bin/pulumi
 COPY --from=grype /grype /usr/local/bin/grype
 COPY --from=syft /syft /usr/local/bin/syft
 COPY --from=goreleaser /usr/bin/goreleaser /usr/local/bin/goreleaser
+COPY --from=golang /usr/local/go/ /usr/local/go/
 COPY --from=nodejs /usr/local /usr/local
 COPY --from=python /usr/local /usr/local
 
