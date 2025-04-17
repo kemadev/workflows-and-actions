@@ -111,6 +111,9 @@ COPY --link --from=archive-deps /usr/local/bin/helm /usr/local/bin/helm
 COPY --link --from=archive-deps /usr/local/bin/gh /usr/local/bin/gh
 COPY --link --from=archive-deps /usr/local/bin/release-please /usr/local/bin/release-please
 
+# Make all tools root-owned and executable
+RUN chmod 755 /usr/local/bin/* && chown root:root /usr/local/bin/* && chmod 755 /usr/local/go/bin/* && chown root:root /usr/local/go/bin/*
+
 # Configure Go
 ENV GOROOT=/usr/local/go
 ENV GOPATH=/go
