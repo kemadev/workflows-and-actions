@@ -139,8 +139,6 @@ WORKDIR /src
 # Run as root
 USER root:root
 
-# ENV
-
 CMD [ "bash" ]
 
 # Final image as non-root
@@ -154,3 +152,8 @@ RUN mkdir -p ${HOME} && chown nobody:nobody ${HOME}
 
 # Run as non-root
 USER nobody:nobody
+
+# Final image for workflows
+FROM --platform=${BUILDPLATFORM} clean AS workflow-base
+
+ENV CI_SARIF_REPORT_PATH=/tmp/sarif.json
