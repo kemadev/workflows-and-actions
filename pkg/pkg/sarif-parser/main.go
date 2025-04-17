@@ -60,7 +60,7 @@ type Finding struct {
 	Message   string `json:"message"`
 }
 
-func ParseSarifString(s string, format string) int {
+func HandleSarifString(s string, format string) int {
 	var sarif SarifFile
 	if err := json.Unmarshal([]byte(s), &sarif); err != nil {
 		slog.Error("Error unmarshalling SARIF string", slog.String("error", err.Error()))
@@ -71,7 +71,7 @@ func ParseSarifString(s string, format string) int {
 	return rc
 }
 
-func ParseSarifFile(path string, format string) int {
+func HandleSarifFile(path string, format string) int {
 	file, err := os.Open(path)
 	if err != nil {
 		slog.Error("Error opening SARIF file", slog.String("error", err.Error()))
