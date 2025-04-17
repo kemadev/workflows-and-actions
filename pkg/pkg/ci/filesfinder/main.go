@@ -12,7 +12,6 @@ const (
 )
 
 type Args struct {
-	//
 	Extension   string
 	Paths       []string
 	IgnorePaths []string
