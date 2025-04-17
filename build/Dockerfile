@@ -79,7 +79,7 @@ RUN curl -sSL "https://get.helm.sh/helm-${HELM_VERSION}-${TARGETOS}-${TARGETARCH
 RUN curl -sSL "https://github.com/cli/cli/releases/download/v${GITHUB_CLI_VERSION}/gh_${GITHUB_CLI_VERSION}_${TARGETOS}_${TARGETARCH}.tar.gz" | tar -xz --strip-components=2 -C /usr/local/bin "gh_${GITHUB_CLI_VERSION}_${TARGETOS}_${TARGETARCH}/bin/gh"
 
 # Install nodejs
-COPY --from=nodejs /usr/local /usr/local
+COPY --link --from=nodejs /usr/local /usr/local
 
 # Install release-please
 RUN npm --cache=false install --global "release-please@${RELEASE_PLEASE_VERSION}"
@@ -87,25 +87,25 @@ RUN npm --cache=false install --global "release-please@${RELEASE_PLEASE_VERSION}
 FROM --platform=${BUILDPLATFORM} base AS clean
 
 # Copy tools from the respective stages
-COPY --from=hadolint /bin/hadolint /usr/local/bin/hadolint
-COPY --from=actionlint /usr/local/bin/actionlint /usr/local/bin/actionlint
-COPY --from=trufflehog /usr/bin/trufflehog /usr/local/bin/trufflehog
-COPY --from=semgrep /usr/bin/semgrep /usr/local/bin/semgrep
-COPY --from=golangci_lint /usr/bin/golangci-lint /usr/local/bin/golangci-lint
-COPY --from=yamllint /app/bin/yamllint /usr/local/bin/yamllint
-COPY --from=markdownlint /usr/local/bin/markdownlint-cli2 /usr/local/bin/markdownlint
-COPY --from=shellcheck /bin/shellcheck /usr/local/bin/shellcheck
-COPY --from=kubectl /opt/bitnami/kubectl/bin/kubectl /usr/local/bin/kubectl
-COPY --from=pulumi /usr/bin/pulumi /usr/local/bin/pulumi
-COPY --from=grype /grype /usr/local/bin/grype
-COPY --from=syft /syft /usr/local/bin/syft
-COPY --from=goreleaser /usr/bin/goreleaser /usr/local/bin/goreleaser
-COPY --from=golang /usr/local/go/ /usr/local/go/
-COPY --from=nodejs /usr/local /usr/local
-COPY --from=python /usr/local /usr/local
-COPY --from=deps /usr/local/bin/helm /usr/local/bin/helm
-COPY --from=deps /usr/local/bin/gh /usr/local/bin/gh
-COPY --from=deps /usr/local/bin/release-please /usr/local/bin/release-please
+COPY --link --from=hadolint /bin/hadolint /usr/local/bin/hadolint
+COPY --link --from=actionlint /usr/local/bin/actionlint /usr/local/bin/actionlint
+COPY --link --from=trufflehog /usr/bin/trufflehog /usr/local/bin/trufflehog
+COPY --link --from=semgrep /usr/bin/semgrep /usr/local/bin/semgrep
+COPY --link --from=golangci_lint /usr/bin/golangci-lint /usr/local/bin/golangci-lint
+COPY --link --from=yamllint /app/bin/yamllint /usr/local/bin/yamllint
+COPY --link --from=markdownlint /usr/local/bin/markdownlint-cli2 /usr/local/bin/markdownlint
+COPY --link --from=shellcheck /bin/shellcheck /usr/local/bin/shellcheck
+COPY --link --from=kubectl /opt/bitnami/kubectl/bin/kubectl /usr/local/bin/kubectl
+COPY --link --from=pulumi /usr/bin/pulumi /usr/local/bin/pulumi
+COPY --link --from=grype /grype /usr/local/bin/grype
+COPY --link --from=syft /syft /usr/local/bin/syft
+COPY --link --from=goreleaser /usr/bin/goreleaser /usr/local/bin/goreleaser
+COPY --link --from=golang /usr/local/go/ /usr/local/go/
+COPY --link --from=nodejs /usr/local /usr/local
+COPY --link --from=python /usr/local /usr/local
+COPY --link --from=deps /usr/local/bin/helm /usr/local/bin/helm
+COPY --link --from=deps /usr/local/bin/gh /usr/local/bin/gh
+COPY --link --from=deps /usr/local/bin/release-please /usr/local/bin/release-please
 
 # Configure Go
 ENV GOROOT=/usr/local/go
