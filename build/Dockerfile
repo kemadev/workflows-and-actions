@@ -91,18 +91,18 @@ ARG GITHUB_CLI_VERSION=2.70.0
 ARG RELEASE_PLEASE_VERSION=17.0.0
 
 # Install helm
-RUN curl -sSL "https://get.helm.sh/helm-${HELM_VERSION}-${TARGETOS}-${TARGETARCH}.tar.gz" | tar -xz --strip-components=1 -C /usr/local/bin ${TARGETOS}-${TARGETARCH}/helm
+RUN curl -sSL "https://get.helm.sh/helm-${HELM_VERSION}-${TARGETOS}-${TARGETARCH}.tar.gz" | tar -xz --strip-components=1 -C /usr/local/bin "${TARGETOS}-${TARGETARCH}/helm"
 
 # Install gh (note the v prefix after download)
 RUN curl -sSL "https://github.com/cli/cli/releases/download/v${GITHUB_CLI_VERSION}/gh_${GITHUB_CLI_VERSION}_${TARGETOS}_${TARGETARCH}.tar.gz" | tar -xz --strip-components=2 -C /usr/local/bin "gh_${GITHUB_CLI_VERSION}_${TARGETOS}_${TARGETARCH}/bin/gh"
 
 # Install release-please
-RUN npm --cache=false install --global release-please
+RUN npm --cache=false install --global "release-please@${RELEASE_PLEASE_VERSION}"
 
 # Configure Go
 ENV GOROOT=/usr/local/go
 ENV GOPATH=/go
-ENV PATH=${PATH}:${GOROOT}/bin:${GOPATH}/bin
+ENV PATH="${PATH}:${GOROOT}/bin:${GOPATH}/bin"
 
 # Git args
 ARG GIT_USERNAME="github-actions[bot]"
