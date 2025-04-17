@@ -157,8 +157,12 @@ USER nobody:nobody
 # Final image for workflows
 FROM --platform=${BUILDPLATFORM} clean AS workflow-base
 
+# Create tool directory
 RUN mkdir -p /tool && chown root:root /tool
 
+# Copy tool sources
 COPY ./pkg/ /tool/
+
+# Where to store SARIF reports, used in workflows
 
 ENV KEMA_CI_SARIF_REPORT_PATH=/tmp/report.sarif
