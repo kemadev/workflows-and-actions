@@ -60,7 +60,7 @@ RUN apk add --no-cache \
 
 SHELL ["/bin/bash", "-uo", "pipefail", "-c"]
 
-FROM --platform=${BUILDPLATFORM} base AS deps
+FROM --platform=${BUILDPLATFORM} base AS archive-deps
 
 # Docker buildx ARGs
 ARG TARGETOS
@@ -84,6 +84,10 @@ COPY --link --from=nodejs /usr/local /usr/local
 # Install release-please
 RUN npm --cache=false install --global "release-please@${RELEASE_PLEASE_VERSION}"
 
+FROM --platform=${BUILDPLATFORM} nodejs AS nodejs-deps
+
+RUN rm -rf /usr/local/CHANGELOG.md /usr/local/LICENSE /usr/local/README.md /usr/local/bin/yarn /usr/local/bin/yarnpkg
+
 FROM --platform=${BUILDPLATFORM} base AS clean
 
 # Copy tools from the respective stages
@@ -101,11 +105,11 @@ COPY --link --from=grype /grype /usr/local/bin/grype
 COPY --link --from=syft /syft /usr/local/bin/syft
 COPY --link --from=goreleaser /usr/bin/goreleaser /usr/local/bin/goreleaser
 COPY --link --from=golang /usr/local/go/ /usr/local/go/
-COPY --link --from=nodejs /usr/local /usr/local
+COPY --link --from=nodejs-deps /usr/local /usr/local
 COPY --link --from=python /usr/local /usr/local
-COPY --link --from=deps /usr/local/bin/helm /usr/local/bin/helm
-COPY --link --from=deps /usr/local/bin/gh /usr/local/bin/gh
-COPY --link --from=deps /usr/local/bin/release-please /usr/local/bin/release-please
+COPY --link --from=archive-deps /usr/local/bin/helm /usr/local/bin/helm
+COPY --link --from=archive-deps /usr/local/bin/gh /usr/local/bin/gh
+COPY --link --from=archive-deps /usr/local/bin/release-please /usr/local/bin/release-please
 
 # Configure Go
 ENV GOROOT=/usr/local/go
