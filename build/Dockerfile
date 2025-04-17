@@ -84,10 +84,13 @@ COPY --link --from=nodejs /usr/local /usr/local
 # Install release-please
 RUN npm --cache=false install --global "release-please@${RELEASE_PLEASE_VERSION}"
 
+# Intermediate image providing dependencies for nodejs
 FROM --platform=${BUILDPLATFORM} nodejs AS nodejs-deps
 
+# Cleanup nodejs mess
 RUN rm -rf /usr/local/CHANGELOG.md /usr/local/LICENSE /usr/local/README.md /usr/local/bin/yarn /usr/local/bin/yarnpkg /usr/local/bin/docker-entrypoint.sh
 
+# Final image
 FROM --platform=${BUILDPLATFORM} base AS clean
 
 # Copy tools from the respective stages
@@ -133,6 +136,13 @@ RUN git config --global user.name "${GIT_USERNAME}" && git config --global user.
 RUN mkdir -p /src
 WORKDIR /src
 
-USER nobody:nobody
+# Run as root
+USER root:root
 
 CMD [ "bash" ]
+
+# Final image as non-root
+FROM --platform=${BUILDPLATFORM} clean AS clean-nonroot
+
+# Run as non-root
+USER nobody:nobody
