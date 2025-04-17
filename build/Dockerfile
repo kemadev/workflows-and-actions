@@ -66,7 +66,7 @@ FROM --platform=${BUILDPLATFORM} base AS archive-deps
 ARG TARGETOS
 ARG TARGETARCH
 
-# Single binary tar archives (can't add those args with ones above as ARG has stage scope)
+# Misc tools (can't add those args with ones above as ARG has stage scope)
 # TODO add renovate tracking
 ARG HELM_VERSION=v3.17.3
 ARG GITHUB_CLI_VERSION=2.70.0
@@ -86,7 +86,7 @@ RUN npm --cache=false install --global "release-please@${RELEASE_PLEASE_VERSION}
 
 FROM --platform=${BUILDPLATFORM} nodejs AS nodejs-deps
 
-RUN rm -rf /usr/local/CHANGELOG.md /usr/local/LICENSE /usr/local/README.md /usr/local/bin/yarn /usr/local/bin/yarnpkg
+RUN rm -rf /usr/local/CHANGELOG.md /usr/local/LICENSE /usr/local/README.md /usr/local/bin/yarn /usr/local/bin/yarnpkg /usr/local/bin/docker-entrypoint.sh
 
 FROM --platform=${BUILDPLATFORM} base AS clean
 
@@ -109,7 +109,9 @@ COPY --link --from=nodejs-deps /usr/local /usr/local
 COPY --link --from=python /usr/local /usr/local
 COPY --link --from=archive-deps /usr/local/bin/helm /usr/local/bin/helm
 COPY --link --from=archive-deps /usr/local/bin/gh /usr/local/bin/gh
-COPY --link --from=archive-deps /usr/local/bin/release-please /usr/local/bin/release-please
+COPY --link --from=archive-deps /usr/local/lib/node_modules/release-please /usr/local/lib/node_modules/release-please
+
+RUN ln -s /usr/local/lib/node_modules/release-please/build/src/bin/release-please.js /usr/local/bin/release-please
 
 # Make all tools root-owned and executable
 RUN chmod 755 /usr/local/bin/* && chown root:root /usr/local/bin/* && chmod 755 /usr/local/go/bin/* && chown root:root /usr/local/go/bin/*
