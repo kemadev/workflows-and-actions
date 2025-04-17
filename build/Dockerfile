@@ -60,7 +60,7 @@ RUN apk add --no-cache \
 
 SHELL ["/bin/bash", "-uo", "pipefail", "-c"]
 
-FROM --platform=${BUILDPLATFORM} base AS archive-deps
+FROM --platform=${BUILDPLATFORM} base AS misc-deps
 
 # Docker buildx ARGs
 ARG TARGETOS
@@ -107,9 +107,9 @@ COPY --link --from=goreleaser /usr/bin/goreleaser /usr/local/bin/goreleaser
 COPY --link --from=golang /usr/local/go/ /usr/local/go/
 COPY --link --from=nodejs-deps /usr/local /usr/local
 COPY --link --from=python /usr/local /usr/local
-COPY --link --from=archive-deps /usr/local/bin/helm /usr/local/bin/helm
-COPY --link --from=archive-deps /usr/local/bin/gh /usr/local/bin/gh
-COPY --link --from=archive-deps /usr/local/lib/node_modules/release-please /usr/local/lib/node_modules/release-please
+COPY --link --from=misc-deps /usr/local/bin/helm /usr/local/bin/helm
+COPY --link --from=misc-deps /usr/local/bin/gh /usr/local/bin/gh
+COPY --link --from=misc-deps /usr/local/lib/node_modules/release-please /usr/local/lib/node_modules/release-please
 
 # Link nodejs tools
 RUN ln -s /usr/local/lib/node_modules/release-please/build/src/bin/release-please.js /usr/local/bin/release-please
