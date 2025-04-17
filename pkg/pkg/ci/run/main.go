@@ -55,6 +55,14 @@ func dispatchCommand(args []string) (int, error) {
 				actionlintSarifFormatTemplate,
 			},
 		})
+	case "secrets":
+		return runLinter(linterArgs{
+			Bin: "trufflehog",
+			// TODO handle passing all files like for docker or just running w/o (let bin find files)
+			CliArgs: []string{
+				"--json",
+			},
+		})
 	default:
 		return 1, fmt.Errorf("unknown command: %s", args[0])
 	}

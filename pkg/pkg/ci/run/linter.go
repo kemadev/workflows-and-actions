@@ -22,9 +22,6 @@ func runLinter(a linterArgs) (int, error) {
 	if a.Bin == "" {
 		return 1, fmt.Errorf("linter binary is required")
 	}
-	if a.Ext == "" {
-		return 1, fmt.Errorf("file extension is required")
-	}
 	if a.Paths == nil {
 		a.Paths = []string{filesfinder.RootPath}
 	}
