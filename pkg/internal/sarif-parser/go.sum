@@ -1,4 +1,0 @@
-github.com/kemadev/workflows-and-actions/pkg/pkg/logger/runner v0.0.0-20250417114711-9ba80ec526ec h1:gKcdA/o3EkLyf8SweQ/eNsThsfNnttcDC4H+SgYK92o=
-github.com/kemadev/workflows-and-actions/pkg/pkg/logger/runner v0.0.0-20250417114711-9ba80ec526ec/go.mod h1:KAksanpSGuGLDXmyzSzb03KTaiDHrLfk26UaDdr9bN8=
-github.com/kemadev/workflows-and-actions/pkg/pkg/sarif-parser v0.0.0-20250417114711-9ba80ec526ec h1:gb1TOR1Eam8R/IYd3sjqFQw7GZoQkrbP/HqF/v6WsVM=
-github.com/kemadev/workflows-and-actions/pkg/pkg/sarif-parser v0.0.0-20250417114711-9ba80ec526ec/go.mod h1:n8hNKIlwgXHUtj7aN8jS4wi1Z58+SbeuquoIoQKibs8=

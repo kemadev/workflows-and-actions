@@ -28,12 +28,12 @@ func main() {
 }
 
 func dispatchCommand(args []string) (int, error) {
-	// if len(args) == 0 {
-	// 	return 0, fmt.Errorf("no command provided")
-	// }
+	if len(args) == 0 {
+		return 0, fmt.Errorf("no command provided")
+	}
 	switch args[0] {
-	case "ci-docker":
-		return ciDocker(args[1:])
+	case "docker":
+		return docker(args[1:])
 	default:
 		return 1, fmt.Errorf("unknown command: %s", args[0])
 	}

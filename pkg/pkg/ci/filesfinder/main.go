@@ -3,6 +3,7 @@ package filesfinder
 import (
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 )
 
@@ -11,15 +12,16 @@ const (
 )
 
 type Args struct {
+	//
 	Extension   string
-	Paths       string
+	Paths       []string
 	IgnorePaths []string
 	Recursive   bool
 }
 
 func handleArgs(a Args) (Args, error) {
-	if a.Paths == "" {
-		a.Paths = rootPath
+	if a.Paths == nil {
+		a.Paths = []string{"/src"}
 	}
 	if a.Extension == "" {
 		return Args{}, fmt.Errorf("extension is required")
@@ -37,29 +39,27 @@ func FindFilesByExtension(arg Args) ([]string, error) {
 		return nil, err
 	}
 	fl := []string{}
-	d, err := os.ReadDir(a.Paths)
-	if err != nil {
-		return nil, err
-	}
-	for _, entry := range d {
-		if entry.IsDir() {
-			if !a.Recursive {
-				continue
-			}
-			for _, dir := range a.IgnorePaths {
-				if entry.Name() == dir {
+	for _, path := range a.Paths {
+		d, err := os.ReadDir(path)
+		if err != nil {
+			return nil, err
+		}
+		for _, entry := range d {
+			if entry.IsDir() {
+				if !a.Recursive || slices.Contains(a.IgnorePaths, entry.Name()) {
 					continue
 				}
-			}
-			subDirFiles, err := FindFilesByExtension(a)
-			if err != nil {
-				return nil, err
-			}
-			fl = append(fl, subDirFiles...)
-		}
-		if entry.Type().IsRegular() {
-			if strings.Split(entry.Name(), a.Extension) != nil {
-				fl = append(fl, entry.Name())
+				subDirPath := fmt.Sprintf("%s/%s", path, entry.Name())
+				subDirArgs := a
+				subDirArgs.Paths = []string{subDirPath}
+				subDirFiles, err := FindFilesByExtension(subDirArgs)
+				if err != nil {
+					return nil, err
+				}
+				fl = append(fl, subDirFiles...)
+			} else if strings.HasSuffix(entry.Name(), a.Extension) {
+				filePath := fmt.Sprintf("%s/%s", path, entry.Name())
+				fl = append(fl, filePath)
 			}
 		}
 	}

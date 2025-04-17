@@ -2,7 +2,6 @@ package sarifparser
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"log/slog"
 	"os"
@@ -61,31 +60,19 @@ type Finding struct {
 	Message   string `json:"message"`
 }
 
-var outputFormat string
-
-func init() {
-	flag.StringVar(&outputFormat, "output-format", "human", "Output format (human, json, github)")
-}
-
-func ParseSarifFile(path string, gha bool) int {
-	flag.Parse()
-	sarifFilePath := path
-	if sarifFilePath == "" {
-		sarifFilePath = flag.Arg(0)
-		if sarifFilePath == "" {
-			flag.Usage()
-			return 1
-		}
-	}
-	if gha {
-		outputFormat = "github"
-	} else if outputFormat != "human" && outputFormat != "json" && outputFormat != "github" {
-		flag.Usage()
+func ParseSarifString(s string, format string) int {
+	var sarif SarifFile
+	if err := json.Unmarshal([]byte(s), &sarif); err != nil {
+		slog.Error("Error unmarshalling SARIF string", slog.String("error", err.Error()))
 		return 1
 	}
-	slog.Debug("Program config", slog.String("sarif-path", sarifFilePath), slog.String("format", outputFormat))
 
-	file, err := os.Open(sarifFilePath)
+	rc := printFindings(sarif, format)
+	return rc
+}
+
+func ParseSarifFile(path string, format string) int {
+	file, err := os.Open(path)
 	if err != nil {
 		slog.Error("Error opening SARIF file", slog.String("error", err.Error()))
 		return 1
@@ -99,6 +86,11 @@ func ParseSarifFile(path string, gha bool) int {
 		return 1
 	}
 
+	rc := printFindings(sarif, format)
+	return rc
+}
+
+func printFindings(sarif SarifFile, format string) int {
 	var annotations []Finding
 	for _, run := range sarif.Runs {
 		for _, result := range run.Results {
@@ -119,7 +111,8 @@ func ParseSarifFile(path string, gha bool) int {
 		}
 	}
 
-	if outputFormat == "human" {
+	switch format {
+	case "human":
 		for _, annotation := range annotations {
 			fmt.Printf("Tool: %s\n", annotation.ToolName)
 			fmt.Printf("Rule ID: %s\n", annotation.RuleID)
@@ -128,19 +121,20 @@ func ParseSarifFile(path string, gha bool) int {
 			fmt.Printf("Message: %s\n", annotation.Message)
 			fmt.Println()
 		}
-	}
-	if outputFormat == "json" {
+	case "json":
 		output, err := json.MarshalIndent(annotations, "", "  ")
 		if err != nil {
 			slog.Error("Error marshalling JSON", slog.String("error", err.Error()))
 			return 1
 		}
 		fmt.Println(string(output))
-	}
-	if outputFormat == "github" {
+	case "github":
 		for _, annotation := range annotations {
 			fmt.Printf("::%s title=%s file=%s,line=%d,endLine=%d,col=%d,endColumn=%d::%s\n", annotation.Level, annotation.ToolName, annotation.FilePath, annotation.StartLine, annotation.EndLine, annotation.StartCol, annotation.EndCol, annotation.Message)
 		}
+	default:
+		slog.Error("Unknown format", slog.String("format", format))
+		return 1
 	}
 	rc := 0
 	if len(annotations) > 0 {
