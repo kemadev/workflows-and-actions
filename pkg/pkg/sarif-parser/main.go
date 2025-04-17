@@ -102,6 +102,7 @@ func printFindings(sarif SarifFile, format string) (int, error) {
 	for _, run := range sarif.Runs {
 		for _, result := range run.Results {
 			for _, location := range result.Locations {
+				// repo is mounted at /src
 				relpath := location.PhysicalLocation.ArtifactLocation.URI
 				l := len(filesfinder.RootPath) + 1
 				if !(len(relpath) > l && relpath[:l] == filesfinder.RootPath+"/") {
