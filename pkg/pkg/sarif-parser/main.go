@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-	"time"
 
 	_ "github.com/kemadev/workflows-and-actions/pkg/pkg/logger/runner"
 )
@@ -69,7 +68,6 @@ func init() {
 }
 
 func ParseSarifFile(path string, gha bool) int {
-	s := time.Now()
 	flag.Parse()
 	sarifFilePath := path
 	if sarifFilePath == "" {
@@ -85,21 +83,20 @@ func ParseSarifFile(path string, gha bool) int {
 		flag.Usage()
 		return 1
 	}
-	slog.Debug("SARIF file path: ", slog.String("path", sarifFilePath))
-	slog.Debug("Output format: ", slog.String("format", outputFormat))
+	slog.Debug("Program config", slog.String("sarif-path", sarifFilePath), slog.String("format", outputFormat))
 
 	file, err := os.Open(sarifFilePath)
 	if err != nil {
-		fmt.Printf("Error opening SARIF file: %v\n", err)
-		os.Exit(1)
+		slog.Error("Error opening SARIF file", slog.String("error", err.Error()))
+		return 1
 	}
 	defer file.Close()
 
 	var sarif SarifFile
 	decoder := json.NewDecoder(file)
 	if err := decoder.Decode(&sarif); err != nil {
-		fmt.Printf("Error decoding SARIF file: %v\n", err)
-		os.Exit(1)
+		slog.Error("Error decoding SARIF file", slog.String("error", err.Error()))
+		return 1
 	}
 
 	var annotations []Finding
@@ -135,8 +132,8 @@ func ParseSarifFile(path string, gha bool) int {
 	if outputFormat == "json" {
 		output, err := json.MarshalIndent(annotations, "", "  ")
 		if err != nil {
-			fmt.Printf("Error marshaling annotations: %v\n", err)
-			os.Exit(1)
+			slog.Error("Error marshalling JSON", slog.String("error", err.Error()))
+			return 1
 		}
 		fmt.Println(string(output))
 	}
@@ -149,6 +146,5 @@ func ParseSarifFile(path string, gha bool) int {
 	if len(annotations) > 0 {
 		rc = 1
 	}
-	slog.Debug("Execution time: ", slog.Duration("duration", time.Since(s)))
 	return rc
 }
