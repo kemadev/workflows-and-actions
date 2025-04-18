@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"os/exec"
+	"sync"
 
 	"github.com/kemadev/workflows-and-actions/pkg/pkg/ci/filesfinder"
 	sarifparser "github.com/kemadev/workflows-and-actions/pkg/pkg/sarif-parser"
@@ -48,21 +51,66 @@ func runLinter(a linterArgs) (int, error) {
 	slog.Debug("running linter", slog.String("binary", a.Bin), slog.String("args", fmt.Sprintf("%v", ca)))
 	cmd := exec.Command(a.Bin, ca...)
 
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
 	format := "human"
 	if os.Getenv("GITHUB_ACTIONS") != "" {
 		format = "github"
 	}
 
-	err := cmd.Run()
+	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
-		slog.Debug("command execution failed", "error", err, "stderr", stderr.String(), slog.String("stdout", stdout.String()))
-		sarifparser.HandleSarifString(stdout.String(), format)
+		slog.Error("error creating stdout pipe", slog.String("error", err.Error()))
 		return 1, err
 	}
-	slog.Debug("command executed successfully", slog.String("stderr", stderr.String()), slog.String("stdout", stdout.String()))
+	stderrPipe, err := cmd.StderrPipe()
+	if err != nil {
+		slog.Error("error creating stderr pipe", slog.String("error", err.Error()))
+		return 1, err
+	}
+
+	var stdoutBuf, stderrBuf bytes.Buffer
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		stdout := io.TeeReader(stdoutPipe, &stdoutBuf)
+		scanner := bufio.NewScanner(stdout)
+		// Avoid buffering as it can cause deadlocks
+		scanner.Split(bufio.ScanBytes)
+		for scanner.Scan() {
+			line := scanner.Text()
+			fmt.Fprint(os.Stdout, line)
+			slog.Debug("stdout", slog.String("line", line))
+		}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		stderr := io.TeeReader(stderrPipe, &stderrBuf)
+		scanner := bufio.NewScanner(stderr)
+		// Avoid buffering as it can cause deadlocks
+		scanner.Split(bufio.ScanBytes)
+		for scanner.Scan() {
+			line := scanner.Text()
+			fmt.Fprint(os.Stderr, line)
+			slog.Debug("stderr", slog.String("line", line))
+		}
+	}()
+
+	if err := cmd.Start(); err != nil {
+		slog.Error("error starting command", slog.String("error", err.Error()))
+		return 1, err
+	}
+
+	wg.Wait()
+
+	if err := cmd.Wait(); err != nil {
+		slog.Error("error waiting for command", slog.String("error", err.Error()))
+		sarifparser.HandleSarifString(stdoutBuf.String(), format)
+		return 1, err
+	}
+
+	slog.Debug("command executed successfully")
 	return 0, nil
 }

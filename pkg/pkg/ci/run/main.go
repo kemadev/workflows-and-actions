@@ -79,6 +79,8 @@ func dispatchCommand(args []string) (int, error) {
 				"scan",
 				"--metrics=off",
 				"--error",
+				"--sarif",
+				"-",
 				"--config",
 				"p/default",
 				"--config",
@@ -95,8 +97,6 @@ func dispatchCommand(args []string) (int, error) {
 				"p/kubernetes",
 				"--config",
 				"p/dockerfile",
-				"--sarif",
-				"-",
 			},
 		})
 	default:
