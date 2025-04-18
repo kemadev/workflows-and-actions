@@ -75,12 +75,17 @@ func runLinter(a linterArgs) (int, error) {
 		defer wg.Done()
 		stdout := io.TeeReader(stdoutPipe, &stdoutBuf)
 		scanner := bufio.NewScanner(stdout)
-		// Avoid buffering as it can cause deadlocks
+		// TODO find a better solution, pretty sure this deadlock workaround will cause issues
 		scanner.Split(bufio.ScanBytes)
+		lb := bytes.NewBuffer(nil)
 		for scanner.Scan() {
-			line := scanner.Text()
-			fmt.Fprint(os.Stdout, line)
-			slog.Debug("stdout", slog.String("line", line))
+			b := scanner.Text()
+			fmt.Fprint(os.Stdout, b)
+			lb.WriteString(b)
+			if b == "\n" {
+				slog.Debug("stdout", slog.String("line", lb.String()))
+				lb.Reset()
+			}
 		}
 	}()
 
@@ -89,12 +94,17 @@ func runLinter(a linterArgs) (int, error) {
 		defer wg.Done()
 		stderr := io.TeeReader(stderrPipe, &stderrBuf)
 		scanner := bufio.NewScanner(stderr)
-		// Avoid buffering as it can cause deadlocks
+		// TODO find a better solution, pretty sure this deadlock workaround will cause issues
 		scanner.Split(bufio.ScanBytes)
+		lb := bytes.NewBuffer(nil)
 		for scanner.Scan() {
-			line := scanner.Text()
-			fmt.Fprint(os.Stderr, line)
-			slog.Debug("stderr", slog.String("line", line))
+			b := scanner.Text()
+			fmt.Fprint(os.Stderr, b)
+			lb.WriteString(b)
+			if b == "\n" {
+				slog.Debug("stderr", slog.String("line", lb.String()))
+				lb.Reset()
+			}
 		}
 	}()
 
