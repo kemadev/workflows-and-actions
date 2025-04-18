@@ -8,7 +8,7 @@ ARG ALPINE_MAJOR_MINOR_PATCH_VERSION=3.21.3
 ## Single binary copy from container
 ARG HADOLINT_VERSION=v2.12.0
 ARG ACTIONLINT_VERSION=1.7.7
-ARG TRUFFLEHOG_VERSION=3.88.23
+ARG GITLEAKS_VERSION=v8.24.3
 ARG SEMGREP_VERSION=1.119.0
 ARG GOLANGCI_LINT_VERSION=v2.1.2
 ARG YAMLLINT_VERSION=0.34.0
@@ -28,7 +28,7 @@ ARG PYTHON_VERSION=3.13.3
 # Define images to copy from (can't use ARG in COPY statements)
 FROM --platform=${BUILDPLATFORM} docker.io/hadolint/hadolint:${HADOLINT_VERSION} AS hadolint
 FROM --platform=${BUILDPLATFORM} docker.io/rhysd/actionlint:${ACTIONLINT_VERSION} AS actionlint
-FROM --platform=${BUILDPLATFORM} docker.io/trufflesecurity/trufflehog:${TRUFFLEHOG_VERSION} AS trufflehog
+FROM --platform=${BUILDPLATFORM} docker.io/zricethezav/gitleaks:${GITLEAKS_VERSION} AS gitleaks
 FROM --platform=${BUILDPLATFORM} docker.io/semgrep/semgrep:${SEMGREP_VERSION} AS semgrep
 FROM --platform=${BUILDPLATFORM} docker.io/golangci/golangci-lint:${GOLANGCI_LINT_VERSION} AS golangci-lint
 FROM --platform=${BUILDPLATFORM} docker.io/pipelinecomponents/yamllint:${YAMLLINT_VERSION} AS yamllint
@@ -96,7 +96,7 @@ FROM --platform=${BUILDPLATFORM} base AS clean
 # Copy tools from the respective stages
 COPY --link --from=hadolint /bin/hadolint /usr/local/bin/hadolint
 COPY --link --from=actionlint /usr/local/bin/actionlint /usr/local/bin/actionlint
-COPY --link --from=trufflehog /usr/bin/trufflehog /usr/local/bin/trufflehog
+COPY --link --from=gitleaks /usr/bin/gitleaks /usr/local/bin/gitleaks
 COPY --link --from=semgrep /usr/bin/semgrep /usr/local/bin/semgrep
 COPY --link --from=golangci-lint /usr/bin/golangci-lint /usr/local/bin/golangci-lint
 COPY --link --from=yamllint /app/bin/yamllint /usr/local/bin/yamllint
@@ -177,8 +177,5 @@ RUN --mount=type=cache,target=/root/go/pkg \
 FROM --platform=${BUILDPLATFORM} clean AS workflow-clean
 
 COPY --link --from=workflow-base /usr/local/bin/kema-ci /usr/local/bin/kema-ci
-
-# Where to store SARIF reports, used in workflows
-ENV KEMA_CI_SARIF_REPORT_PATH=/tmp/report.sarif
 
 ENTRYPOINT [ "/usr/local/bin/kema-ci" ]

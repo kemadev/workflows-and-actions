@@ -37,6 +37,9 @@ func dispatchCommand(args []string) (int, error) {
 		return runLinter(linterArgs{
 			Bin: "hadolint",
 			Ext: "Dockerfile",
+			Paths: []string{
+				filesfinder.RootPath,
+			},
 			CliArgs: []string{
 				"--format",
 				"sarif",
@@ -57,10 +60,16 @@ func dispatchCommand(args []string) (int, error) {
 		})
 	case "secrets":
 		return runLinter(linterArgs{
-			Bin: "trufflehog",
-			// TODO handle passing all files like for docker or just running w/o (let bin find files)
+			Bin: "gitleaks",
 			CliArgs: []string{
-				"--json",
+				"dir",
+				"--no-banner",
+				"--max-decode-depth",
+				"3",
+				"--report-format",
+				"sarif",
+				"--report-path",
+				"-",
 			},
 		})
 	default:
