@@ -2,11 +2,10 @@ package sarifparser
 
 import (
 	"encoding/json"
-	"fmt"
 	"log/slog"
-	"os"
 
 	"github.com/kemadev/workflows-and-actions/pkg/pkg/ci/filesfinder"
+	"github.com/kemadev/workflows-and-actions/pkg/pkg/logger/runner"
 	_ "github.com/kemadev/workflows-and-actions/pkg/pkg/logger/runner"
 )
 
@@ -49,18 +48,6 @@ type SarifFile struct {
 	} `json:"runs"`
 }
 
-type Finding struct {
-	ToolName  string `json:"tool_name"`
-	RuleID    string `json:"rule_id"`
-	Level     string `json:"level"`
-	FilePath  string `json:"file_path"`
-	StartLine int    `json:"start_line"`
-	EndLine   int    `json:"end_line"`
-	StartCol  int    `json:"start_col"`
-	EndCol    int    `json:"end_col"`
-	Message   string `json:"message"`
-}
-
 func HandleSarifString(s string, format string) (int, error) {
 	var sarif SarifFile
 	if err := json.Unmarshal([]byte(s), &sarif); err != nil {
@@ -68,37 +55,21 @@ func HandleSarifString(s string, format string) (int, error) {
 		return 1, err
 	}
 
-	rc, err := printFindings(sarif, format)
+	annotations, err := annotationsFromSarif(sarif)
+	if err != nil {
+		slog.Error("Error converting SARIF to annotations", slog.String("error", err.Error()))
+		return 1, err
+	}
+
+	rc, err := runner.PrintFindings(annotations, format)
 	if err != nil {
 		return 1, err
 	}
 	return rc, nil
 }
 
-func HandleSarifFile(path string, format string) (int, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		slog.Error("Error opening SARIF file", slog.String("error", err.Error()))
-		return 1, err
-	}
-	defer file.Close()
-
-	var sarif SarifFile
-	decoder := json.NewDecoder(file)
-	if err := decoder.Decode(&sarif); err != nil {
-		slog.Error("Error decoding SARIF file", slog.String("error", err.Error()))
-		return 1, err
-	}
-
-	rc, err := printFindings(sarif, format)
-	if err != nil {
-		return 1, err
-	}
-	return rc, nil
-}
-
-func printFindings(sarif SarifFile, format string) (int, error) {
-	var annotations []Finding
+func annotationsFromSarif(sarif SarifFile) ([]runner.Finding, error) {
+	var annotations []runner.Finding
 	for _, run := range sarif.Runs {
 		for _, result := range run.Results {
 			for _, location := range result.Locations {
@@ -111,7 +82,7 @@ func printFindings(sarif SarifFile, format string) (int, error) {
 				if result.Level == "" {
 					result.Level = "error"
 				}
-				annotation := Finding{
+				annotation := runner.Finding{
 					ToolName:  run.Tool.Driver.Name,
 					RuleID:    result.RuleID,
 					Level:     result.Level,
@@ -126,34 +97,5 @@ func printFindings(sarif SarifFile, format string) (int, error) {
 			}
 		}
 	}
-
-	switch format {
-	case "human":
-		for _, annotation := range annotations {
-			fmt.Printf("Tool: %s\n", annotation.ToolName)
-			fmt.Printf("Rule ID: %s\n", annotation.RuleID)
-			fmt.Printf("Level: %s\n", annotation.Level)
-			fmt.Printf("File: %s\n", annotation.FilePath+":"+fmt.Sprintf("%d", annotation.StartLine))
-			fmt.Printf("Message: %s\n", annotation.Message)
-			fmt.Println()
-		}
-	case "json":
-		output, err := json.MarshalIndent(annotations, "", "  ")
-		if err != nil {
-			return 1, err
-		}
-		fmt.Println(string(output))
-	case "github":
-		for _, annotation := range annotations {
-			// See https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions
-			fmt.Printf("::%s title=%s,file=%s,line=%d,endLine=%d,col=%d,endColumn=%d::%s\n", annotation.Level, annotation.ToolName, annotation.FilePath, annotation.StartLine, annotation.EndLine, annotation.StartCol, annotation.EndCol, annotation.Message)
-		}
-	default:
-		return 1, fmt.Errorf("unknown format: %s", format)
-	}
-	rc := 0
-	if len(annotations) > 0 {
-		rc = 1
-	}
-	return rc, nil
+	return annotations, nil
 }
