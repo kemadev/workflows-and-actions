@@ -59,10 +59,10 @@ func runLinter(a linterArgs) (int, error) {
 
 	err := cmd.Run()
 	if err != nil {
-		slog.Debug("command execution failed", "error", err, "stderr", stderr.String(), "stdout", stdout.String())
+		slog.Debug("command execution failed", "error", err, "stderr", stderr.String(), slog.String("stdout", stdout.String()))
 		sarifparser.HandleSarifString(stdout.String(), format)
 		return 1, err
 	}
-	slog.Debug("command executed successfully", "stderr", stderr.String(), "stdout", stdout.String())
+	slog.Debug("command executed successfully", slog.String("stderr", stderr.String()), slog.String("stdout", stdout.String()))
 	return 0, nil
 }
