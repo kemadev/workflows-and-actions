@@ -34,7 +34,7 @@ func processPipe(pipe io.Reader, buf *bytes.Buffer, output *os.File, wg *sync.Wa
 	}
 }
 
-func runLinter(a linterArgs) (int, error) {
+func runSarifLinter(a linterArgs) (int, error) {
 	if a.Bin == "" {
 		return 1, fmt.Errorf("linter binary is required")
 	}

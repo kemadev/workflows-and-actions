@@ -34,7 +34,7 @@ func dispatchCommand(args []string) (int, error) {
 	}
 	switch args[0] {
 	case "docker":
-		return runLinter(linterArgs{
+		return runSarifLinter(linterArgs{
 			Bin: "hadolint",
 			Ext: "Dockerfile",
 			Paths: []string{
@@ -46,7 +46,7 @@ func dispatchCommand(args []string) (int, error) {
 			},
 		})
 	case "gha":
-		return runLinter(linterArgs{
+		return runSarifLinter(linterArgs{
 			Bin: "actionlint",
 			Ext: ".yaml",
 			Paths: []string{
@@ -59,7 +59,7 @@ func dispatchCommand(args []string) (int, error) {
 			},
 		})
 	case "secrets":
-		return runLinter(linterArgs{
+		return runSarifLinter(linterArgs{
 			Bin: "gitleaks",
 			CliArgs: []string{
 				"dir",
@@ -73,7 +73,7 @@ func dispatchCommand(args []string) (int, error) {
 			},
 		})
 	case "sast":
-		return runLinter(linterArgs{
+		return runSarifLinter(linterArgs{
 			Bin: "semgrep",
 			CliArgs: []string{
 				"scan",
@@ -97,6 +97,17 @@ func dispatchCommand(args []string) (int, error) {
 				"p/kubernetes",
 				"--config",
 				"p/dockerfile",
+			},
+		})
+	case "test":
+		return runSarifLinter(linterArgs{
+			Bin: "go",
+			CliArgs: []string{
+				"test",
+				"-bench=.",
+				"-benchmem",
+				"-covermode=atomic",
+				"-json",
 			},
 		})
 	default:
