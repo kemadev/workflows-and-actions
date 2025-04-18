@@ -9,7 +9,6 @@ ARG ALPINE_MAJOR_MINOR_PATCH_VERSION=3.21.3
 ARG HADOLINT_VERSION=v2.12.0
 ARG ACTIONLINT_VERSION=1.7.7
 ARG GITLEAKS_VERSION=v8.24.3
-ARG SEMGREP_VERSION=1.119.0
 ARG GOLANGCI_LINT_VERSION=v2.1.2
 ARG YAMLLINT_VERSION=0.34.0
 ARG MARKDOWNLINT_VERSION=v0.17.2
@@ -29,7 +28,6 @@ ARG PYTHON_VERSION=3.13.3
 FROM --platform=${BUILDPLATFORM} docker.io/hadolint/hadolint:${HADOLINT_VERSION} AS hadolint
 FROM --platform=${BUILDPLATFORM} docker.io/rhysd/actionlint:${ACTIONLINT_VERSION} AS actionlint
 FROM --platform=${BUILDPLATFORM} docker.io/zricethezav/gitleaks:${GITLEAKS_VERSION} AS gitleaks
-FROM --platform=${BUILDPLATFORM} docker.io/semgrep/semgrep:${SEMGREP_VERSION} AS semgrep
 FROM --platform=${BUILDPLATFORM} docker.io/golangci/golangci-lint:${GOLANGCI_LINT_VERSION} AS golangci-lint
 FROM --platform=${BUILDPLATFORM} docker.io/pipelinecomponents/yamllint:${YAMLLINT_VERSION} AS yamllint
 FROM --platform=${BUILDPLATFORM} docker.io/davidanson/markdownlint-cli2:${MARKDOWNLINT_VERSION} AS markdownlint
@@ -50,6 +48,7 @@ FROM --platform=${BUILDPLATFORM} docker.io/alpine:${ALPINE_MAJOR_MINOR_PATCH_VER
 # hadolint ignore=DL3018
 RUN apk add --no-cache \
 	libstdc++ \
+	python3 \
 	bash \
 	curl \
 	jq \
@@ -71,6 +70,7 @@ ARG TARGETARCH
 ARG HELM_VERSION=v3.17.3
 ARG GITHUB_CLI_VERSION=2.70.0
 ARG RELEASE_PLEASE_VERSION=17.0.0
+ARG SEMGREP_VERSION=1.119.0
 
 # Install helm
 RUN curl -sSL "https://get.helm.sh/helm-${HELM_VERSION}-${TARGETOS}-${TARGETARCH}.tar.gz" | tar -xz --strip-components=1 -C /usr/local/bin "${TARGETOS}-${TARGETARCH}/helm"
@@ -83,6 +83,12 @@ COPY --link --from=nodejs /usr/local /usr/local
 
 # Install release-please
 RUN npm --cache=false install --global "release-please@${RELEASE_PLEASE_VERSION}"
+
+# Install python
+COPY --link --from=python /usr/local/ /usr/local/
+
+# Install semgrep
+RUN pip install --no-cache-dir "semgrep==${SEMGREP_VERSION}"
 
 # Intermediate image providing dependencies for nodejs
 FROM --platform=${BUILDPLATFORM} nodejs AS nodejs-deps
@@ -97,7 +103,6 @@ FROM --platform=${BUILDPLATFORM} base AS clean
 COPY --link --from=hadolint /bin/hadolint /usr/local/bin/hadolint
 COPY --link --from=actionlint /usr/local/bin/actionlint /usr/local/bin/actionlint
 COPY --link --from=gitleaks /usr/bin/gitleaks /usr/local/bin/gitleaks
-COPY --link --from=semgrep /usr/bin/semgrep /usr/local/bin/semgrep
 COPY --link --from=golangci-lint /usr/bin/golangci-lint /usr/local/bin/golangci-lint
 COPY --link --from=yamllint /app/bin/yamllint /usr/local/bin/yamllint
 COPY --link --from=markdownlint /usr/local/bin/markdownlint-cli2 /usr/local/bin/markdownlint
@@ -113,6 +118,10 @@ COPY --link --from=python /usr/local/ /usr/local/
 COPY --link --from=misc-deps /usr/local/bin/helm /usr/local/bin/helm
 COPY --link --from=misc-deps /usr/local/bin/gh /usr/local/bin/gh
 COPY --link --from=misc-deps /usr/local/lib/node_modules/release-please /usr/local/lib/node_modules/release-please
+COPY --link --from=misc-deps /usr/local/bin/semgrep /usr/local/bin/semgrep
+COPY --link --from=misc-deps /usr/local/bin/pysemgrep /usr/local/bin/pysemgrep
+# COPY --link --from=misc-deps /usr/local/bin/semgrep-core /usr/local/bin/osemgrep
+COPY --from=misc-deps /usr/local/lib/ /usr/local/lib/
 
 # Link nodejs tools
 RUN ln -s /usr/local/lib/node_modules/release-please/build/src/bin/release-please.js /usr/local/bin/release-please
