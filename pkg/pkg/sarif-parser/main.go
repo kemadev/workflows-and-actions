@@ -108,6 +108,9 @@ func printFindings(sarif SarifFile, format string) (int, error) {
 				if len(relpath) > l && relpath[:l] == filesfinder.RootPath+"/" {
 					relpath = relpath[l:]
 				}
+				if result.Level == "" {
+					result.Level = "error"
+				}
 				annotation := Finding{
 					ToolName:  run.Tool.Driver.Name,
 					RuleID:    result.RuleID,
@@ -142,7 +145,8 @@ func printFindings(sarif SarifFile, format string) (int, error) {
 		fmt.Println(string(output))
 	case "github":
 		for _, annotation := range annotations {
-			fmt.Printf("::%s title=%s file=%s,line=%d,endLine=%d,col=%d,endColumn=%d::%s\n", annotation.Level, annotation.ToolName, annotation.FilePath, annotation.StartLine, annotation.EndLine, annotation.StartCol, annotation.EndCol, annotation.Message)
+			// See https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions
+			fmt.Printf("::%s title=%s,file=%s,line=%d,endLine=%d,col=%d,endColumn=%d::%s\n", annotation.Level, annotation.ToolName, annotation.FilePath, annotation.StartLine, annotation.EndLine, annotation.StartCol, annotation.EndCol, annotation.Message)
 		}
 	default:
 		return 1, fmt.Errorf("unknown format: %s", format)
