@@ -21,6 +21,19 @@ type linterArgs struct {
 	CliArgs []string
 }
 
+func processPipe(pipe io.Reader, buf *bytes.Buffer, output *os.File, wg *sync.WaitGroup) {
+	defer wg.Done()
+	reader := io.TeeReader(pipe, buf)
+	scanner := bufio.NewScanner(reader)
+	// Some linters can output a lot of data, in a one-line json format
+	lb := make([]byte, 0, 32*1024*1024)
+	scanner.Buffer(lb, len(lb))
+	for scanner.Scan() {
+		line := scanner.Text()
+		fmt.Fprintln(output, line)
+	}
+}
+
 func runLinter(a linterArgs) (int, error) {
 	if a.Bin == "" {
 		return 1, fmt.Errorf("linter binary is required")
@@ -70,43 +83,9 @@ func runLinter(a linterArgs) (int, error) {
 	var stdoutBuf, stderrBuf bytes.Buffer
 	var wg sync.WaitGroup
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		stdout := io.TeeReader(stdoutPipe, &stdoutBuf)
-		scanner := bufio.NewScanner(stdout)
-		// TODO find a better solution, pretty sure this deadlock workaround will cause issues
-		scanner.Split(bufio.ScanBytes)
-		lb := bytes.NewBuffer(nil)
-		for scanner.Scan() {
-			b := scanner.Text()
-			fmt.Fprint(os.Stdout, b)
-			lb.WriteString(b)
-			if b == "\n" {
-				slog.Debug("stdout", slog.String("line", lb.String()))
-				lb.Reset()
-			}
-		}
-	}()
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		stderr := io.TeeReader(stderrPipe, &stderrBuf)
-		scanner := bufio.NewScanner(stderr)
-		// TODO find a better solution, pretty sure this deadlock workaround will cause issues
-		scanner.Split(bufio.ScanBytes)
-		lb := bytes.NewBuffer(nil)
-		for scanner.Scan() {
-			b := scanner.Text()
-			fmt.Fprint(os.Stderr, b)
-			lb.WriteString(b)
-			if b == "\n" {
-				slog.Debug("stderr", slog.String("line", lb.String()))
-				lb.Reset()
-			}
-		}
-	}()
+	wg.Add(2)
+	go processPipe(stdoutPipe, &stdoutBuf, os.Stdout, &wg)
+	go processPipe(stderrPipe, &stderrBuf, os.Stderr, &wg)
 
 	if err := cmd.Start(); err != nil {
 		slog.Error("error starting command", slog.String("error", err.Error()))
