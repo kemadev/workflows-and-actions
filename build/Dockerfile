@@ -132,6 +132,12 @@ ARG GIT_EMAIL="kemadev+github-actions[bot]@users.noreply.github.com"
 # Configure git
 RUN git config --global user.name "${GIT_USERNAME}" && git config --global user.email "${GIT_EMAIL}"
 
+# Configure semgrep
+ENV SEMGREP_IN_DOCKER=1
+
+# Configure python
+ENV PYTHONIOENCODING=utf8 PYTHONUNBUFFERED=1
+
 # Create base directory
 RUN mkdir -p /src && chown root:root /src
 WORKDIR /src

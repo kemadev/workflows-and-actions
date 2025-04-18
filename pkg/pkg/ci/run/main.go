@@ -72,6 +72,33 @@ func dispatchCommand(args []string) (int, error) {
 				"-",
 			},
 		})
+	case "sast":
+		return runLinter(linterArgs{
+			Bin: "semgrep",
+			CliArgs: []string{
+				"scan",
+				"--metrics=off",
+				"--error",
+				"--sarif",
+				"-",
+				"--config",
+				"p/default",
+				"--config",
+				"p/gitlab",
+				"--config",
+				"p/golang",
+				"--config",
+				"p/cwe-top-25",
+				"--config",
+				"p/owasp-top-ten",
+				"--config",
+				"p/r2c-security-audit",
+				"--config",
+				"p/kubernetes",
+				"--config",
+				"p/dockerfile",
+			},
+		})
 	default:
 		return 1, fmt.Errorf("unknown command: %s", args[0])
 	}
