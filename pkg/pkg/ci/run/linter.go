@@ -19,7 +19,7 @@ type linterArgs struct {
 	Paths        []string
 	CliArgs      []string
 	Type         string
-	jsonMappings map[string]string
+	jsonMappings jsonToFindingsMappings
 }
 
 func processPipe(pipe io.Reader, buf *bytes.Buffer, output *os.File, wg *sync.WaitGroup) {

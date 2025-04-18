@@ -104,6 +104,7 @@ func dispatchCommand(args []string) (int, error) {
 		})
 	case "test":
 		// TODO use runLinter with linter type arg
+		// TODO sarif into merge jsonmappings w/ const struct to use in all sarif parsers
 		return runLinter(linterArgs{
 			Bin:  "go",
 			Type: "json",
@@ -114,8 +115,32 @@ func dispatchCommand(args []string) (int, error) {
 				"-covermode=atomic",
 				"-json",
 			},
+			jsonMappings: jsonToFindingsMappings{
+				ToolName: "go-test",
+				RuleID:   "no-failing-test",
+				Level:    "error",
+				FilePath: "Package",
+				// TODO find a way to get position in file
+				StartLine: 1,
+				EndLine:   1,
+				StartCol:  1,
+				EndCol:    1,
+				Message:   "Test failed!",
+			},
 		})
 	default:
 		return 1, fmt.Errorf("unknown command: %s", args[0])
 	}
+}
+
+type jsonToFindingsMappings struct {
+	ToolName  string
+	RuleID    string
+	Level     string
+	FilePath  string
+	StartLine int
+	EndLine   int
+	StartCol  int
+	EndCol    int
+	Message   string
 }
