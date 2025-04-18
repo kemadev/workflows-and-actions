@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/kemadev/workflows-and-actions/pkg/pkg/ci/filesfinder"
-	_ "github.com/kemadev/workflows-and-actions/pkg/pkg/logger/runner"
 )
 
 var rc int
@@ -34,9 +33,10 @@ func dispatchCommand(args []string) (int, error) {
 	}
 	switch args[0] {
 	case "docker":
-		return runSarifLinter(linterArgs{
-			Bin: "hadolint",
-			Ext: "Dockerfile",
+		return runLinter(linterArgs{
+			Bin:  "hadolint",
+			Type: "sarif",
+			Ext:  "Dockerfile",
 			Paths: []string{
 				filesfinder.RootPath,
 			},
@@ -46,9 +46,10 @@ func dispatchCommand(args []string) (int, error) {
 			},
 		})
 	case "gha":
-		return runSarifLinter(linterArgs{
-			Bin: "actionlint",
-			Ext: ".yaml",
+		return runLinter(linterArgs{
+			Bin:  "actionlint",
+			Type: "sarif",
+			Ext:  ".yaml",
 			Paths: []string{
 				filesfinder.RootPath + "/.github/workflows",
 				filesfinder.RootPath + "/.github/actions",
@@ -59,8 +60,9 @@ func dispatchCommand(args []string) (int, error) {
 			},
 		})
 	case "secrets":
-		return runSarifLinter(linterArgs{
-			Bin: "gitleaks",
+		return runLinter(linterArgs{
+			Bin:  "gitleaks",
+			Type: "sarif",
 			CliArgs: []string{
 				"dir",
 				"--no-banner",
@@ -73,8 +75,9 @@ func dispatchCommand(args []string) (int, error) {
 			},
 		})
 	case "sast":
-		return runSarifLinter(linterArgs{
-			Bin: "semgrep",
+		return runLinter(linterArgs{
+			Bin:  "semgrep",
+			Type: "sarif",
 			CliArgs: []string{
 				"scan",
 				"--metrics=off",
@@ -101,8 +104,9 @@ func dispatchCommand(args []string) (int, error) {
 		})
 	case "test":
 		// TODO use runLinter with linter type arg
-		return runSarifLinter(linterArgs{
-			Bin: "go",
+		return runLinter(linterArgs{
+			Bin:  "go",
+			Type: "json",
 			CliArgs: []string{
 				"test",
 				"-bench=.",

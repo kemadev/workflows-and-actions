@@ -1,12 +1,10 @@
-package sarifparser
+package main
 
 import (
 	"encoding/json"
 	"log/slog"
 
 	"github.com/kemadev/workflows-and-actions/pkg/pkg/ci/filesfinder"
-	"github.com/kemadev/workflows-and-actions/pkg/pkg/logger/runner"
-	_ "github.com/kemadev/workflows-and-actions/pkg/pkg/logger/runner"
 )
 
 type SarifFile struct {
@@ -48,6 +46,11 @@ type SarifFile struct {
 	} `json:"runs"`
 }
 
+type dummyJson struct {
+	Schema string `json:"$schema"`
+	Foo    string `json:"foo.bar.baz"`
+}
+
 func HandleSarifString(s string, format string) (int, error) {
 	var sarif SarifFile
 	if err := json.Unmarshal([]byte(s), &sarif); err != nil {
@@ -61,15 +64,15 @@ func HandleSarifString(s string, format string) (int, error) {
 		return 1, err
 	}
 
-	rc, err := runner.PrintFindings(annotations, format)
+	rc, err := PrintFindings(annotations, format)
 	if err != nil {
 		return 1, err
 	}
 	return rc, nil
 }
 
-func annotationsFromSarif(sarif SarifFile) ([]runner.Finding, error) {
-	var annotations []runner.Finding
+func annotationsFromSarif(sarif SarifFile) ([]Finding, error) {
+	var annotations []Finding
 	for _, run := range sarif.Runs {
 		for _, result := range run.Results {
 			for _, location := range result.Locations {
@@ -82,7 +85,7 @@ func annotationsFromSarif(sarif SarifFile) ([]runner.Finding, error) {
 				if result.Level == "" {
 					result.Level = "error"
 				}
-				annotation := runner.Finding{
+				annotation := Finding{
 					ToolName:  run.Tool.Driver.Name,
 					RuleID:    result.RuleID,
 					Level:     result.Level,

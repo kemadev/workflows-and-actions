@@ -11,14 +11,15 @@ import (
 	"sync"
 
 	"github.com/kemadev/workflows-and-actions/pkg/pkg/ci/filesfinder"
-	sarifparser "github.com/kemadev/workflows-and-actions/pkg/pkg/sarif-parser"
 )
 
 type linterArgs struct {
-	Bin     string
-	Ext     string
-	Paths   []string
-	CliArgs []string
+	Bin          string
+	Ext          string
+	Paths        []string
+	CliArgs      []string
+	Type         string
+	jsonMappings map[string]string
 }
 
 func processPipe(pipe io.Reader, buf *bytes.Buffer, output *os.File, wg *sync.WaitGroup) {
@@ -34,7 +35,7 @@ func processPipe(pipe io.Reader, buf *bytes.Buffer, output *os.File, wg *sync.Wa
 	}
 }
 
-func runSarifLinter(a linterArgs) (int, error) {
+func runLinter(a linterArgs) (int, error) {
 	if a.Bin == "" {
 		return 1, fmt.Errorf("linter binary is required")
 	}
@@ -94,12 +95,41 @@ func runSarifLinter(a linterArgs) (int, error) {
 
 	wg.Wait()
 
-	if err := cmd.Wait(); err != nil {
-		slog.Error("error waiting for command", slog.String("error", err.Error()))
-		sarifparser.HandleSarifString(stdoutBuf.String(), format)
-		return 1, err
+	rc, err := handleLinterOutcome(cmd, &stdoutBuf, &stderrBuf, format, a)
+	if err != nil {
+		return rc, err
 	}
 
-	slog.Debug("command executed successfully")
 	return 0, nil
+}
+
+func handleLinterOutcome(cmd *exec.Cmd, stdoutBuf *bytes.Buffer, stderrBuf *bytes.Buffer, format string, args linterArgs) (int, error) {
+	err := cmd.Wait()
+	if err == nil {
+		slog.Debug("command executed successfully")
+		return 0, nil
+	}
+	slog.Error("command execution failed", slog.String("error", err.Error()))
+	s := stdoutBuf.String()
+	switch args.Type {
+	case "sarif":
+		slog.Debug("handling sarif string")
+		if s == "" {
+			slog.Error("no sarif output")
+			return 1, fmt.Errorf("no sarif output")
+		}
+		rc, err := HandleSarifString(s, format)
+		if err != nil {
+			slog.Error("error handling sarif string", slog.String("error", err.Error()))
+			return rc, err
+		}
+		return rc, nil
+		// case "json":
+		// 	annotations, err := AnnotationsFromJson(s, args.jsonMappings)
+		// 	if err != nil {
+		// 		slog.Error("error converting json to annotations", slog.String("error", err.Error()))
+		// 		return 1, err
+		// 	}
+	}
+	return 1, err
 }
