@@ -100,6 +100,7 @@ func dispatchCommand(args []string) (int, error) {
 			},
 		})
 	case "test":
+		// TODO use runLinter with linter type arg
 		return runSarifLinter(linterArgs{
 			Bin: "go",
 			CliArgs: []string{
