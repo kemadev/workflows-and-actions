@@ -36,7 +36,7 @@ type jsonToFindingsMappings struct {
 	Message   jsonToFindingsMapping
 }
 
-// not 100% SARIF compliant (rule overrides / default config, ...), however sufficient for simple annotations using default values if key is not found
+// NOTE not 100% SARIF compliant (rule overrides / default config, ...), however sufficient for simple annotations using default values if key is not found
 var sarifToFindingsMappings = jsonInfos{
 	Mappings: jsonToFindingsMappings{
 		ToolName:  jsonToFindingsMapping{Key: "runs[].tool.driver.name"},
