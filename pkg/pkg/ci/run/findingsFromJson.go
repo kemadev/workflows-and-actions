@@ -8,10 +8,10 @@ import (
 	"strings"
 )
 
+// not 100% SARIF compliant (rule overrides / default config, ...), however sufficient for simple annotations
 var sarifToFindingsMappings = jsonToFindingsMappings{
-	ToolName: "runs[].tool.driver.name",
-	RuleID:   "runs[].results[].ruleId",
-	// The value could come from rule override / default config, but we won't bother and default to "warning"
+	ToolName:  "runs[].tool.driver.name",
+	RuleID:    "runs[].results[].ruleId",
 	Level:     "runs[].results[].level",
 	FilePath:  "runs[].results[].locations[].physicalLocation.artifactLocation.uri",
 	StartLine: "runs[].results[].locations[].physicalLocation.region.startLine",
@@ -37,22 +37,42 @@ func FindingsFromJsonMappings(s string, m jsonToFindingsMappings) ([]Finding, er
 		return nil, err
 	}
 	if finding.Level, err = getValueFromMapping(jsonData, m.Level); err != nil {
-		return nil, err
+		if err == keyNorFoundError {
+			finding.Level = "warning"
+		} else {
+			return nil, err
+		}
 	}
 	if finding.FilePath, err = getValueFromMapping(jsonData, m.FilePath); err != nil {
 		return nil, err
 	}
 	if finding.StartLine, err = getIntValueFromMapping(jsonData, m.StartLine); err != nil {
-		return nil, err
+		if err == keyNorFoundError {
+			finding.StartLine = 1
+		} else {
+			return nil, err
+		}
 	}
 	if finding.EndLine, err = getIntValueFromMapping(jsonData, m.EndLine); err != nil {
-		return nil, err
+		if err == keyNorFoundError {
+			finding.EndLine = finding.StartLine
+		} else {
+			return nil, err
+		}
 	}
 	if finding.StartCol, err = getIntValueFromMapping(jsonData, m.StartCol); err != nil {
-		return nil, err
+		if err == keyNorFoundError {
+			finding.StartCol = 1
+		} else {
+			return nil, err
+		}
 	}
 	if finding.EndCol, err = getIntValueFromMapping(jsonData, m.EndCol); err != nil {
-		return nil, err
+		if err == keyNorFoundError {
+			finding.EndCol = finding.StartCol
+		} else {
+			return nil, err
+		}
 	}
 	if finding.Message, err = getValueFromMapping(jsonData, m.Message); err != nil {
 		return nil, err
@@ -60,6 +80,8 @@ func FindingsFromJsonMappings(s string, m jsonToFindingsMappings) ([]Finding, er
 	findings = append(findings, finding)
 	return findings, nil
 }
+
+var keyNorFoundError error = errors.New("key not found")
 
 func getValueFromMapping(data map[string]interface{}, mapping string) (string, error) {
 	parts := strings.Split(mapping, ".")
@@ -77,7 +99,7 @@ func getValueFromMapping(data map[string]interface{}, mapping string) (string, e
 			if next, ok := current.(map[string]interface{})[part]; ok {
 				current = next
 			} else {
-				return "", errors.New("key not found for part: " + part)
+				return "", keyNorFoundError
 			}
 		}
 	}
