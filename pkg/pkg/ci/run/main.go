@@ -72,6 +72,7 @@ func dispatchCommand(args []string) (int, error) {
 				"--report-path",
 				"-",
 			},
+			jsonMappings: sarifToFindingsMappings,
 		})
 	case "sast":
 		return runLinter(linterArgs{
