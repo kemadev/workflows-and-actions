@@ -18,7 +18,6 @@ type linterArgs struct {
 	Ext          string
 	Paths        []string
 	CliArgs      []string
-	Type         string
 	jsonMappings jsonToFindingsMappings
 }
 
@@ -111,25 +110,13 @@ func handleLinterOutcome(cmd *exec.Cmd, stdoutBuf *bytes.Buffer, stderrBuf *byte
 	}
 	slog.Error("command execution failed", slog.String("error", err.Error()))
 	s := stdoutBuf.String()
-	switch args.Type {
-	case "sarif":
-		slog.Debug("handling sarif string")
-		if s == "" {
-			slog.Error("no sarif output")
-			return 1, fmt.Errorf("no sarif output")
-		}
-		rc, err := HandleSarifString(s, format)
-		if err != nil {
-			slog.Error("error handling sarif string", slog.String("error", err.Error()))
-			return rc, err
-		}
-		return rc, nil
-		// case "json":
-		// 	annotations, err := AnnotationsFromJson(s, args.jsonMappings)
-		// 	if err != nil {
-		// 		slog.Error("error converting json to annotations", slog.String("error", err.Error()))
-		// 		return 1, err
-		// 	}
+	f, err := FindingsFromJsonMappings(s, args.jsonMappings)
+	if err != nil {
+		return 1, err
 	}
-	return 1, err
+	rc, err := PrintFindings(f, format)
+	if err != nil {
+		return 1, err
+	}
+	return rc, nil
 }

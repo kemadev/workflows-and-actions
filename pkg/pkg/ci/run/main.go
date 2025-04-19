@@ -34,9 +34,8 @@ func dispatchCommand(args []string) (int, error) {
 	switch args[0] {
 	case "docker":
 		return runLinter(linterArgs{
-			Bin:  "hadolint",
-			Type: "sarif",
-			Ext:  "Dockerfile",
+			Bin: "hadolint",
+			Ext: "Dockerfile",
 			Paths: []string{
 				filesfinder.RootPath,
 			},
@@ -44,12 +43,12 @@ func dispatchCommand(args []string) (int, error) {
 				"--format",
 				"sarif",
 			},
+			jsonMappings: sarifToFindingsMappings,
 		})
 	case "gha":
 		return runLinter(linterArgs{
-			Bin:  "actionlint",
-			Type: "sarif",
-			Ext:  ".yaml",
+			Bin: "actionlint",
+			Ext: ".yaml",
 			Paths: []string{
 				filesfinder.RootPath + "/.github/workflows",
 				filesfinder.RootPath + "/.github/actions",
@@ -58,11 +57,11 @@ func dispatchCommand(args []string) (int, error) {
 				"-format",
 				actionlintSarifFormatTemplate,
 			},
+			jsonMappings: sarifToFindingsMappings,
 		})
 	case "secrets":
 		return runLinter(linterArgs{
-			Bin:  "gitleaks",
-			Type: "sarif",
+			Bin: "gitleaks",
 			CliArgs: []string{
 				"dir",
 				"--no-banner",
@@ -76,8 +75,7 @@ func dispatchCommand(args []string) (int, error) {
 		})
 	case "sast":
 		return runLinter(linterArgs{
-			Bin:  "semgrep",
-			Type: "sarif",
+			Bin: "semgrep",
 			CliArgs: []string{
 				"scan",
 				"--metrics=off",
@@ -101,13 +99,13 @@ func dispatchCommand(args []string) (int, error) {
 				"--config",
 				"p/dockerfile",
 			},
+			jsonMappings: sarifToFindingsMappings,
 		})
 	case "test":
 		// TODO use runLinter with linter type arg
 		// TODO sarif into merge jsonmappings w/ const struct to use in all sarif parsers
 		return runLinter(linterArgs{
-			Bin:  "go",
-			Type: "json",
+			Bin: "go",
 			CliArgs: []string{
 				"test",
 				"-bench=.",
@@ -121,10 +119,10 @@ func dispatchCommand(args []string) (int, error) {
 				Level:    "error",
 				FilePath: "Package",
 				// TODO find a way to get position in file
-				StartLine: 1,
-				EndLine:   1,
-				StartCol:  1,
-				EndCol:    1,
+				StartLine: "1",
+				EndLine:   "1",
+				StartCol:  "1",
+				EndCol:    "1",
 				Message:   "Test failed!",
 			},
 		})
@@ -138,9 +136,9 @@ type jsonToFindingsMappings struct {
 	RuleID    string
 	Level     string
 	FilePath  string
-	StartLine int
-	EndLine   int
-	StartCol  int
-	EndCol    int
+	StartLine string
+	EndLine   string
+	StartCol  string
+	EndCol    string
 	Message   string
 }
