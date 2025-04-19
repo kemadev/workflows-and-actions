@@ -116,15 +116,34 @@ func dispatchCommand(args []string) (int, error) {
 			jsonInfo: jsonInfos{
 				Type: "stream",
 				Mappings: jsonToFindingsMappings{
-					ToolName:  jsonToFindingsMapping{Key: JsonStreamArrayKey + "[].Package"},
-					RuleID:    jsonToFindingsMapping{Key: JsonStreamArrayKey + "[].Package"},
-					Level:     jsonToFindingsMapping{Key: JsonStreamArrayKey + "[].Package"},
-					FilePath:  jsonToFindingsMapping{Key: JsonStreamArrayKey + "[].Package"},
-					StartLine: jsonToFindingsMapping{Key: JsonStreamArrayKey + "[].Package"},
-					EndLine:   jsonToFindingsMapping{Key: JsonStreamArrayKey + "[].Package"},
-					StartCol:  jsonToFindingsMapping{Key: JsonStreamArrayKey + "[].Package"},
-					EndCol:    jsonToFindingsMapping{Key: JsonStreamArrayKey + "[].Package"},
-					Message:   jsonToFindingsMapping{Key: JsonStreamArrayKey + "[].Package"},
+					ToolName: jsonToFindingsMapping{
+						OverrideKey: "go-test",
+					},
+					RuleID: jsonToFindingsMapping{
+						OverrideKey: "no-failing-test",
+					},
+					Level: jsonToFindingsMapping{
+						OverrideKey: "error",
+					},
+					FilePath: jsonToFindingsMapping{
+						Key: "Package",
+						SelectorRegex: "^\\s*\"([^\"]+)\"$",
+					},
+					StartLine: jsonToFindingsMapping{
+						OverrideKey: "1",
+					},
+					EndLine: jsonToFindingsMapping{
+						OverrideKey: "1",
+					},
+					StartCol: jsonToFindingsMapping{
+						OverrideKey: "1",
+					},
+					EndCol: jsonToFindingsMapping{
+						OverrideKey: "1",
+					},
+					Message: jsonToFindingsMapping{
+						OverrideKey: "no-failing-test",
+					},
 				},
 			},
 		})
