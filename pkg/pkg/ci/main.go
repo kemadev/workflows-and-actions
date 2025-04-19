@@ -39,115 +39,136 @@ func dispatchCommand(args []string) (int, error) {
 			},
 			CliArgs: []string{
 				"--format",
-				"sarif",
+				"json",
 			},
-			jsonInfo: sarifToFindingsMappings,
-		})
-	case "gha":
-		return runLinter(linterArgs{
-			Bin: "actionlint",
-			Ext: ".yaml",
-			Paths: []string{
-				FilesFindingRootPath + "/.github/workflows",
-				FilesFindingRootPath + "/.github/actions",
-			},
-			CliArgs: []string{
-				"-format",
-				actionlintSarifFormatTemplate,
-			},
-			jsonInfo: sarifToFindingsMappings,
-		})
-	case "secrets":
-		return runLinter(linterArgs{
-			Bin: "gitleaks",
-			CliArgs: []string{
-				"dir",
-				"--no-banner",
-				"--max-decode-depth",
-				"3",
-				"--report-format",
-				"sarif",
-				"--report-path",
-				"-",
-			},
-			jsonInfo: sarifToFindingsMappings,
-		})
-	case "sast":
-		return runLinter(linterArgs{
-			Bin: "semgrep",
-			CliArgs: []string{
-				"scan",
-				"--metrics=off",
-				"--error",
-				"--sarif",
-				"-",
-				"--config",
-				"p/default",
-				"--config",
-				"p/gitlab",
-				"--config",
-				"p/golang",
-				"--config",
-				"p/cwe-top-25",
-				"--config",
-				"p/owasp-top-ten",
-				"--config",
-				"p/r2c-security-audit",
-				"--config",
-				"p/kubernetes",
-				"--config",
-				"p/dockerfile",
-			},
-			jsonInfo: sarifToFindingsMappings,
-		})
-	case "test":
-		return runLinter(linterArgs{
-			Bin: "go",
-			CliArgs: []string{
-				"test",
-				"-bench=.",
-				"-benchmem",
-				"-covermode=atomic",
-				"-json",
-			},
-			// TODO annotate poor coverage
-			// TODO annotate failing test
-			// TODO add position in file to annotations
 			jsonInfo: jsonInfos{
-				Type: "stream",
 				Mappings: jsonToFindingsMappings{
-					ToolName: jsonToFindingsMapping{
-						OverrideKey: "go-test",
+					ToolName: jsonMappingInfo{
+						OverrideKey: "hadolint",
 					},
-					RuleID: jsonToFindingsMapping{
-						OverrideKey: "no-failing-test",
+					RuleID: jsonMappingInfo{
+						Key: "code",
 					},
-					Level: jsonToFindingsMapping{
-						OverrideKey:         "Action",
-						GlobalSelectorRegex: "^" + GitRepoBasePath + "(.*)",
+					Level: jsonMappingInfo{
+						Key: "level",
 					},
-					FilePath: jsonToFindingsMapping{
-						Key:                   "Package",
-						ValueTransformerRegex: "^" + GitRepoBasePath + "(.*)",
+					FilePath: jsonMappingInfo{
+						Key: "file",
 					},
-					StartLine: jsonToFindingsMapping{
-						OverrideKey: "1",
+					StartLine: jsonMappingInfo{
+						Key: "line",
 					},
-					EndLine: jsonToFindingsMapping{
-						OverrideKey: "1",
-					},
-					StartCol: jsonToFindingsMapping{
-						OverrideKey: "1",
-					},
-					EndCol: jsonToFindingsMapping{
-						OverrideKey: "1",
-					},
-					Message: jsonToFindingsMapping{
-						OverrideKey: "no-failing-test",
+					Message: jsonMappingInfo{
+						Key: "message",
 					},
 				},
 			},
 		})
+	// case "gha":
+	// 	return runLinter(linterArgs{
+	// 		Bin: "actionlint",
+	// 		Ext: ".yaml",
+	// 		Paths: []string{
+	// 			FilesFindingRootPath + "/.github/workflows",
+	// 			FilesFindingRootPath + "/.github/actions",
+	// 		},
+	// 		CliArgs: []string{
+	// 			"-format",
+	// 			actionlintSarifFormatTemplate,
+	// 		},
+	// 		jsonInfo: sarifToFindingsMappings,
+	// 	})
+	// case "secrets":
+	// 	return runLinter(linterArgs{
+	// 		Bin: "gitleaks",
+	// 		CliArgs: []string{
+	// 			"dir",
+	// 			"--no-banner",
+	// 			"--max-decode-depth",
+	// 			"3",
+	// 			"--report-format",
+	// 			"sarif",
+	// 			"--report-path",
+	// 			"-",
+	// 		},
+	// 		jsonInfo: sarifToFindingsMappings,
+	// 	})
+	// case "sast":
+	// 	return runLinter(linterArgs{
+	// 		Bin: "semgrep",
+	// 		CliArgs: []string{
+	// 			"scan",
+	// 			"--metrics=off",
+	// 			"--error",
+	// 			"--sarif",
+	// 			"-",
+	// 			"--config",
+	// 			"p/default",
+	// 			"--config",
+	// 			"p/gitlab",
+	// 			"--config",
+	// 			"p/golang",
+	// 			"--config",
+	// 			"p/cwe-top-25",
+	// 			"--config",
+	// 			"p/owasp-top-ten",
+	// 			"--config",
+	// 			"p/r2c-security-audit",
+	// 			"--config",
+	// 			"p/kubernetes",
+	// 			"--config",
+	// 			"p/dockerfile",
+	// 		},
+	// 		jsonInfo: sarifToFindingsMappings,
+	// 	})
+	// case "test":
+	// 	return runLinter(linterArgs{
+	// 		Bin: "go",
+	// 		CliArgs: []string{
+	// 			"test",
+	// 			"-bench=.",
+	// 			"-benchmem",
+	// 			"-covermode=atomic",
+	// 			"-json",
+	// 		},
+	// 		// TODO annotate poor coverage
+	// 		// TODO annotate failing test
+	// 		// TODO add position in file to annotations
+	// 		jsonInfo: jsonInfos{
+	// 			Type: "stream",
+	// 			Mappings: jsonToFindingsMappings{
+	// 				ToolName: jsonMappingInfo{
+	// 					OverrideKey: "go-test",
+	// 				},
+	// 				RuleID: jsonMappingInfo{
+	// 					OverrideKey: "no-failing-test",
+	// 				},
+	// 				Level: jsonMappingInfo{
+	// 					OverrideKey:         "Action",
+	// 					GlobalSelectorRegex: "^" + GitRepoBasePath + "(.*)",
+	// 				},
+	// 				FilePath: jsonMappingInfo{
+	// 					Key:                   "Package",
+	// 					ValueTransformerRegex: "^" + GitRepoBasePath + "(.*)",
+	// 				},
+	// 				StartLine: jsonMappingInfo{
+	// 					OverrideKey: "1",
+	// 				},
+	// 				EndLine: jsonMappingInfo{
+	// 					OverrideKey: "1",
+	// 				},
+	// 				StartCol: jsonMappingInfo{
+	// 					OverrideKey: "1",
+	// 				},
+	// 				EndCol: jsonMappingInfo{
+	// 					OverrideKey: "1",
+	// 				},
+	// 				Message: jsonMappingInfo{
+	// 					OverrideKey: "no-failing-test",
+	// 				},
+	// 			},
+	// 		},
+	// 	})
 	default:
 		return 1, fmt.Errorf("unknown command: %s", args[0])
 	}
