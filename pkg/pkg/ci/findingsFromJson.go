@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -72,51 +73,51 @@ func FindingsFromJson(s string, i jsonInfos) ([]Finding, error) {
 	var findings []Finding
 	finding := Finding{}
 	var err error
-	if finding.ToolName, err = getValueFromMapping(jsonData, m.ToolName.Key, m.ToolName.OverrideKey); err != nil {
+	if finding.ToolName, err = getValueFromMapping(jsonData, m.ToolName); err != nil {
 		return nil, err
 	}
-	if finding.RuleID, err = getValueFromMapping(jsonData, m.RuleID.Key, m.RuleID.OverrideKey); err != nil {
+	if finding.RuleID, err = getValueFromMapping(jsonData, m.RuleID); err != nil {
 		return nil, err
 	}
-	if finding.Level, err = getValueFromMapping(jsonData, m.Level.Key, m.Level.OverrideKey); err != nil {
+	if finding.Level, err = getValueFromMapping(jsonData, m.Level); err != nil {
 		if err == keyNorFoundError {
 			finding.Level = "warning"
 		} else {
 			return nil, err
 		}
 	}
-	if finding.FilePath, err = getValueFromMapping(jsonData, m.FilePath.Key, m.FilePath.OverrideKey); err != nil {
+	if finding.FilePath, err = getValueFromMapping(jsonData, m.FilePath); err != nil {
 		return nil, err
 	}
-	if finding.StartLine, err = getIntValueFromMapping(jsonData, m.StartLine.Key, m.StartLine.OverrideKey); err != nil {
+	if finding.StartLine, err = getIntValueFromMapping(jsonData, m.StartLine); err != nil {
 		if err == keyNorFoundError {
 			finding.StartLine = 1
 		} else {
 			return nil, err
 		}
 	}
-	if finding.EndLine, err = getIntValueFromMapping(jsonData, m.EndLine.Key, m.EndLine.OverrideKey); err != nil {
+	if finding.EndLine, err = getIntValueFromMapping(jsonData, m.EndLine); err != nil {
 		if err == keyNorFoundError {
 			finding.EndLine = finding.StartLine
 		} else {
 			return nil, err
 		}
 	}
-	if finding.StartCol, err = getIntValueFromMapping(jsonData, m.StartCol.Key, m.StartCol.OverrideKey); err != nil {
+	if finding.StartCol, err = getIntValueFromMapping(jsonData, m.StartCol); err != nil {
 		if err == keyNorFoundError {
 			finding.StartCol = 1
 		} else {
 			return nil, err
 		}
 	}
-	if finding.EndCol, err = getIntValueFromMapping(jsonData, m.EndCol.Key, m.EndCol.OverrideKey); err != nil {
+	if finding.EndCol, err = getIntValueFromMapping(jsonData, m.EndCol); err != nil {
 		if err == keyNorFoundError {
 			finding.EndCol = finding.StartCol
 		} else {
 			return nil, err
 		}
 	}
-	if finding.Message, err = getValueFromMapping(jsonData, m.Message.Key, m.Message.OverrideKey); err != nil {
+	if finding.Message, err = getValueFromMapping(jsonData, m.Message); err != nil {
 		return nil, err
 	}
 	findings = append(findings, finding)
@@ -125,14 +126,20 @@ func FindingsFromJson(s string, i jsonInfos) ([]Finding, error) {
 
 var keyNorFoundError error = errors.New("key not found")
 
-func getValueFromMapping(data map[string]interface{}, mapping string, override string) (string, error) {
-	if mapping == "" {
-		if override != "" {
-			return override, nil
-		}
-		return "", keyNorFoundError
+func getValueFromMapping(data map[string]interface{}, m jsonToFindingsMapping) (string, error) {
+	if m.OverrideKey != "" {
+		return m.OverrideKey, nil
 	}
-	parts := strings.Split(mapping, ".")
+	if m.GlobalSelectorRegex != "" {
+		s, err := regexp.Compile(m.GlobalSelectorRegex)
+		if err != nil {
+			return "", err
+		}
+		if !s.MatchString(m.Key) {
+			return "", keyNorFoundError
+		}
+	}
+	parts := strings.Split(m.Key, ".")
 	var current interface{} = data
 
 	for _, part := range parts {
@@ -157,7 +164,11 @@ func getValueFromMapping(data map[string]interface{}, mapping string, override s
 		return "", nil
 	}
 	if str, ok := current.(string); ok {
-		return str, nil
+		s, err := regexp.Compile(m.ValueTransformerRegex)
+		if err != nil {
+			return "", err
+		}
+		return s.FindString(str), nil
 	}
 	if num, ok := current.(int); ok {
 		return strconv.Itoa(num), nil
@@ -171,11 +182,11 @@ func getValueFromMapping(data map[string]interface{}, mapping string, override s
 		}
 		return "false", nil
 	}
-	return "", fmt.Errorf("value for mapping %s is not a string, int, float, or bool", mapping)
+	return "", fmt.Errorf("value for mapping %s is not a string, int, float, or bool", m.Key)
 }
 
-func getIntValueFromMapping(data map[string]interface{}, mapping string, override string) (int, error) {
-	value, err := getValueFromMapping(data, mapping, override)
+func getIntValueFromMapping(data map[string]interface{}, m jsonToFindingsMapping) (int, error) {
+	value, err := getValueFromMapping(data, m)
 	if err != nil {
 		return 1, err
 	}

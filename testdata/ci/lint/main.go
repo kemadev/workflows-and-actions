@@ -4,7 +4,7 @@ import "fmt"
 
 func main() {
 	f1("f1")
-	f2()
+	f2("")
 	f3()
 }
 
@@ -14,8 +14,11 @@ func f1(s string) {
 	}
 }
 
-func f2() {
-	fmt.Println("f2")
+func f2(s string) error {
+	if s == "" {
+		return fmt.Errorf("empty string")
+	}
+	return nil
 }
 
 func f3() {
