@@ -45,6 +45,8 @@ var sarifToFindingsMappings = jsonInfos{
 	},
 }
 
+const JsonStreamArrayKey = "jsonStreamArrayKey"
+
 func FindingsFromJson(s string, i jsonInfos) ([]Finding, error) {
 	if i.Type == "stream" {
 		for _, line := range strings.Split(s, "\n") {
@@ -53,7 +55,7 @@ func FindingsFromJson(s string, i jsonInfos) ([]Finding, error) {
 			}
 		}
 		s = strings.TrimSuffix(s, ",")
-		s = "{[" + s + "]}"
+		s = `{"`+ JsonStreamArrayKey +`":[` + s + "]}"
 	}
 	m := i.Mappings
 	var jsonData map[string]interface{}
