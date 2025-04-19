@@ -21,12 +21,15 @@ type linterArgs struct {
 	jsonMappings jsonToFindingsMappings
 }
 
+// NOTE read buffer size is limited, any output line (split function) larger than this will cause deadlock
+const MaxBufferSize = 32 * 1024 * 1024
+
 func processPipe(pipe io.Reader, buf *bytes.Buffer, output *os.File, wg *sync.WaitGroup) {
 	defer wg.Done()
 	reader := io.TeeReader(pipe, buf)
 	scanner := bufio.NewScanner(reader)
 	// Some linters can output a lot of data, in a one-line json format
-	lb := make([]byte, 0, 32*1024*1024)
+	lb := make([]byte, 0, MaxBufferSize)
 	scanner.Buffer(lb, len(lb))
 	for scanner.Scan() {
 		line := scanner.Text()
