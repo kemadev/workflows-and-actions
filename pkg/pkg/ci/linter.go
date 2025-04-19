@@ -110,8 +110,7 @@ func handleLinterOutcome(cmd *exec.Cmd, stdoutBuf *bytes.Buffer, stderrBuf *byte
 		return 0, nil
 	}
 	slog.Error("command execution failed", slog.String("error", err.Error()))
-	s := stdoutBuf.String()
-	f, err := FindingsFromJson(s, args.jsonInfo)
+	f, err := FindingsFromJson(stdoutBuf.String(), args.jsonInfo)
 	if err != nil {
 		return 1, err
 	}
