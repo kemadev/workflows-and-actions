@@ -103,8 +103,6 @@ func dispatchCommand(args []string) (int, error) {
 			jsonMappings: sarifToFindingsMappings,
 		})
 	case "test":
-		// TODO use runLinter with linter type arg
-		// TODO sarif into merge jsonmappings w/ const struct to use in all sarif parsers
 		return runLinter(linterArgs{
 			Bin: "go",
 			CliArgs: []string{
