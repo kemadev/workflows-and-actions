@@ -102,7 +102,7 @@ func runLinter(a linterArgs) (int, error) {
 		return rc, err
 	}
 
-	return 0, nil
+	return rc, nil
 }
 
 func handleLinterOutcome(cmd *exec.Cmd, stdoutBuf *bytes.Buffer, stderrBuf *bytes.Buffer, format string, args linterArgs) (int, error) {
@@ -117,9 +117,9 @@ func handleLinterOutcome(cmd *exec.Cmd, stdoutBuf *bytes.Buffer, stderrBuf *byte
 	if err != nil {
 		return 1, err
 	}
-	rc, err := PrintFindings(f, format)
+	err = PrintFindings(f, format)
 	if err != nil {
 		return 1, err
 	}
-	return rc, nil
+	return cmd.ProcessState.ExitCode(), nil
 }

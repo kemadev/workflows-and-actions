@@ -18,10 +18,10 @@ type Finding struct {
 	Message   string
 }
 
-func PrintFindings(findings []Finding, format string) (int, error) {
+func PrintFindings(findings []Finding, format string) error {
 	err := validateFindings(findings)
 	if err != nil {
-		return 1, err
+		return err
 	}
 	switch format {
 	case "human":
@@ -36,7 +36,7 @@ func PrintFindings(findings []Finding, format string) (int, error) {
 	case "json":
 		output, err := json.MarshalIndent(findings, "", "  ")
 		if err != nil {
-			return 1, err
+			return err
 		}
 		fmt.Println(string(output))
 	case "github":
@@ -45,13 +45,9 @@ func PrintFindings(findings []Finding, format string) (int, error) {
 			fmt.Printf("::%s title=%s,file=%s,line=%d,endLine=%d,col=%d,endColumn=%d::%s\n", annotation.Level, annotation.ToolName, annotation.FilePath, annotation.StartLine, annotation.EndLine, annotation.StartCol, annotation.EndCol, annotation.Message)
 		}
 	default:
-		return 1, fmt.Errorf("unknown format: %s", format)
+		return fmt.Errorf("unknown format: %s", format)
 	}
-	rc := 0
-	if len(findings) > 0 {
-		rc = 1
-	}
-	return rc, nil
+	return nil
 }
 
 // Based on GitHub workflow commands, see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#setting-a-debug-message
