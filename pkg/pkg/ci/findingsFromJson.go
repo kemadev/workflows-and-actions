@@ -8,6 +8,11 @@ import (
 	"strings"
 )
 
+type jsonInfos struct {
+	Type     string
+	Mappings jsonToFindingsMappings
+}
+
 type jsonToFindingsMappings struct {
 	ToolName  string
 	RuleID    string
@@ -21,19 +26,22 @@ type jsonToFindingsMappings struct {
 }
 
 // not 100% SARIF compliant (rule overrides / default config, ...), however sufficient for simple annotations using default values if key is not found
-var sarifToFindingsMappings = jsonToFindingsMappings{
-	ToolName:  "runs[].tool.driver.name",
-	RuleID:    "runs[].results[].ruleId",
-	Level:     "runs[].results[].level",
-	FilePath:  "runs[].results[].locations[].physicalLocation.artifactLocation.uri",
-	StartLine: "runs[].results[].locations[].physicalLocation.region.startLine",
-	EndLine:   "runs[].results[].locations[].physicalLocation.region.endLine",
-	StartCol:  "runs[].results[].locations[].physicalLocation.region.startColumn",
-	EndCol:    "runs[].results[].locations[].physicalLocation.region.endColumn",
-	Message:   "runs[].results[].message.text",
+var sarifToFindingsMappings = jsonInfos{
+	Mappings: jsonToFindingsMappings{
+		ToolName:  "runs[].tool.driver.name",
+		RuleID:    "runs[].results[].ruleId",
+		Level:     "runs[].results[].level",
+		FilePath:  "runs[].results[].locations[].physicalLocation.artifactLocation.uri",
+		StartLine: "runs[].results[].locations[].physicalLocation.region.startLine",
+		EndLine:   "runs[].results[].locations[].physicalLocation.region.endLine",
+		StartCol:  "runs[].results[].locations[].physicalLocation.region.startColumn",
+		EndCol:    "runs[].results[].locations[].physicalLocation.region.endColumn",
+		Message:   "runs[].results[].message.text",
+	},
 }
 
-func FindingsFromJsonMappings(s string, m jsonToFindingsMappings) ([]Finding, error) {
+func FindingsFromJson(s string, i jsonInfos) ([]Finding, error) {
+	m := i.Mappings
 	var jsonData map[string]interface{}
 	if err := json.Unmarshal([]byte(s), &jsonData); err != nil {
 		return nil, fmt.Errorf("error unmarshalling json: %w", err)

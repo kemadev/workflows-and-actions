@@ -41,7 +41,7 @@ func dispatchCommand(args []string) (int, error) {
 				"--format",
 				"sarif",
 			},
-			jsonMappings: sarifToFindingsMappings,
+			jsonInfo: sarifToFindingsMappings,
 		})
 	case "gha":
 		return runLinter(linterArgs{
@@ -55,7 +55,7 @@ func dispatchCommand(args []string) (int, error) {
 				"-format",
 				actionlintSarifFormatTemplate,
 			},
-			jsonMappings: sarifToFindingsMappings,
+			jsonInfo: sarifToFindingsMappings,
 		})
 	case "secrets":
 		return runLinter(linterArgs{
@@ -70,7 +70,7 @@ func dispatchCommand(args []string) (int, error) {
 				"--report-path",
 				"-",
 			},
-			jsonMappings: sarifToFindingsMappings,
+			jsonInfo: sarifToFindingsMappings,
 		})
 	case "sast":
 		return runLinter(linterArgs{
@@ -98,7 +98,7 @@ func dispatchCommand(args []string) (int, error) {
 				"--config",
 				"p/dockerfile",
 			},
-			jsonMappings: sarifToFindingsMappings,
+			jsonInfo: sarifToFindingsMappings,
 		})
 	case "test":
 		return runLinter(linterArgs{
@@ -113,16 +113,19 @@ func dispatchCommand(args []string) (int, error) {
 			// TODO annotate poor coverage
 			// TODO annotate failing test
 			// TODO add position in file to annotations
-			jsonMappings: jsonToFindingsMappings{
-				ToolName:  "go-test",
-				RuleID:    "no-failing-test",
-				Level:     "error",
-				FilePath:  "Package",
-				StartLine: "1",
-				EndLine:   "1",
-				StartCol:  "1",
-				EndCol:    "1",
-				Message:   "Test failed!",
+			jsonInfo: jsonInfos{
+				Type: "stream",
+				Mappings: jsonToFindingsMappings{
+					ToolName:  "Package",
+					RuleID:    "Name",
+					Level:     "Action",
+					FilePath:  "File",
+					StartLine: "Line",
+					EndLine:   "Line",
+					StartCol:  "Column",
+					EndCol:    "Column",
+					Message:   "Action",
+				},
 			},
 		})
 	default:

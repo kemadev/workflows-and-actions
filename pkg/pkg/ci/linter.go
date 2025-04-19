@@ -12,11 +12,11 @@ import (
 )
 
 type linterArgs struct {
-	Bin          string
-	Ext          string
-	Paths        []string
-	CliArgs      []string
-	jsonMappings jsonToFindingsMappings
+	Bin      string
+	Ext      string
+	Paths    []string
+	CliArgs  []string
+	jsonInfo jsonInfos
 }
 
 // NOTE read buffer size is limited, any output line (split function) larger than this will cause deadlock
@@ -111,7 +111,7 @@ func handleLinterOutcome(cmd *exec.Cmd, stdoutBuf *bytes.Buffer, stderrBuf *byte
 	}
 	slog.Error("command execution failed", slog.String("error", err.Error()))
 	s := stdoutBuf.String()
-	f, err := FindingsFromJsonMappings(s, args.jsonMappings)
+	f, err := FindingsFromJson(s, args.jsonInfo)
 	if err != nil {
 		return 1, err
 	}
