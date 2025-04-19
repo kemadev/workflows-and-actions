@@ -110,6 +110,7 @@ func dispatchCommand(args []string) (int, error) {
 				"-bench=.",
 				"-benchmem",
 				"-covermode=atomic",
+				"-race",
 				"-json",
 			},
 			jsonMappings: jsonToFindingsMappings{
