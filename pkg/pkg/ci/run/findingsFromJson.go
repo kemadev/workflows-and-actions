@@ -8,7 +8,19 @@ import (
 	"strings"
 )
 
-// not 100% SARIF compliant (rule overrides / default config, ...), however sufficient for simple annotations
+type jsonToFindingsMappings struct {
+	ToolName  string
+	RuleID    string
+	Level     string
+	FilePath  string
+	StartLine string
+	EndLine   string
+	StartCol  string
+	EndCol    string
+	Message   string
+}
+
+// not 100% SARIF compliant (rule overrides / default config, ...), however sufficient for simple annotations using default values if key is not found
 var sarifToFindingsMappings = jsonToFindingsMappings{
 	ToolName:  "runs[].tool.driver.name",
 	RuleID:    "runs[].results[].ruleId",

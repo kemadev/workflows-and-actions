@@ -129,15 +129,3 @@ func dispatchCommand(args []string) (int, error) {
 		return 1, fmt.Errorf("unknown command: %s", args[0])
 	}
 }
-
-type jsonToFindingsMappings struct {
-	ToolName  string
-	RuleID    string
-	Level     string
-	FilePath  string
-	StartLine string
-	EndLine   string
-	StartCol  string
-	EndCol    string
-	Message   string
-}
