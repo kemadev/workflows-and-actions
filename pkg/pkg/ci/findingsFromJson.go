@@ -14,9 +14,14 @@ type jsonInfos struct {
 }
 
 type jsonToFindingsMapping struct {
-	Key           string
-	OverrideKey   string
-	SelectorRegex string
+	// JSON key to find
+	Key string
+	// Do not try to find key and use this value instead
+	OverrideKey string
+	// Transform found value using this regex
+	ValueTransformerRegex string
+	// Discard whole finding if this regex for current key does not match
+	GlobalSelectorRegex string
 }
 
 type jsonToFindingsMappings struct {

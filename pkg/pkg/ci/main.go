@@ -123,11 +123,12 @@ func dispatchCommand(args []string) (int, error) {
 						OverrideKey: "no-failing-test",
 					},
 					Level: jsonToFindingsMapping{
-						OverrideKey: "error",
+						OverrideKey:         "Action",
+						GlobalSelectorRegex: "^" + GitRepoBasePath + "(.*)",
 					},
 					FilePath: jsonToFindingsMapping{
-						Key: "Package",
-						SelectorRegex: "^\\s*\"([^\"]+)\"$",
+						Key:                   "Package",
+						ValueTransformerRegex: "^" + GitRepoBasePath + "(.*)",
 					},
 					StartLine: jsonToFindingsMapping{
 						OverrideKey: "1",
