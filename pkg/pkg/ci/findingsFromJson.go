@@ -47,7 +47,6 @@ var sarifToFindingsMappings = jsonInfos{
 
 func FindingsFromJson(s string, i jsonInfos) ([]Finding, error) {
 	if i.Type == "stream" {
-		// append , to the end of each line
 		for _, line := range strings.Split(s, "\n") {
 			if strings.TrimSpace(line) != "" {
 				s += line + ","
