@@ -6,18 +6,6 @@ import (
 	"slices"
 )
 
-type Finding struct {
-	ToolName  string
-	RuleID    string
-	Level     string
-	FilePath  string
-	StartLine int
-	EndLine   int
-	StartCol  int
-	EndCol    int
-	Message   string
-}
-
 func PrintFindings(findings []Finding, format string) error {
 	err := validateFindings(findings)
 	if err != nil {
