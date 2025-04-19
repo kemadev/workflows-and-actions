@@ -40,29 +40,3 @@ func Test_f1(t *testing.T) {
 }
 
 // Oopsy no test coverage for f2 and f3
-
-// func Test_f2(t *testing.T) {
-// 	tests := []struct {
-// 		name string
-// 	}{
-// 		// TODO: Add test cases.
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			f2()
-// 		})
-// 	}
-// }
-
-// func Test_f3(t *testing.T) {
-// 	tests := []struct {
-// 		name string
-// 	}{
-// 		// TODO: Add test cases.
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			f3()
-// 		})
-// 	}
-// }
