@@ -96,8 +96,8 @@ func FindingsFromJson(s string, i jsonInfos) ([]Finding, error) {
 
 func findingFromJsonObject(m map[string]interface{}, mappings jsonToFindingsMappings) (Finding, error) {
 	f := Finding{}
-	def := setDefaultValue(m, mappings.ToolName.OverrideKey, "unknown")
 	// TODO make this generic (use pointers + type instead of plain + string) and use it for all fields
+	def := setDefaultValue(m, mappings.ToolName.OverrideKey, "unknown")
 	s, ok := m[mappings.ToolName.Key].(string)
 	if ok {
 		f.ToolName = s
