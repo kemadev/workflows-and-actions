@@ -57,6 +57,10 @@ func FindingsFromJsonMappings(s string, m jsonToFindingsMappings) ([]Finding, er
 	}
 	if finding.FilePath, err = getValueFromMapping(jsonData, m.FilePath); err != nil {
 		return nil, err
+	} else {
+		// if strings.HasPrefix(finding.FilePath, gitRepoBasePath) {
+		// 	finding.FilePath = strings.TrimPrefix(finding.FilePath, gitRepoBasePath)
+		// }
 	}
 	if finding.StartLine, err = getIntValueFromMapping(jsonData, m.StartLine); err != nil {
 		if err == keyNorFoundError {

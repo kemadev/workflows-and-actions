@@ -1,4 +1,4 @@
-package filesfinder
+package main
 
 import (
 	"fmt"
@@ -11,19 +11,19 @@ const (
 	RootPath = "/src"
 )
 
-type Args struct {
+type FilesFindingArgs struct {
 	Extension   string
 	Paths       []string
 	IgnorePaths []string
 	Recursive   bool
 }
 
-func handleArgs(a Args) (Args, error) {
+func handleArgs(a FilesFindingArgs) (FilesFindingArgs, error) {
 	if a.Paths == nil {
 		a.Paths = []string{"/src"}
 	}
 	if a.Extension == "" {
-		return Args{}, fmt.Errorf("extension is required")
+		return FilesFindingArgs{}, fmt.Errorf("extension is required")
 	}
 	if a.IgnorePaths == nil {
 		a.IgnorePaths = []string{}
@@ -32,7 +32,7 @@ func handleArgs(a Args) (Args, error) {
 	return a, nil
 }
 
-func FindFilesByExtension(arg Args) ([]string, error) {
+func FindFilesByExtension(arg FilesFindingArgs) ([]string, error) {
 	a, err := handleArgs(arg)
 	if err != nil {
 		return nil, err

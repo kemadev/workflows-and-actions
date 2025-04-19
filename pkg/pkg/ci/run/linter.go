@@ -9,8 +9,6 @@ import (
 	"os"
 	"os/exec"
 	"sync"
-
-	"github.com/kemadev/workflows-and-actions/pkg/pkg/ci/filesfinder"
 )
 
 type linterArgs struct {
@@ -43,7 +41,7 @@ func runLinter(a linterArgs) (int, error) {
 	}
 	f := []string{}
 	if a.Paths != nil {
-		fl, err := filesfinder.FindFilesByExtension(filesfinder.Args{
+		fl, err := FindFilesByExtension(FilesFindingArgs{
 			Extension: a.Ext,
 			Paths:     a.Paths,
 			Recursive: true,
