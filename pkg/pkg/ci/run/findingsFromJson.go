@@ -62,7 +62,7 @@ func FindingsFromJsonMappings(s string, m jsonToFindingsMappings) ([]Finding, er
 	}
 	if finding.StartCol, err = getIntValueFromMapping(jsonData, m.StartCol); err != nil {
 		if err == keyNorFoundError {
-			finding.StartCol = 0
+			finding.StartCol = 1
 		} else {
 			return nil, err
 		}
