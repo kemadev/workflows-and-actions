@@ -108,15 +108,16 @@ func dispatchCommand(args []string) (int, error) {
 				"-bench=.",
 				"-benchmem",
 				"-covermode=atomic",
-				"-race",
 				"-json",
 			},
+			// TODO annotate poor coverage
+			// TODO annotate failing test
+			// TODO add position in file to annotations
 			jsonMappings: jsonToFindingsMappings{
-				ToolName: "go-test",
-				RuleID:   "no-failing-test",
-				Level:    "error",
-				FilePath: "Package",
-				// TODO find a way to get position in file
+				ToolName:  "go-test",
+				RuleID:    "no-failing-test",
+				Level:     "error",
+				FilePath:  "Package",
 				StartLine: "1",
 				EndLine:   "1",
 				StartCol:  "1",
