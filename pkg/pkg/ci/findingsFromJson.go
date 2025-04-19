@@ -13,34 +13,49 @@ type jsonInfos struct {
 	Mappings jsonToFindingsMappings
 }
 
+type jsonToFindingsMapping struct {
+	Key           string
+	SelectorRegex string
+}
+
 type jsonToFindingsMappings struct {
-	ToolName  string
-	RuleID    string
-	Level     string
-	FilePath  string
-	StartLine string
-	EndLine   string
-	StartCol  string
-	EndCol    string
-	Message   string
+	ToolName  jsonToFindingsMapping
+	RuleID    jsonToFindingsMapping
+	Level     jsonToFindingsMapping
+	FilePath  jsonToFindingsMapping
+	StartLine jsonToFindingsMapping
+	EndLine   jsonToFindingsMapping
+	StartCol  jsonToFindingsMapping
+	EndCol    jsonToFindingsMapping
+	Message   jsonToFindingsMapping
 }
 
 // not 100% SARIF compliant (rule overrides / default config, ...), however sufficient for simple annotations using default values if key is not found
 var sarifToFindingsMappings = jsonInfos{
 	Mappings: jsonToFindingsMappings{
-		ToolName:  "runs[].tool.driver.name",
-		RuleID:    "runs[].results[].ruleId",
-		Level:     "runs[].results[].level",
-		FilePath:  "runs[].results[].locations[].physicalLocation.artifactLocation.uri",
-		StartLine: "runs[].results[].locations[].physicalLocation.region.startLine",
-		EndLine:   "runs[].results[].locations[].physicalLocation.region.endLine",
-		StartCol:  "runs[].results[].locations[].physicalLocation.region.startColumn",
-		EndCol:    "runs[].results[].locations[].physicalLocation.region.endColumn",
-		Message:   "runs[].results[].message.text",
+		ToolName:  jsonToFindingsMapping{Key: "runs[].tool.driver.name"},
+		RuleID:    jsonToFindingsMapping{Key: "runs[].results[].ruleId"},
+		Level:     jsonToFindingsMapping{Key: "runs[].results[].level"},
+		FilePath:  jsonToFindingsMapping{Key: "runs[].results[].locations[].physicalLocation.artifactLocation.uri"},
+		StartLine: jsonToFindingsMapping{Key: "runs[].results[].locations[].physicalLocation.region.startLine"},
+		EndLine:   jsonToFindingsMapping{Key: "runs[].results[].locations[].physicalLocation.region.endLine"},
+		StartCol:  jsonToFindingsMapping{Key: "runs[].results[].locations[].physicalLocation.region.startColumn"},
+		EndCol:    jsonToFindingsMapping{Key: "runs[].results[].locations[].physicalLocation.region.endColumn"},
+		Message:   jsonToFindingsMapping{Key: "runs[].results[].message.text"},
 	},
 }
 
 func FindingsFromJson(s string, i jsonInfos) ([]Finding, error) {
+	if i.Type == "stream" {
+		// append , to the end of each line
+		for _, line := range strings.Split(s, "\n") {
+			if strings.TrimSpace(line) != "" {
+				s += line + ","
+			}
+		}
+		s = strings.TrimSuffix(s, ",")
+		s = "{[" + s + "]}"
+	}
 	m := i.Mappings
 	var jsonData map[string]interface{}
 	if err := json.Unmarshal([]byte(s), &jsonData); err != nil {
@@ -50,55 +65,55 @@ func FindingsFromJson(s string, i jsonInfos) ([]Finding, error) {
 	var findings []Finding
 	finding := Finding{}
 	var err error
-	if finding.ToolName, err = getValueFromMapping(jsonData, m.ToolName); err != nil {
+	if finding.ToolName, err = getValueFromMapping(jsonData, m.ToolName.Key); err != nil {
 		return nil, err
 	}
-	if finding.RuleID, err = getValueFromMapping(jsonData, m.RuleID); err != nil {
+	if finding.RuleID, err = getValueFromMapping(jsonData, m.RuleID.Key); err != nil {
 		return nil, err
 	}
-	if finding.Level, err = getValueFromMapping(jsonData, m.Level); err != nil {
+	if finding.Level, err = getValueFromMapping(jsonData, m.Level.Key); err != nil {
 		if err == keyNorFoundError {
 			finding.Level = "warning"
 		} else {
 			return nil, err
 		}
 	}
-	if finding.FilePath, err = getValueFromMapping(jsonData, m.FilePath); err != nil {
+	if finding.FilePath, err = getValueFromMapping(jsonData, m.FilePath.Key); err != nil {
 		return nil, err
 	} else {
 		if strings.HasPrefix(finding.FilePath, GitRepoBasePath) {
 			finding.FilePath = strings.TrimPrefix(finding.FilePath, GitRepoBasePath)
 		}
 	}
-	if finding.StartLine, err = getIntValueFromMapping(jsonData, m.StartLine); err != nil {
+	if finding.StartLine, err = getIntValueFromMapping(jsonData, m.StartLine.Key); err != nil {
 		if err == keyNorFoundError {
 			finding.StartLine = 1
 		} else {
 			return nil, err
 		}
 	}
-	if finding.EndLine, err = getIntValueFromMapping(jsonData, m.EndLine); err != nil {
+	if finding.EndLine, err = getIntValueFromMapping(jsonData, m.EndLine.Key); err != nil {
 		if err == keyNorFoundError {
 			finding.EndLine = finding.StartLine
 		} else {
 			return nil, err
 		}
 	}
-	if finding.StartCol, err = getIntValueFromMapping(jsonData, m.StartCol); err != nil {
+	if finding.StartCol, err = getIntValueFromMapping(jsonData, m.StartCol.Key); err != nil {
 		if err == keyNorFoundError {
 			finding.StartCol = 1
 		} else {
 			return nil, err
 		}
 	}
-	if finding.EndCol, err = getIntValueFromMapping(jsonData, m.EndCol); err != nil {
+	if finding.EndCol, err = getIntValueFromMapping(jsonData, m.EndCol.Key); err != nil {
 		if err == keyNorFoundError {
 			finding.EndCol = finding.StartCol
 		} else {
 			return nil, err
 		}
 	}
-	if finding.Message, err = getValueFromMapping(jsonData, m.Message); err != nil {
+	if finding.Message, err = getValueFromMapping(jsonData, m.Message.Key); err != nil {
 		return nil, err
 	}
 	findings = append(findings, finding)
