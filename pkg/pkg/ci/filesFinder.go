@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	RootPath = "/src"
+	FilesFindingRootPath = "/src"
 )
 
 type FilesFindingArgs struct {

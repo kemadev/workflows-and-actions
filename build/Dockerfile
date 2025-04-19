@@ -175,12 +175,12 @@ FROM --platform=${BUILDPLATFORM} clean AS workflow-base
 # Create tool directory
 RUN mkdir -p /tool && chown root:root /tool
 
-WORKDIR /tool/pkg/pkg/ci/run
+WORKDIR /tool/pkg/pkg/ci
 
 # Add cache layer for dependencies, mount from host to avoid COPY layer, verbose output for cache behavior logging
 RUN --mount=type=cache,target=/root/go/pkg \
-	--mount=type=bind,source=./pkg/pkg/ci/run/go.mod,target=go.mod \
-	--mount=type=bind,source=./pkg/pkg/ci/run/go.sum,target=go.sum \
+	--mount=type=bind,source=./pkg/pkg/ci/go.mod,target=go.mod \
+	--mount=type=bind,source=./pkg/pkg/ci/go.sum,target=go.sum \
 	go mod download -x
 
 # Add cache layer for dependencies, mount from host to avoid COPY layer

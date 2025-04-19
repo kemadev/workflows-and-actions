@@ -5,8 +5,6 @@ import (
 	"log/slog"
 	"os"
 	"time"
-
-	"github.com/kemadev/workflows-and-actions/pkg/pkg/ci/filesfinder"
 )
 
 var rc int
@@ -37,7 +35,7 @@ func dispatchCommand(args []string) (int, error) {
 			Bin: "hadolint",
 			Ext: "Dockerfile",
 			Paths: []string{
-				filesfinder.RootPath,
+				FilesFindingRootPath,
 			},
 			CliArgs: []string{
 				"--format",
@@ -50,8 +48,8 @@ func dispatchCommand(args []string) (int, error) {
 			Bin: "actionlint",
 			Ext: ".yaml",
 			Paths: []string{
-				filesfinder.RootPath + "/.github/workflows",
-				filesfinder.RootPath + "/.github/actions",
+				FilesFindingRootPath + "/.github/workflows",
+				FilesFindingRootPath + "/.github/actions",
 			},
 			CliArgs: []string{
 				"-format",
