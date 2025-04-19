@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -95,8 +96,32 @@ func FindingsFromJson(s string, i jsonInfos) ([]Finding, error) {
 
 func findingFromJsonObject(m map[string]interface{}, mappings jsonToFindingsMappings) (Finding, error) {
 	f := Finding{}
-	def := setDefaultValue(m, mappings.ToolName.Key, mappings.ToolName.OverrideKey, "unknown")
-	return Finding{}, nil
+	def := setDefaultValue(m, mappings.ToolName.OverrideKey, "unknown")
+	// TODO make this generic (use pointers + type instead of plain + string) and use it for all fields
+	s, ok := m[mappings.ToolName.Key].(string)
+	if ok {
+		f.ToolName = s
+	} else {
+		f.ToolName = fmt.Sprintf("%v", def)
+	}
+	if mappings.ToolName.ValueTransformerRegex != "" {
+		r, err := regexp.MatchString(mappings.ToolName.ValueTransformerRegex, f.ToolName)
+		if err != nil {
+			return f, fmt.Errorf("error matching regex: %w", err)
+		}
+		if !r {
+			return f, fmt.Errorf("regex %s did not match %s", mappings.ToolName.ValueTransformerRegex, f.ToolName)
+		}
+	}
+	f.RuleID = "foo"
+	f.Message = "bar"
+	f.Level = "notice"
+	f.FilePath = "allo"
+	f.StartLine = 1
+	f.EndLine = 1
+	f.StartCol = 1
+	f.EndCol = 1
+	return f, nil
 }
 
 func setDefaultValue(v interface{}, overrideKey string, defaultValue string) interface{} {
